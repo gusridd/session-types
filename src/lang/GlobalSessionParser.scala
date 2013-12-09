@@ -93,6 +93,7 @@ case class Message (val x_1: String, val s: String, val r: String, val msg: Stri
   }
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr {
+  override def toString() : String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
   def substitute(s1: String, s2: String): Choice = {
     Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
@@ -110,6 +111,7 @@ object Choice {
   }
 }
 class ChoiceJoin private (val x_1: String,val x_2: String,val x_3: String) extends expr {
+  override def toString() : String = "ChoiceJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def canonical(): String = x_1 + "+" + x_2 + "=" + x_3
   def substitute(s1: String, s2: String): ChoiceJoin = {
     ChoiceJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
@@ -128,6 +130,7 @@ object ChoiceJoin {
 }
 
 class Parallel private(val x_1: String,val x_2: String,val x_3: String) extends expr {
+  override def toString() : String = "Parallel(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def canonical(): String = x_1 + "=" + x_2 + "|" + x_3
   def substitute(s1: String, s2: String): Parallel = {
     Parallel(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
@@ -143,6 +146,7 @@ object Parallel{
 }
 
 class ParallelJoin private(val x_1: String,val x_2: String,val x_3: String) extends expr {
+  override def toString() : String = "ParallelJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def canonical(): String = x_1 + "|" + x_2 + "=" + x_3
   def substitute(s1: String, s2: String): ParallelJoin = {
     ParallelJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
@@ -184,6 +188,7 @@ class GlobalProtocol(val exprs: List[expr]) {
   override def toString(): String = exprs.toString
 
   def contains(x: String): Boolean = xs contains x
+  
 
   private[this] def sanityCheck() = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
@@ -226,6 +231,23 @@ class GlobalProtocol(val exprs: List[expr]) {
 
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
       throw new SanityConditionException("Unique start: x_0 must appear exactly once, on the left-hand side")
+    }
+    
+    threadReduction()
+  }
+  
+  private[this] def threadReduction(){
+    def messageReduction(exprs : List[expr]) : (List[expr],Boolean) = {
+      val msg = exprs collectFirst {case m @ Message(_,_,_,_,_,_) => m }
+      msg match {
+        case None => (exprs,false)
+        case Some(m @ Message(x1,_,_,_,_,x2)) => ((exprs filterNot (_==m)).map(_.substitute(x1,x2)),true)
+      }
+    }
+    var messageReducted = messageReduction(exprs)
+    while(messageReducted._2){
+      println(messageReducted)
+      messageReducted = messageReduction(messageReducted._1)
     }
   }
 
