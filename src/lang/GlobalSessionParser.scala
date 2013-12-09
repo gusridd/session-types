@@ -6,10 +6,6 @@ import scala.collection.mutable.Map
 import scala.util.matching.UnanchoredRegex
 import scala.math.Ordering.String
 
-/**
- * Parser for global types
- * It ensures the ordering of id's in: choice, choiceJoin, parallel, parallelJoin
- */
 class GlobalSessionParser extends JavaTokenParsers {
 
   import scala.math.Ordering.String
@@ -91,12 +87,19 @@ class Choice private(val x_1: String, val x_2: String, val x_3: String) extends 
     new Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
+/**
+ * Companion object and Extractor Choices with lexicographical order
+ */
 object Choice{
   def apply(x_1: String, x_2: String, x_3: String) : Choice = {
     new Choice(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
   }
-  def unapply(c : Choice) = {
-    
+  def unapply(c : Choice) : Option[(String,String,String)] = {
+//    c match {
+//      case Choice(x1,x2,x3) => Option(x1,x2,x3)
+//      case _ => None
+//    }
+    Option(c.x_1,c.x_2,c.x_3)
   }
 }
 case class ChoiceJoin(x_1: String, x_2: String, x_3: String) extends expr {
