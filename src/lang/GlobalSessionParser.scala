@@ -35,11 +35,11 @@ class GlobalSessionParser extends JavaTokenParsers {
   }
 
   def parallel: Parser[Parallel] = xid ~ "=" ~ xid ~ "|" ~ xid ^^ {
-    case x1 ~ _ ~ x2 ~ _ ~ x3 => new Parallel(x1, String.min(x2, x3), String.max(x2, x3))
+    case x1 ~ _ ~ x2 ~ _ ~ x3 => Parallel(x1, String.min(x2, x3), String.max(x2, x3))
   }
 
   def parallelJoin: Parser[ParallelJoin] = xid ~ "|" ~ xid ~ "=" ~ xid ^^ {
-    case x1 ~ _ ~ x2 ~ _ ~ x3 => new ParallelJoin(String.min(x1, x2), String.max(x1, x2), x3)
+    case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(String.min(x1, x2), String.max(x1, x2), x3)
   }
 
   def end: Parser[End] = xid ~ "=" ~ "end" ^^ { case x ~ _ ~ _ => new End(x) }
@@ -75,51 +75,88 @@ trait expr {
   def replace(s1: String, s2: String): expr
 }
 
+//trait TernaryConstructor[T] {
+//  val x_1: String
+//  val x_2: String
+//  val x_3: String
+//  def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
+//  def construct(x1:String,x2:String,x3:String) : T
+//  def replace(s1: String, s2: String): Choice = {
+//    construct(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
+//  }
+//}
+
 case class Message (val x_1: String, val s: String, val r: String, val msg: String,val t: String,val x_2: String) extends expr {
   def canonical(): String = x_1 + "=" + s + "->" + r + ":" + msg + "(" + t + ");" + x_2
   def replace(s1: String, s2: String): Message = {
-    new Message(x_1.sub(s1, s2), s, r, msg, t, x_2.sub(s1, s2))
+    Message(x_1.sub(s1, s2), s, r, msg, t, x_2.sub(s1, s2))
   }
 }
-class Choice private(val x_1: String, val x_2: String, val x_3: String) extends expr {
+class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr {
   def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
   def replace(s1: String, s2: String): Choice = {
-    new Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
+    Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
 /**
  * Companion object and Extractor Choices with lexicographical order
  */
-object Choice{
+object Choice {
   def apply(x_1: String, x_2: String, x_3: String) : Choice = {
     new Choice(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
   }
   def unapply(c : Choice) : Option[(String,String,String)] = {
-//    c match {
-//      case Choice(x1,x2,x3) => Option(x1,x2,x3)
-//      case _ => None
-//    }
     Option(c.x_1,c.x_2,c.x_3)
   }
 }
-case class ChoiceJoin(x_1: String, x_2: String, x_3: String) extends expr {
+class ChoiceJoin private (val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "+" + x_2 + "=" + x_3
   def replace(s1: String, s2: String): ChoiceJoin = {
     ChoiceJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
-case class Parallel(x_1: String, x_2: String, x_3: String) extends expr {
+/**
+ * Companion object and Extractor ChoiceJoin with lexicographical order
+ */
+object ChoiceJoin {
+  def apply(x_1: String, x_2: String, x_3: String) : ChoiceJoin = {
+    new ChoiceJoin(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  }
+  def unapply(c : ChoiceJoin) : Option[(String,String,String)] = {
+    Option(c.x_1,c.x_2,c.x_3)
+  }
+}
+
+class Parallel private(val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "=" + x_2 + "|" + x_3
   def replace(s1: String, s2: String): Parallel = {
     Parallel(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
-case class ParallelJoin(x_1: String, x_2: String, x_3: String) extends expr {
+object Parallel{
+  def apply(x_1: String, x_2: String, x_3: String) : Parallel = {
+    new Parallel(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  }
+  def unapply(c : Parallel) : Option[(String,String,String)] = {
+    Option(c.x_1,c.x_2,c.x_3)
+  }
+}
+
+class ParallelJoin private(val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "|" + x_2 + "=" + x_3
   def replace(s1: String, s2: String): ParallelJoin = {
     ParallelJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
+object ParallelJoin {
+  def apply(x_1: String, x_2: String, x_3: String) : ParallelJoin = {
+    new ParallelJoin(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  }
+  def unapply(c : ParallelJoin) : Option[(String,String,String)] = {
+    Option(c.x_1,c.x_2,c.x_3)
+  }
+}
+
 case class End(x: String) extends expr {
   def canonical(): String = x + "= end"
   def replace(s1: String, s2: String): End = {

@@ -1,3 +1,3 @@
 package object lang {
-	implicit def stringToReplaceable(s: String) = new identifier(s)
+	implicit def stringToIdentifier(s: String) = new identifier(s)
 }
