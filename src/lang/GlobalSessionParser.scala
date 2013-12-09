@@ -17,29 +17,29 @@ class GlobalSessionParser extends JavaTokenParsers {
   def message: Parser[Message] = (messageWithType | messageWithoutType) ^^ (x => x)
 
   def messageWithType: Parser[Message] = xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ "(" ~ id ~ ")" ~ ";" ~ xid ^^ {
-    case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ t ~ _ ~ _ ~ x2 => new Message(x1, s, r, m, t, x2)
+    case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ t ~ _ ~ _ ~ x2 => Message(x1, s, r, m, t, x2)
   }
 
   def messageWithoutType: Parser[Message] = xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ ";" ~ xid ^^ {
-    case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ x2 => new Message(x1, s, r, m, "", x2)
+    case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ x2 => Message(x1, s, r, m, "", x2)
   }
 
   def choice: Parser[Choice] = xid ~ "=" ~ xid ~ "+" ~ xid ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 =>
-      Choice(x1, String.min(x2, x3), String.max(x2, x3))
+      Choice(x1, x2, x3)
   }
 
   def choiceJoin: Parser[ChoiceJoin] = xid ~ "+" ~ xid ~ "=" ~ xid ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 =>
-      ChoiceJoin(String.min(x1, x2), String.max(x1, x2), x3)
+      ChoiceJoin(x1, x2, x3)
   }
 
   def parallel: Parser[Parallel] = xid ~ "=" ~ xid ~ "|" ~ xid ^^ {
-    case x1 ~ _ ~ x2 ~ _ ~ x3 => Parallel(x1, String.min(x2, x3), String.max(x2, x3))
+    case x1 ~ _ ~ x2 ~ _ ~ x3 => Parallel(x1, x2, x3)
   }
 
   def parallelJoin: Parser[ParallelJoin] = xid ~ "|" ~ xid ~ "=" ~ xid ^^ {
-    case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(String.min(x1, x2), String.max(x1, x2), x3)
+    case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(x1, x2, x3)
   }
 
   def end: Parser[End] = xid ~ "=" ~ "end" ^^ { case x ~ _ ~ _ => new End(x) }
@@ -55,7 +55,7 @@ class GlobalSessionParser extends JavaTokenParsers {
  */
 class identifier(self: String) {
   def sub(target: String, replacement: String): String =
-    if (self == target) replacement else target
+    if (self == target) replacement else self
 
   def minimum(other: String): String =
     if (self < other) self else other
@@ -72,7 +72,7 @@ object GlobalParser extends GlobalSessionParser {
 
 trait expr {
   def canonical(): String
-  def replace(s1: String, s2: String): expr
+  def substitute(s1: String, s2: String): expr
 }
 
 //trait TernaryConstructor[T] {
@@ -88,13 +88,13 @@ trait expr {
 
 case class Message (val x_1: String, val s: String, val r: String, val msg: String,val t: String,val x_2: String) extends expr {
   def canonical(): String = x_1 + "=" + s + "->" + r + ":" + msg + "(" + t + ");" + x_2
-  def replace(s1: String, s2: String): Message = {
+  def substitute(s1: String, s2: String): Message = {
     Message(x_1.sub(s1, s2), s, r, msg, t, x_2.sub(s1, s2))
   }
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr {
   def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
-  def replace(s1: String, s2: String): Choice = {
+  def substitute(s1: String, s2: String): Choice = {
     Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
@@ -111,7 +111,7 @@ object Choice {
 }
 class ChoiceJoin private (val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "+" + x_2 + "=" + x_3
-  def replace(s1: String, s2: String): ChoiceJoin = {
+  def substitute(s1: String, s2: String): ChoiceJoin = {
     ChoiceJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
@@ -129,7 +129,7 @@ object ChoiceJoin {
 
 class Parallel private(val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "=" + x_2 + "|" + x_3
-  def replace(s1: String, s2: String): Parallel = {
+  def substitute(s1: String, s2: String): Parallel = {
     Parallel(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
@@ -144,7 +144,7 @@ object Parallel{
 
 class ParallelJoin private(val x_1: String,val x_2: String,val x_3: String) extends expr {
   def canonical(): String = x_1 + "|" + x_2 + "=" + x_3
-  def replace(s1: String, s2: String): ParallelJoin = {
+  def substitute(s1: String, s2: String): ParallelJoin = {
     ParallelJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
 }
@@ -159,13 +159,13 @@ object ParallelJoin {
 
 case class End(x: String) extends expr {
   def canonical(): String = x + "= end"
-  def replace(s1: String, s2: String): End = {
+  def substitute(s1: String, s2: String): End = {
     End(x.sub(s1, s2))
   }
 }
 case class Continue(x_1: String, x_2: String) extends expr {
   def canonical(): String = x_1 + " = " + x_2
-  def replace(s1: String, s2: String): Continue = {
+  def substitute(s1: String, s2: String): Continue = {
     Continue(x_1.sub(s1, s2), x_2.sub(s1, s2))
   }
 }
