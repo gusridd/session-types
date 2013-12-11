@@ -5,6 +5,7 @@ import scala.collection.immutable.HashSet
 import scala.collection.mutable.Map
 import scala.util.matching.UnanchoredRegex
 import scala.math.Ordering.String
+import scala.collection.mutable.HashMap
 
 class GlobalSessionParser extends JavaTokenParsers {
 
@@ -70,9 +71,11 @@ object GlobalParser extends GlobalSessionParser {
   }
 }
 
-trait expr {
-  def canonical(): String
+sealed trait expr {
+  def canonical(): String = left + "=" + right
   def substitute(s1: String, s2: String): expr
+  def left: String
+  def right: String
 }
 
 //trait TernaryConstructor[T] {
@@ -86,92 +89,106 @@ trait expr {
 //  }
 //}
 
-case class Message (val x_1: String, val s: String, val r: String, val msg: String,val t: String,val x_2: String) extends expr {
-  def canonical(): String = x_1 + "=" + s + "->" + r + ":" + msg + "(" + t + ");" + x_2
+case class Message(val x_1: String, val s: String, val r: String, val msg: String, val t: String, val x_2: String) extends expr {
+  //  def canonical(): String = left + "=" + right
   def substitute(s1: String, s2: String): Message = {
     Message(x_1.sub(s1, s2), s, r, msg, t, x_2.sub(s1, s2))
   }
+  def left = x_1
+  def right = s + "->" + r + ":" + msg + "(" + t + ");" + x_2
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr {
-  override def toString() : String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
-  def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
+  override def toString(): String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
+  //  def canonical(): String = x_1 + "=" + x_2 + "+" + x_3
   def substitute(s1: String, s2: String): Choice = {
     Choice(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
+  def left = x_1
+  def right = x_2 + "+" + x_3
 }
 /**
  * Companion object and Extractor Choices with lexicographical order
  */
 object Choice {
-  def apply(x_1: String, x_2: String, x_3: String) : Choice = {
-    new Choice(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  def apply(x_1: String, x_2: String, x_3: String): Choice = {
+    new Choice(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
   }
-  def unapply(c : Choice) : Option[(String,String,String)] = {
-    Option(c.x_1,c.x_2,c.x_3)
+  def unapply(c: Choice): Option[(String, String, String)] = {
+    Option(c.x_1, c.x_2, c.x_3)
   }
 }
-class ChoiceJoin private (val x_1: String,val x_2: String,val x_3: String) extends expr {
-  override def toString() : String = "ChoiceJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
-  def canonical(): String = x_1 + "+" + x_2 + "=" + x_3
+class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr {
+  override def toString(): String = "ChoiceJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
+  //  def canonical(): String = x_1 + "+" + x_2 + "=" + x_3
   def substitute(s1: String, s2: String): ChoiceJoin = {
     ChoiceJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
+  def left = x_1 + "+" + x_2
+  def right = x_3
 }
 /**
  * Companion object and Extractor ChoiceJoin with lexicographical order
  */
 object ChoiceJoin {
-  def apply(x_1: String, x_2: String, x_3: String) : ChoiceJoin = {
-    new ChoiceJoin(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  def apply(x_1: String, x_2: String, x_3: String): ChoiceJoin = {
+    new ChoiceJoin(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
   }
-  def unapply(c : ChoiceJoin) : Option[(String,String,String)] = {
-    Option(c.x_1,c.x_2,c.x_3)
+  def unapply(c: ChoiceJoin): Option[(String, String, String)] = {
+    Option(c.x_1, c.x_2, c.x_3)
   }
 }
 
-class Parallel private(val x_1: String,val x_2: String,val x_3: String) extends expr {
-  override def toString() : String = "Parallel(" + x_1 + "," + x_2 + "," + x_3 + ")"
-  def canonical(): String = x_1 + "=" + x_2 + "|" + x_3
+class Parallel private (val x_1: String, val x_2: String, val x_3: String) extends expr {
+  override def toString(): String = "Parallel(" + x_1 + "," + x_2 + "," + x_3 + ")"
+  //  def canonical(): String = x_1 + "=" + x_2 + "|" + x_3
   def substitute(s1: String, s2: String): Parallel = {
     Parallel(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
+  def left = x_1
+  def right = x_2 + "|" + x_3
 }
-object Parallel{
-  def apply(x_1: String, x_2: String, x_3: String) : Parallel = {
-    new Parallel(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+object Parallel {
+  def apply(x_1: String, x_2: String, x_3: String): Parallel = {
+    new Parallel(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
   }
-  def unapply(c : Parallel) : Option[(String,String,String)] = {
-    Option(c.x_1,c.x_2,c.x_3)
+  def unapply(c: Parallel): Option[(String, String, String)] = {
+    Option(c.x_1, c.x_2, c.x_3)
   }
 }
 
-class ParallelJoin private(val x_1: String,val x_2: String,val x_3: String) extends expr {
-  override def toString() : String = "ParallelJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
-  def canonical(): String = x_1 + "|" + x_2 + "=" + x_3
+class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr {
+  override def toString(): String = "ParallelJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
+  //  def canonical(): String = x_1 + "|" + x_2 + "=" + x_3
   def substitute(s1: String, s2: String): ParallelJoin = {
     ParallelJoin(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
+  def left = x_1 + "|" + x_2
+  def right = x_3
 }
 object ParallelJoin {
-  def apply(x_1: String, x_2: String, x_3: String) : ParallelJoin = {
-    new ParallelJoin(x_1,String.min(x_2,x_3),String.max(x_2,x_3))
+  def apply(x_1: String, x_2: String, x_3: String): ParallelJoin = {
+    new ParallelJoin(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
   }
-  def unapply(c : ParallelJoin) : Option[(String,String,String)] = {
-    Option(c.x_1,c.x_2,c.x_3)
+  def unapply(c: ParallelJoin): Option[(String, String, String)] = {
+    Option(c.x_1, c.x_2, c.x_3)
   }
 }
 
 case class End(x: String) extends expr {
-  def canonical(): String = x + "= end"
+  //  def canonical(): String = x + "= end"
   def substitute(s1: String, s2: String): End = {
     End(x.sub(s1, s2))
   }
+  def left = x
+  def right = "end"
 }
 case class Continue(x_1: String, x_2: String) extends expr {
-  def canonical(): String = x_1 + " = " + x_2
+  //  def canonical(): String = x_1 + " = " + x_2
   def substitute(s1: String, s2: String): Continue = {
     Continue(x_1.sub(s1, s2), x_2.sub(s1, s2))
   }
+  def left = x_1
+  def right = x_2
 }
 
 class SanityConditionException(s: String) extends Exception
@@ -188,7 +205,6 @@ class GlobalProtocol(val exprs: List[expr]) {
   override def toString(): String = exprs.toString
 
   def contains(x: String): Boolean = xs contains x
-  
 
   private[this] def sanityCheck() = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
@@ -232,33 +248,72 @@ class GlobalProtocol(val exprs: List[expr]) {
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
       throw new SanityConditionException("Unique start: x_0 must appear exactly once, on the left-hand side")
     }
-    
+
     threadReduction()
   }
-  
-  private[this] def threadReduction(){
-    def messageReduction(exprs : List[expr]) : (List[expr],Boolean) = {
-      val msg = exprs collectFirst {case m @ Message(_,_,_,_,_,_) => m }
+
+  private[this] def threadReduction() {
+    def messageReduction(exprs: List[expr]): (List[expr], Boolean) = {
+      val msg = exprs collectFirst { case m @ Message(_, _, _, _, _, _) => m }
       msg match {
-        case None => (exprs,false)
-        case Some(m @ Message(x1,_,_,_,_,x2)) => ((exprs filterNot (_==m)).map(_.substitute(x1,x2)),true)
+        case None => (exprs, false)
+        case Some(m @ Message(x1, _, _, _, _, x2)) => ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true)
       }
     }
-    var messageReducted = messageReduction(exprs)
-    while(messageReducted._2){
-      println(messageReducted)
-      messageReducted = messageReduction(messageReducted._1)
+    def getHash(exprs: List[expr]) = {
+      val leftHash = HashMap[String, expr]()
+      exprs foreach {
+        case e => {
+          leftHash += (e.left -> e)
+        }
+      }
+      leftHash
     }
+
+    
+
+    val hash = getHash(exprs)
+
+    def reduce(exprs: List[expr]): (List[expr], Boolean) = {
+      exprs foreach {
+        case m @ Message(x1, _, _, _, _, x2) => 
+          return ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true)
+        case p @ Parallel(x1, x2, x3) => hash.get(x1) match {
+          case Some(pj @ ParallelJoin(x2, x3, x4)) => 
+            return ((exprs filterNot (x => x == p || x == pj)).map(_.substitute(x1, x4)), true)
+          case None => 
+        }
+        case c @ Choice(x1,x2,x3) => hash.get(x1) match {
+          case Some(cj @ ChoiceJoin(x2,x3,x4)) => 
+            return ((exprs filterNot (x => x == c || x == cj)).map(_.substitute(x1, x4)), true)
+          case None => 
+        }
+        case rec @ ChoiceJoin(x1,x2,x3) => hash.get(rec.left) match {
+          case Some(recj @ Choice(x3,x4,x2)) => 
+            return ((exprs filterNot (x => x == rec || x == recj)).map(_.substitute(x1, x4)), true)
+          case None =>
+        }
+        case _ => 
+      }
+      (exprs, false)
+    }
+    
+    var reduction = reduce(exprs)
+    while (reduction._2) {
+      println(reduction)
+      reduction = reduce(reduction._1)
+    }
+
   }
 
 }
 
 object Collector {
 
-  def collectMessages(g: GlobalProtocol): List[String] = g.exprs filter (_ match {
-    case Message(_, _, _, _, _, _) => true
-    case _ => false
-  }) map ({ case Message(_, _, _, msg, _, _) => msg }) sorted
+//  def collectMessages(g: GlobalProtocol): List[String] = g.exprs filter (_ match {
+//    case Message(_, _, _, _, _, _) => true
+//    case _ => false
+//  }) map ({ case Message(_, _, _, msg, _, _) => msg }) sorted
 
   def collectStateVariables(g: GlobalProtocol): List[String] = (g.exprs flatMap (_ match {
     case Message(x1, _, _, _, _, x2) => List(x1, x2)
