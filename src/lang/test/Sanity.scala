@@ -56,11 +56,17 @@ class Sanity {
   
   @Test
   def testReductionFiltering() {
-    val c = Choice("x_0","x_3","x_4")
-    val cj = ChoiceJoin("x_3","x_4","x_5")
+    val c : expr = Choice("x_0","x_3","x_4")
+    val cj : expr = ChoiceJoin("x_3","x_4","x_5")
     val exprs : List[expr] = List(c,cj)
     val filtered = (exprs filterNot (x => x == c || x == cj))
     assert(filtered.size == 0)
+    
+    val end : expr = End("x_6")
+    val exprs2 : List[expr] = List(end)
+    val filtered2 = (exprs2 filterNot (x => x == End("x_6")))
+    println(filtered2)
+    assert(filtered2.size == 0)
     
   }
 

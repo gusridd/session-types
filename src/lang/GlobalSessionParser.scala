@@ -284,9 +284,9 @@ class GlobalProtocol(val exprs: List[expr]) {
         case e @ End(x) => {
           println("[End] " + e);
           println("nonfiltered " + exprs)
-          val filtered = (exprs filter (x => e == x))
-          println("filtered " + filtered)
-          ((exprs filter (x => e == x)).map(_.substitute(e.left, e.right)), true)
+          val filtered = (exprs filterNot (x => x == e))
+          println("filtered-> " + filtered)
+          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
         }
         case _ =>
       }
