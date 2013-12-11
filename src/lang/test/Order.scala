@@ -17,8 +17,8 @@ class Order {
   }
   
   @Test  def testChoiceJoinOrder() {
-    val c1 = ChoiceJoin("x_1","x_2","x_3")
-    val c2 = ChoiceJoin("x_1","x_3","x_2")
+    val c1 = ChoiceJoin("x_3","x_2","x_1")
+    val c2 = ChoiceJoin("x_2","x_3","x_1")
     
     assertEquals(c1.x_1,c2.x_1)
     assertEquals(c1.x_2,c2.x_2)
@@ -35,8 +35,8 @@ class Order {
   }
   
   @Test  def testParallelJoinOrder() {
-    val c1 = ParallelJoin("x_1","x_2","x_3")
-    val c2 = ParallelJoin("x_1","x_3","x_2")
+    val c1 = ParallelJoin("x_3","x_2","x_1")
+    val c2 = ParallelJoin("x_2","x_3","x_1")
     
     assertEquals(c1.x_1,c2.x_1)
     assertEquals(c1.x_2,c2.x_2)

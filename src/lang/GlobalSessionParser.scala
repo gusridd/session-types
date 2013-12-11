@@ -224,11 +224,15 @@ class GlobalProtocol(val exprs: List[expr]) {
         endCount = endCount + 1
     }
     if (endCount > 1) throw new SanityConditionException("UniqueEnd: end appears more than once")
-
+    exprs foreach {x => println(x.canonical)}
+    println("m")
+    println(m)
     val unambiguous = m filter {
       case (k, (v1, v2)) if k != x0 => v1 != 1 || v2 != 1
       case _ => false
     }
+    println("unambiguous")
+    println(unambiguous)
 
     if (!unambiguous.isEmpty) {
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
@@ -283,9 +287,9 @@ class GlobalProtocol(val exprs: List[expr]) {
         }
         case e @ End(x) => {
           println("[End] " + e);
-          println("nonfiltered " + exprs)
-          val filtered = (exprs filterNot (x => x == e))
-          println("filtered-> " + filtered)
+//          println("nonfiltered " + exprs)
+//          val filtered = (exprs filterNot (x => x == e))
+//          println("filtered-> " + filtered)
           return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
         }
         case _ =>
