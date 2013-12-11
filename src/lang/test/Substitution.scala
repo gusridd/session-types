@@ -60,8 +60,8 @@ class Substitution {
     val c = ChoiceJoin("x_1", "x_2", "x_3")
     val nc1 = c.substitute("x_1", "x_4")
 
-    assertEquals(nc1.x_1, "x_4")
-    assertEquals(nc1.x_2, "x_2")
+    assertEquals(nc1.x_1, "x_2")
+    assertEquals(nc1.x_2, "x_4")
     assertEquals(nc1.x_3, "x_3")
 
     val nc2 = c.substitute("x_4", "x_2")

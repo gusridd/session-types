@@ -133,7 +133,7 @@ class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) ext
  */
 object ChoiceJoin {
   def apply(x_1: String, x_2: String, x_3: String): ChoiceJoin =
-    new ChoiceJoin(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
+    new ChoiceJoin(String.min(x_1,x_2), String.max(x_1, x_2), x_3)
 
   def unapply(c: ChoiceJoin): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
 }
@@ -161,7 +161,7 @@ class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) e
 }
 object ParallelJoin {
   def apply(x_1: String, x_2: String, x_3: String): ParallelJoin = {
-    new ParallelJoin(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
+    new ParallelJoin(String.min(x_1,x_2), String.max(x_1, x_2), x_3)
   }
   def unapply(c: ParallelJoin): Option[(String, String, String)] = {
     Option(c.x_1, c.x_2, c.x_3)
