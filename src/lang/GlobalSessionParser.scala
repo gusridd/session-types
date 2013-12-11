@@ -269,21 +269,20 @@ class GlobalProtocol(val exprs: List[expr]) {
       }
       leftHash
     }
-
     
-
     val hash = getHash(exprs)
+    println(hash)
 
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) => 
           return ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true)
-        case p @ Parallel(x1, x2, x3) => hash.get(x1) match {
+        case p @ Parallel(x1, x2, x3) => hash.get(p.right) match {
           case Some(pj @ ParallelJoin(x2, x3, x4)) => 
             return ((exprs filterNot (x => x == p || x == pj)).map(_.substitute(x1, x4)), true)
           case None => 
         }
-        case c @ Choice(x1,x2,x3) => hash.get(x1) match {
+        case c @ Choice(x1,x2,x3) => hash.get(c.right) match {
           case Some(cj @ ChoiceJoin(x2,x3,x4)) => 
             return ((exprs filterNot (x => x == c || x == cj)).map(_.substitute(x1, x4)), true)
           case None => 
@@ -297,12 +296,15 @@ class GlobalProtocol(val exprs: List[expr]) {
       }
       (exprs, false)
     }
-    
+    println("reduction: " + exprs)
     var reduction = reduce(exprs)
+    
     while (reduction._2) {
-      println(reduction)
+      println("reduction: " + reduction._1)
       reduction = reduce(reduction._1)
     }
+    if(reduction._1.length > 0)
+      throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
 
   }
 
