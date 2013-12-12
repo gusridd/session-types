@@ -78,7 +78,7 @@ sealed trait expr {
   def right: String
 }
 
-trait Ternary {
+sealed trait Ternary {
   type T
   protected val x_1: String
   protected val x_2: String
@@ -93,6 +93,7 @@ trait Ternary {
   }
   override def hashCode = x_1.hashCode + x_2.hashCode + x_3.hashCode
 }
+
 object Ternary {
   def unapply(t: Ternary): Option[(String, String, String)] = Some(t.x_1, t.x_2, t.x_3)
 }
@@ -119,7 +120,6 @@ object Choice {
     new Choice(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
 
   def unapply(c: Choice): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
-
 }
 class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = ChoiceJoin
@@ -133,7 +133,7 @@ class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) ext
  */
 object ChoiceJoin {
   def apply(x_1: String, x_2: String, x_3: String): ChoiceJoin =
-    new ChoiceJoin(String.min(x_1,x_2), String.max(x_1, x_2), x_3)
+    new ChoiceJoin(String.min(x_1, x_2), String.max(x_1, x_2), x_3)
 
   def unapply(c: ChoiceJoin): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
 }
@@ -161,7 +161,7 @@ class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) e
 }
 object ParallelJoin {
   def apply(x_1: String, x_2: String, x_3: String): ParallelJoin = {
-    new ParallelJoin(String.min(x_1,x_2), String.max(x_1, x_2), x_3)
+    new ParallelJoin(String.min(x_1, x_2), String.max(x_1, x_2), x_3)
   }
   def unapply(c: ParallelJoin): Option[(String, String, String)] = {
     Option(c.x_1, c.x_2, c.x_3)
@@ -224,15 +224,15 @@ class GlobalProtocol(val exprs: List[expr]) {
         endCount = endCount + 1
     }
     if (endCount > 1) throw new SanityConditionException("UniqueEnd: end appears more than once")
-    exprs foreach {x => println(x.canonical)}
-    println("m")
-    println(m)
+    //    exprs foreach { x => println(x.canonical) }
+    //    println("m")
+    //    println(m)
     val unambiguous = m filter {
       case (k, (v1, v2)) if k != x0 => v1 != 1 || v2 != 1
       case _ => false
     }
-    println("unambiguous")
-    println(unambiguous)
+    //    println("unambiguous")
+    //    println(unambiguous)
 
     if (!unambiguous.isEmpty) {
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
@@ -241,10 +241,9 @@ class GlobalProtocol(val exprs: List[expr]) {
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
       throw new SanityConditionException("Unique start: x_0 must appear exactly once, on the left-hand side")
     }
-    threadReduction()
   }
 
-  private[this] def threadReduction() {
+  def threadReduction() {
 
     def getHash(exprs: List[expr]) = {
       val leftHash = HashMap[String, expr]()
@@ -261,7 +260,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) =>
-          return { println("[Trans]"); ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
+          return { /*println("[Trans]"); */ ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
         case p @ Parallel(x1, x2, x3) => hash.get(p.right) match {
           case Some(pj @ ParallelJoin(x2p, x3p, x4p)) =>
             return { println("[Bra]"); ((exprs filter (x => x != p && x != pj)).map(_.substitute(x1, x4p)), true) }
@@ -270,10 +269,10 @@ class GlobalProtocol(val exprs: List[expr]) {
         case c @ Choice(x1, x2, x3) => hash.get(c.right) match {
           case Some(cj @ ChoiceJoin(x2p, x3p, x4p)) =>
             return {
-              println("[Bra]: " + c + " AND " + cj)
-              println("nonfiltered " + exprs)
-              val filtered = (exprs filter (x => c != x && x != cj))
-              println("filtered " + filtered)
+              //              println("[Bra]: " + c + " AND " + cj)
+              //              println("nonfiltered " + exprs)
+              //              val filtered = (exprs filter (x => c != x && x != cj))
+              //              println("filtered " + filtered)
               ((exprs filter (x => x != c && x != cj)).map(_.substitute(x1, x4p)), true)
             }
           case Some(_) =>
@@ -286,29 +285,52 @@ class GlobalProtocol(val exprs: List[expr]) {
           case None =>
         }
         case e @ End(x) => {
-          println("[End] " + e);
-//          println("nonfiltered " + exprs)
-//          val filtered = (exprs filterNot (x => x == e))
-//          println("filtered-> " + filtered)
+          //          println("[End] " + e);
           return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
         }
         case _ =>
       }
       (exprs, false)
     }
-    println("reduction: " + exprs)
-    exprs foreach { x => println(x.canonical) }
+    //    println("reduction: " + exprs)
+    //    exprs foreach { x => println(x.canonical) }
     var reduction = reduce(exprs)
 
     while (reduction._2) {
-      println("reduction: " + reduction._1)
-      reduction._1 foreach { x => println(x.canonical) }
+      //      println("reduction: " + reduction._1)
+      //      reduction._1 foreach { x => println(x.canonical) }
       reduction = reduce(reduction._1)
     }
-    println("FINAL STEP: " + reduction._1)
+    //    println("FINAL STEP: " + reduction._1)
     if (reduction._1.length > 0)
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
 
+  }
+
+  def linearityCheck(): Boolean = {
+    def nonNullSuffix(s1:String, s2: String) = {
+      (s1,s2) match {
+        case ("",_) => false
+        case (_,"") => false
+      }
+    }
+    
+    val linFun = Lin(this)(_)
+    exprs map ({
+      case Parallel(x_1, x_2, x_3) => {
+        val l1 = linFun(x_2)
+        val l2 = linFun(x_3)
+        println("l1: " + l1)
+        println("l2: " + l2)
+        l1 forall {
+          case (p1,l1,x1) => l2 forall {
+            case (p2,l2,x2) => l1 != l2
+          }
+        }
+        false
+      }
+      case _ => true
+    }) reduce (_ && _)
   }
 
 }
@@ -366,31 +388,52 @@ object Rcv {
 }
 
 object Lin {
+
+  val map: scala.collection.mutable.Map[String, expr] = collection.mutable.Map();
+
+  def initializeMap(g: GlobalProtocol) = {
+    val variables = Collector.collectStateVariables(g)
+    g.exprs foreach {
+      case m @ Message(x1, _, _, _, _, x2) => map(x1) = m
+      case c @ Choice(x1, x2, x3) => map(x1) = c
+      case cj @ ChoiceJoin(x1, x2, x3) => {
+        map(x1) = cj
+        map(x2) = cj
+      }
+      case p @ Parallel(x1, x2, x3) => map(x1) = p
+      case pj @ ParallelJoin(x1, x2, x3) => {
+        map(x1) = pj
+        map(x2) = pj
+      }
+      case e @ End(x) => map(x) = e
+      case c @ Continue(x1, x2) => map(x1) = c
+    }
+  }
+
   def apply(g: GlobalProtocol)(x: String) = {
+    initializeMap(g)
     l(g, "", "", x)
   }
 
-  private def l(g: GlobalProtocol, xt: String, pt: String, xi: String): Set[(String, String, String)] = {
-    val it = g.exprs.iterator
-    while (it.hasNext) {
-      val e = it.next
-      e match {
-        case ChoiceJoin(x, xp, xpp) if ((x == xi) && (xpp contains xt)) => return Set.empty
-        case End(x) if (x == xi) => return Set.empty
+  private def l(g: GlobalProtocol, xm: String, xj: String, xi: String): Set[(String, String, String)] = {
 
-        case Message(x, p, pp, label, _, xp) if (x == xi && !(pt contains pp)) => return Set((p + "·" + pp, label, xt)) ++ l(g, xt, pt, xp)
+    map(xi) match {
+      case ChoiceJoin(x, xp, xpp) if (xpp contains xm) => return Set.empty
+      case End(x) if (x == xi) => return Set.empty
 
-        case Choice(x, xp, xpp) if (x == xi) => return l(g, xt, pt, xp) ++ l(g, xt, pt, xpp)
+      case Message(x, p, pp, label, _, xp) if !(xj contains pp) => return Set((p + "·" + pp, label, xm)) ++ l(g, xm, xj, xp)
 
-        case Parallel(x, xp, xpp) if (x == xi) => return l(g, xt, pt, xp) ++ l(g, xt, pt, xpp)
+      case Choice(x, xp, xpp) => return l(g, xm, xj, xp) ++ l(g, xm, xj, xpp)
 
-        case ChoiceJoin(x, xp, xpp) if ((x == xi || xp == xi) && !(xt contains ("·" + xp))) => return l(g, xt + "·" + xpp, pt, xpp)
+      case Parallel(x, xp, xpp) => return l(g, xm, xj, xp) ++ l(g, xm, xj, xpp)
 
-        case ParallelJoin(x, xp, xpp) if (x == xi || xp == xi) => return l(g, xt, xp + "·" + xpp, xpp)
+      case ChoiceJoin(x, xp, xpp) if !(xm contains ("·" + xp)) => return l(g, xm + "·" + xpp, xj, xpp)
 
-        case _ => throw new Exception("Undefined Lin for " + e.canonical)
-      }
+      case ParallelJoin(x, xp, xpp) => return l(g, xm, xp + "·" + xpp, xpp)
+
+      case _ => throw new Exception("Undefined Lin for " + map(xi))
     }
+
     Set.empty
   }
 }

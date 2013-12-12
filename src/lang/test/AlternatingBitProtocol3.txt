@@ -1,0 +1,17 @@
+		x_0 = x_1 | x_2
+		x_1 = x_3 | x_4
+  x_2 + x_5 = x_6
+  x_3 + x_7 = x_8
+  x_4 + x_9 = x_10
+		x_6 = Alice -> Bob : Msg1(String);x_11
+	   x_11 = x_12 | x_13
+	   x_13 = Bob -> Alice : Ack1(String);x_14
+ x_12 | x_8 = x_15
+	   x_15 = Alice -> Bob : Msg2(String);x_16
+	   x_16 = x_17 | x_18
+	   x_17 = Bob -> Alice : Ack2(String);x_7
+x_18 | x_10 = x_19
+	   x_19 = Alice -> Bob : Msg3(String);x_20
+ 	   x_20 = x_21 | x_22
+	   x_21 = Bob -> Alice : Ack3(String);x_9
+x_22 | x_14 = x_5

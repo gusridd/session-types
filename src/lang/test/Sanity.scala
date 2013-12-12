@@ -36,6 +36,7 @@ class Sanity {
   def testThreadCorrectnessWrong() {
     val reader = new FileReader("./src/lang/test/threadCorrectnessWrong.txt")
     val g: GlobalProtocol = GlobalParser.parse(reader)
+    g.threadReduction
     reader.close
   }
   
@@ -44,14 +45,23 @@ class Sanity {
     val reader1 = new FileReader("./src/lang/test/threadCorrectnessGood1.txt")
     val g1: GlobalProtocol = GlobalParser.parse(reader1)
     reader1.close
+    g1.threadReduction
+    
     
     val reader2 = new FileReader("./src/lang/test/threadCorrectnessGood2.txt")
     val g2: GlobalProtocol = GlobalParser.parse(reader2)
     reader2.close
+    g2.threadReduction
     
     val reader3 = new FileReader("./src/lang/test/AlternatingBitProtocol.txt")
     val g3: GlobalProtocol = GlobalParser.parse(reader3)
     reader3.close
+    g3.threadReduction
+    
+    val reader4 = new FileReader("./src/lang/test/AlternatingBitProtocol3.txt")
+    val g4: GlobalProtocol = GlobalParser.parse(reader4)
+    reader4.close
+    g4.threadReduction
   }
   
   @Test
