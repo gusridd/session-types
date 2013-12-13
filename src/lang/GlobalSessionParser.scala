@@ -189,7 +189,7 @@ class GlobalProtocol(val exprs: List[expr]) {
   private val x0: String = "x_0"
   private val xs: HashSet[String] = HashSet() ++ Collector.collectStateVariables(this)
 
-//  sanityCheck()
+  //  sanityCheck()
 
   override def toString(): String = exprs.toString
 
@@ -291,6 +291,65 @@ class GlobalProtocol(val exprs: List[expr]) {
       }
       (exprs, false)
     }
+
+    def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
+      val leftHash = HashMap[String, expr]()
+      val rightHash = HashMap[String, expr]()
+      exprs foreach {
+        case m @ Message(x1, _, _, _, _, x2) => {
+          leftHash(x1) = m
+          rightHash(x2) = m
+        }
+        case e @ End(x) => {
+          leftHash(x) = e
+        }
+        case c @  Continue(x1,x2) => {
+          leftHash(x1) = c
+          rightHash(x2) = c
+        }
+        case c @ Choice(x1, x2, x3) => {
+          leftHash(x1) = c
+          rightHash(x2) = c
+          rightHash(x3) = c
+        }
+        case p @ Parallel(x1, x2, x3) => {
+          leftHash(x1) = p
+          rightHash(x2) = p
+          rightHash(x3) = p
+        }
+        case cj @ ChoiceJoin(x1,x2,x3) => {
+          leftHash(x1) = cj
+          leftHash(x2) = cj
+          rightHash(x3) = cj
+        }
+        case pj @ ParallelJoin(x1,x2,x3) => {
+          leftHash(x1) = pj
+          leftHash(x2) = pj
+          rightHash(x3) = pj
+        }
+      }
+      
+      def TReduction(e : expr, flux : Double, assign : HashMap[String, (Int,Int)], toEliminate : Set[expr]) : (Set[expr],Boolean) = {
+        e match {
+          case p @ Parallel(x1,x2,x3) => {
+            TReduction(leftHash(x2),flux/2,assign,toEliminate + p) match {
+              case (_,false) => (Set(),false)
+              case (,)
+            }
+            
+            
+          }
+        }
+      }
+      
+      exprs foreach {
+        case c @ Choice(x1,x2,x3) => TReduction(c,1.0,HashMap[String, Either[Int,(Int,Int)]](), Set())
+        case p @ Parallel(x1,x2,x3) => 
+      }
+
+      (exprs, false)
+    }
+
     //    println("reduction: " + exprs)
     //    exprs foreach { x => println(x.canonical) }
     var reduction = reduce(exprs)
@@ -307,13 +366,13 @@ class GlobalProtocol(val exprs: List[expr]) {
   }
 
   def linearityCheck(): Boolean = {
-    def nonNullSuffix(s1:String, s2: String) = {
-      (s1,s2) match {
-        case ("",_) => false
-        case (_,"") => false
+    def nonNullSuffix(s1: String, s2: String) = {
+      (s1, s2) match {
+        case ("", _) => false
+        case (_, "") => false
       }
     }
-    
+
     val linFun = Lin(this)(_)
     exprs map ({
       case Parallel(x_1, x_2, x_3) => {
@@ -322,11 +381,11 @@ class GlobalProtocol(val exprs: List[expr]) {
         println("l1: " + l1)
         println("l2: " + l2)
         l1 forall {
-          case (p1,l1,x1) => l2 forall {
-            case (p2,l2,x2) => l1 != l2
+          case (p1, l1, x1) => l2 forall {
+            case (p2, l2, x2) => l1 != l2
           }
         }
-//        false
+        //        false
       }
       case _ => true
     }) reduce (_ && _)
