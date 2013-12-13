@@ -149,7 +149,6 @@ object Parallel {
   def apply(x_1: String, x_2: String, x_3: String): Parallel =
     new Parallel(x_1, String.min(x_2, x_3), String.max(x_2, x_3))
   def unapply(c: Parallel): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
-
 }
 
 class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
@@ -190,13 +189,13 @@ class GlobalProtocol(val exprs: List[expr]) {
   private val x0: String = "x_0"
   private val xs: HashSet[String] = HashSet() ++ Collector.collectStateVariables(this)
 
-  sanityCheck()
+//  sanityCheck()
 
   override def toString(): String = exprs.toString
 
   def contains(x: String): Boolean = xs contains x
 
-  private[this] def sanityCheck() = {
+  def sanityCheck() = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     var endCount = 0
     exprs foreach {
@@ -243,7 +242,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     }
   }
 
-  def threadReduction() {
+  def threadReduction() = {
 
     def getHash(exprs: List[expr]) = {
       val leftHash = HashMap[String, expr]()
@@ -327,7 +326,7 @@ class GlobalProtocol(val exprs: List[expr]) {
             case (p2,l2,x2) => l1 != l2
           }
         }
-        false
+//        false
       }
       case _ => true
     }) reduce (_ && _)
