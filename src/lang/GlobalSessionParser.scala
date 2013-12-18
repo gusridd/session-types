@@ -295,6 +295,9 @@ class GlobalProtocol(val exprs: List[expr]) {
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
       val leftHash = HashMap[String, expr]()
       val rightHash = HashMap[String, expr]()
+      val flows = collection.mutable.Map() ++ ((exprs map (t => (t, 0.0))) toMap);
+      val visited
+      
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) => {
           leftHash(x1) = m
@@ -329,21 +332,28 @@ class GlobalProtocol(val exprs: List[expr]) {
         }
       }
       
+      val startingFlux = 1.0
+      
       def TReduction(e : expr, flux : Double, assign : HashMap[String, (Int,Int)], toEliminate : Set[expr]) : (Set[expr],Boolean) = {
         e match {
           case p @ Parallel(x1,x2,x3) => {
-            TReduction(leftHash(x2),flux/2,assign,toEliminate + p) match {
-              case (_,false) => (Set(),false)
-              case (,)
+            val (leftSet,leftResult) = TReduction(leftHash(x2),flux/2,assign,toEliminate + p)
+            val (rightSet,rightResult) = TReduction(leftHash(x3),flux/2,assign,toEliminate + p)
+            (leftSet ++ rightSet,leftResult || rightResult)
+          }
+          case pj @ ParallelJoin(x1,x2,x3) => {
+            if(flows(pj) == 0){
+              flows(pj) = flux
+              (toEliminate + pj,false)
+            } else if (flows){
+              
             }
-            
-            
           }
         }
       }
       
       exprs foreach {
-        case c @ Choice(x1,x2,x3) => TReduction(c,1.0,HashMap[String, Either[Int,(Int,Int)]](), Set())
+        case c @ Choice(x1,x2,x3) => TReduction(c,startingFlux,HashMap[String, Either[Int,(Int,Int)]](), Set())
         case p @ Parallel(x1,x2,x3) => 
       }
 
