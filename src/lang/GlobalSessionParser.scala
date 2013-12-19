@@ -296,7 +296,6 @@ class GlobalProtocol(val exprs: List[expr]) {
       val leftHash = HashMap[String, expr]()
       val rightHash = HashMap[String, expr]()
       val flows = collection.mutable.Map() ++ ((exprs map (t => (t, 0.0))) toMap);
-      val visited
       
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) => {
@@ -345,15 +344,31 @@ class GlobalProtocol(val exprs: List[expr]) {
             if(flows(pj) == 0){
               flows(pj) = flux
               (toEliminate + pj,false)
-            } else if (flows){
-              
+            } else if (flux + flows(pj) != startingFlux){
+              // Go through and join flows
+              TReduction(leftHash(x3),flux + flows(pj),assign,toEliminate + pj)
+            } else {
+              // A T-System has been found
+              (toEliminate + pj,true)
             }
           }
+          case Choice(x1,x2,x3) => (Set(),false)
+          case ChoiceJoin(x1,x2,x3) => (Set(), false)
+          case End(x) => (Set(),false)
+          case Message(x1,_,_,_,_,x2) => throw new Exception("Messages should not exist at this point")
+          case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
         }
       }
       
       exprs foreach {
-        case c @ Choice(x1,x2,x3) => TReduction(c,startingFlux,HashMap[String, Either[Int,(Int,Int)]](), Set())
+        case c @ Choice(x1,x2,x3) => {
+          val (set,result) = TReduction(c,startingFlux,HashMap[String, (Int,Int)](), Set())
+          if(result){
+            println("FIRST AND LAST")
+            println(set.head)
+            println(set.last)
+          }
+        }
         case p @ Parallel(x1,x2,x3) => 
       }
 
@@ -369,6 +384,14 @@ class GlobalProtocol(val exprs: List[expr]) {
       //      reduction._1 foreach { x => println(x.canonical) }
       reduction = reduce(reduction._1)
     }
+    
+    reduction = STReduction(exprs)
+    while (reduction._2) {
+      //      println("reduction: " + reduction._1)
+      reduction._1 foreach { x => println(x.canonical) }
+      reduction = STReduction(reduction._1)
+    }
+    
     //    println("FINAL STEP: " + reduction._1)
     if (reduction._1.length > 0)
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
