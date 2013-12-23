@@ -66,11 +66,11 @@ class Sanity {
     val g3: GlobalProtocol = GlobalParser.parse(reader3)
     reader3.close
     g3.threadReduction()
-    
-    val reader4 = new FileReader("./src/lang/test/AlternatingBitProtocol3.txt")
-    val g4: GlobalProtocol = GlobalParser.parse(reader4)
-    reader4.close
-    g4.threadReduction()
+//    
+//    val reader4 = new FileReader("./src/lang/test/AlternatingBitProtocol3.txt")
+//    val g4: GlobalProtocol = GlobalParser.parse(reader4)
+//    reader4.close
+//    g4.threadReduction()
   }
   
   @Test

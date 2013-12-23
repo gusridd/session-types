@@ -297,10 +297,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
       val leftHash = HashMap[String, expr]()
       val rightHash = HashMap[String, expr]()
-//      val flows = collection.mutable.Map[expr,Double]() //++ ((exprs map (t => (t, 0.0))) toMap);
-      
-      println("flows")
-//      println(flows)
+
       println(exprs)
       
       exprs foreach {
@@ -339,33 +336,33 @@ class GlobalProtocol(val exprs: List[expr]) {
       
       val startingFlux = 1.0
       
-      def TReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean) = {
+      def TReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean,Option[ParallelJoin]) = {
         println("\nTReduction(" + flux + "): " + e)
         println("assign: " + assign)
         println("toEliminate: " + toEliminate)
         e match {
           case p @ Parallel(x1,x2,x3) => {
-            val (leftSet,leftResult) = TReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
-            val (rightSet,rightResult) = TReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
-            (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult)
+            val (leftSet,leftResult,leftSome) = TReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
+            val (rightSet,rightResult,rightSome) = TReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
+            // flux closing is done at the right side, thus rightSome is the only posible last 'expr'
+            (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult, rightSome)
           }
           case pj @ ParallelJoin(x1,x2,x3) => {
             if(! assign.contains(pj)){
               assign(pj) = flux
-              (toEliminate += pj,false)
+              (toEliminate += pj,false,None)
             } else if (flux + assign(pj) != startingFlux){
               // Go through and join flows
-//              assign(pj) = flux + assign(pj) 
               TReduction(leftHash(x3),flux + assign(pj),assign,toEliminate += pj)
             } else {
               // A T-System has been found
               println("T-System found!!!")
-              (toEliminate += pj,true)
+              (toEliminate += pj,true, Some(pj))
             }
           }
-          case Choice(x1,x2,x3) => (Set(),false)
-          case ChoiceJoin(x1,x2,x3) => (Set(), false)
-          case End(x) => (Set(),false)
+          case Choice(x1,x2,x3) => (Set(),false,None)
+          case ChoiceJoin(x1,x2,x3) => (Set(), false, None)
+          case End(x) => (Set(),false,None)
           case Message(x1,_,_,_,_,x2) => throw new Exception("Messages should not exist at this point")
           case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
         }
@@ -374,13 +371,16 @@ class GlobalProtocol(val exprs: List[expr]) {
 
 
       exprs foreach {
-        case c @ Parallel(x1,x2,x3) => {
-          val (set,result) = TReduction(c,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
+        case first @ Parallel(x1,x2,x3) => {
+          val (set,result,last) = TReduction(first,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
           if(result){
             println("SET, FIRST AND LAST")
             println(set)
-            println(set.head)
-            println(set.last)
+            println(first)
+            println(last)
+            println("filtered")
+            println(exprs filterNot (e => set.contains(e)))
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)),true)
           }
         }
         case p @ Choice(x1,x2,x3) => 
