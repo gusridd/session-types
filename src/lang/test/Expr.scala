@@ -62,8 +62,12 @@ class Expr {
     val e1 : expr = Parallel("x_1", "x_2", "x_3")
     val e2 : expr = Parallel("x_1", "x_2", "x_3")
     val e3 : expr = Parallel("x_1", "x_2", "x_4")
+    
+    val e5 : expr = Parallel("x_0","x_3","x_4")
+    val e6 : expr = Parallel("x_3","x_5","x_8")
     assertTrue(e1 == e2)
-    assertTrue(e1 != e3)
+    assertFalse(e1 == e3)
+    assertFalse(e5 == e6)
   }
 
   @Test def testCompareParallelJoin() {

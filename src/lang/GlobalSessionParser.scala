@@ -6,6 +6,8 @@ import scala.collection.mutable.Map
 import scala.util.matching.UnanchoredRegex
 import scala.math.Ordering.String
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
+import scala.collection.mutable.LinkedHashSet
 
 class GlobalSessionParser extends JavaTokenParsers {
 
@@ -88,7 +90,7 @@ sealed trait Ternary {
     construct(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
   override def equals(c: Any) = c match {
-    case c @ Ternary(x_1, x_2, x_3) => x_1 == c.x_1 && x_2 == c.x_2 && x_3 == c.x_3
+    case c @ Ternary(x_1, x_2, x_3) => this.x_1 == c.x_1 && this.x_2 == c.x_2 && this.x_3 == c.x_3
     case _ => false
   }
   override def hashCode = x_1.hashCode + x_2.hashCode + x_3.hashCode
@@ -295,7 +297,11 @@ class GlobalProtocol(val exprs: List[expr]) {
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
       val leftHash = HashMap[String, expr]()
       val rightHash = HashMap[String, expr]()
-      val flows = collection.mutable.Map() ++ ((exprs map (t => (t, 0.0))) toMap);
+//      val flows = collection.mutable.Map[expr,Double]() //++ ((exprs map (t => (t, 0.0))) toMap);
+      
+      println("flows")
+//      println(flows)
+      println(exprs)
       
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) => {
@@ -333,23 +339,28 @@ class GlobalProtocol(val exprs: List[expr]) {
       
       val startingFlux = 1.0
       
-      def TReduction(e : expr, flux : Double, assign : HashMap[String, (Int,Int)], toEliminate : Set[expr]) : (Set[expr],Boolean) = {
+      def TReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean) = {
+        println("\nTReduction(" + flux + "): " + e)
+        println("assign: " + assign)
+        println("toEliminate: " + toEliminate)
         e match {
           case p @ Parallel(x1,x2,x3) => {
-            val (leftSet,leftResult) = TReduction(leftHash(x2),flux/2,assign,toEliminate + p)
-            val (rightSet,rightResult) = TReduction(leftHash(x3),flux/2,assign,toEliminate + p)
-            (leftSet ++ rightSet,leftResult || rightResult)
+            val (leftSet,leftResult) = TReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
+            val (rightSet,rightResult) = TReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
+            (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult)
           }
           case pj @ ParallelJoin(x1,x2,x3) => {
-            if(flows(pj) == 0){
-              flows(pj) = flux
-              (toEliminate + pj,false)
-            } else if (flux + flows(pj) != startingFlux){
+            if(! assign.contains(pj)){
+              assign(pj) = flux
+              (toEliminate += pj,false)
+            } else if (flux + assign(pj) != startingFlux){
               // Go through and join flows
-              TReduction(leftHash(x3),flux + flows(pj),assign,toEliminate + pj)
+//              assign(pj) = flux + assign(pj) 
+              TReduction(leftHash(x3),flux + assign(pj),assign,toEliminate += pj)
             } else {
               // A T-System has been found
-              (toEliminate + pj,true)
+              println("T-System found!!!")
+              (toEliminate += pj,true)
             }
           }
           case Choice(x1,x2,x3) => (Set(),false)
@@ -359,17 +370,20 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
         }
       }
-      println(exprs)
+      
+
+
       exprs foreach {
-        case c @ Choice(x1,x2,x3) => {
-          val (set,result) = TReduction(c,startingFlux,HashMap[String, (Int,Int)](), Set())
+        case c @ Parallel(x1,x2,x3) => {
+          val (set,result) = TReduction(c,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
           if(result){
-            println("FIRST AND LAST")
+            println("SET, FIRST AND LAST")
+            println(set)
             println(set.head)
             println(set.last)
           }
         }
-        case p @ Parallel(x1,x2,x3) => 
+        case p @ Choice(x1,x2,x3) => 
         case _ => // Do nothing
       }
 
@@ -386,14 +400,15 @@ class GlobalProtocol(val exprs: List[expr]) {
       reduction = reduce(reduction._1)
     }
     
+    println("************\nST REDUCTION\n************\n")
+    
     reduction = STReduction(reduction._1)
     while (reduction._2) {
-      //      println("reduction: " + reduction._1)
+      println("reduction: " + reduction._1)
       reduction._1 foreach { x => println(x.canonical) }
       reduction = STReduction(reduction._1)
     }
     
-    //    println("FINAL STEP: " + reduction._1)
     if (reduction._1.length > 0)
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
     println("*******\nSUCCESS\n*******\n")
