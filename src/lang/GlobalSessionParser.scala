@@ -359,7 +359,7 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
         }
       }
-      
+      println(exprs)
       exprs foreach {
         case c @ Choice(x1,x2,x3) => {
           val (set,result) = TReduction(c,startingFlux,HashMap[String, (Int,Int)](), Set())
@@ -370,22 +370,23 @@ class GlobalProtocol(val exprs: List[expr]) {
           }
         }
         case p @ Parallel(x1,x2,x3) => 
+        case _ => // Do nothing
       }
 
       (exprs, false)
     }
-
-    //    println("reduction: " + exprs)
-    //    exprs foreach { x => println(x.canonical) }
+    println("****************\nSIMPLE REDUCTION\n****************\n")
+    println("reduction: " + exprs)
+    exprs foreach { x => println(x.canonical) }
     var reduction = reduce(exprs)
 
     while (reduction._2) {
-      //      println("reduction: " + reduction._1)
-      //      reduction._1 foreach { x => println(x.canonical) }
+      println("reduction: " + reduction._1)
+      reduction._1 foreach { x => println(x.canonical) }
       reduction = reduce(reduction._1)
     }
     
-    reduction = STReduction(exprs)
+    reduction = STReduction(reduction._1)
     while (reduction._2) {
       //      println("reduction: " + reduction._1)
       reduction._1 foreach { x => println(x.canonical) }
@@ -395,7 +396,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     //    println("FINAL STEP: " + reduction._1)
     if (reduction._1.length > 0)
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
-
+    println("*******\nSUCCESS\n*******\n")
   }
 
   def linearityCheck(): Boolean = {

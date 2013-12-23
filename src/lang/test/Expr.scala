@@ -43,9 +43,11 @@ class Expr {
   @Test def testCompareChoice() {
     val e1 : expr = Choice("x_1", "x_2", "x_3")
     val e2 : expr = Choice("x_1", "x_2", "x_3")
-    val e3 : expr = Choice("x_1", "x_2", "x_4")
+    val e3 : expr = Choice("x_1", "x_3", "x_2")
+    val e4 : expr = Choice("x_1", "x_2", "x_4")
     assertTrue(e1 == e2)
-    assertTrue(e1 != e3)
+    assertTrue(e1 == e3)
+    assertTrue(e1 != e4)
   }
 
   @Test def testCompareChoiceJoin() {
