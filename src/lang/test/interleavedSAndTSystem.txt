@@ -2,6 +2,7 @@ x_0 = x_1 + x_2
 	  x_2 = x_3 + x_4
 x_1 + x_7 = x_5
 x_4 + x_5 = x_6
+	  x_6 = end
 
 x_3 = A -> B : Some; x_10
 x_16 = B -> A : Some; x_7
