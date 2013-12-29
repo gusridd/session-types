@@ -189,6 +189,7 @@ class SanityConditionException(s: String) extends Exception
 class GlobalProtocol(val exprs: List[expr]) {
 
   private val x0: String = "x_0"
+  private val end: String = "end"
   private val xs: HashSet[String] = HashSet() ++ Collector.collectStateVariables(this)
 
   //  sanityCheck()
