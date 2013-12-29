@@ -68,7 +68,7 @@ class identifier(self: String) {
 }
 
 object GlobalParser extends GlobalSessionParser {
-  def parse(reader: java.io.FileReader): GlobalProtocol = {
+  def parse(reader: java.io.Reader): GlobalProtocol = {
     parseAll(global, reader).get
   }
 }
@@ -279,9 +279,11 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Some(_) =>
           case None =>
         }
-        case rec @ ChoiceJoin(x1, x2, x3) => hash.get(rec.right) match {
-          case Some(recj @ Choice(x3p, x4p, x2p)) if (x2 == x2p && x3 == x3p) =>
+        case rec @ ChoiceJoin(x1, x2, x3) => {println("maybeRec:" + rec+"\nhash:"+hash.get(rec.right));hash.get(rec.right)} match {
+          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p || x2 == x2p)) =>
             return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true) }
+          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p || x1 == x2p)) =>
+            return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x4p)), true) }
           case Some(_) =>
           case None =>
         }
@@ -368,7 +370,34 @@ class GlobalProtocol(val exprs: List[expr]) {
         }
       }
       
-
+      def SReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean,Option[ChoiceJoin]) = {
+        e match {
+          case p @ Choice(x1,x2,x3) => {
+            val (leftSet,leftResult,leftSome) = SReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
+            val (rightSet,rightResult,rightSome) = SReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
+            // flux closing is done at the right side, thus rightSome is the only posible last 'expr'
+            (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult, rightSome)
+          }
+          case pj @ ChoiceJoin(x1,x2,x3) => {
+            if(! assign.contains(pj)){
+              assign(pj) = flux
+              (toEliminate += pj,false,None)
+            } else if (flux + assign(pj) != startingFlux){
+              // Go through and join flows
+              SReduction(leftHash(x3),flux + assign(pj),assign,toEliminate += pj)
+            } else {
+              // A T-System has been found
+              println("S-System found!!!")
+              (toEliminate += pj,true, Some(pj))
+            }
+          }
+          case Parallel(x1,x2,x3) => (Set(),false,None)
+          case ParallelJoin(x1,x2,x3) => (Set(), false, None)
+          case End(x) => (Set(),false,None)
+          case Message(x1,_,_,_,_,x2) => throw new Exception("Messages should not exist at this point")
+          case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
+        }
+      }
 
       exprs foreach {
         case first @ Parallel(x1,x2,x3) => {
@@ -383,7 +412,18 @@ class GlobalProtocol(val exprs: List[expr]) {
             return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)),true)
           }
         }
-        case p @ Choice(x1,x2,x3) => 
+        case first @ Choice(x1,x2,x3) => {
+          val (set,result,last) = SReduction(first,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
+          if(result){
+            println("SET, FIRST AND LAST")
+            println(set)
+            println(first)
+            println(last)
+            println("filtered")
+            println(exprs filterNot (e => set.contains(e)))
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)),true)
+          }
+        }
         case _ => // Do nothing
       }
 
