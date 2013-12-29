@@ -82,6 +82,12 @@ class Sanity {
     val g6: GlobalProtocol = GlobalParser.parse(reader6)
     reader6.close
     g6.threadReduction()
+    
+    // The next case is special as is a ST-System that does not reduce to empty, but to a S-System
+    val reader7  = new FileReader("./src/lang/test/recursionWithEnding.txt")
+    val g7: GlobalProtocol = GlobalParser.parse(reader7)
+    reader7.close
+    g7.threadReduction()
   }
   
   @Test
