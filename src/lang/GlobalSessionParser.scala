@@ -78,6 +78,7 @@ sealed trait expr {
   def substitute(s1: String, s2: String): expr
   def left: String
   def right: String
+  def isEnd = false
 }
 
 sealed trait Ternary {
@@ -175,6 +176,7 @@ case class End(x: String) extends expr {
   }
   def left = x
   def right = "end"
+  override def isEnd = true
 }
 case class Continue(x_1: String, x_2: String) extends expr {
   def substitute(s1: String, s2: String): Continue = {
@@ -259,6 +261,11 @@ class GlobalProtocol(val exprs: List[expr]) {
 
     val hash = getHash(exprs)
 
+    /**
+     * reduce: 
+     * exprs: list of expressions to reduce
+     * return the list of the reduced expressions and a boolean representing if a reduction has been applied
+     */
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) =>
@@ -289,8 +296,10 @@ class GlobalProtocol(val exprs: List[expr]) {
           case None =>
         }
         case e @ End(x) => {
-          //          println("[End] " + e);
-          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
+          // end should not be substituted until the end
+          println("[End] " + e);
+//          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
+          //return (exprs,false)
         }
         case _ =>
       }
@@ -450,7 +459,18 @@ class GlobalProtocol(val exprs: List[expr]) {
       reduction = STReduction(reduction._1)
     }
     
-    if (reduction._1.length > 0)
+//    println("****************\nSIMPLE REDUCTION (AGAIN)\n****************\n")
+//    reduction = reduce(reduction._1)
+//
+//    while (reduction._2) {
+//      println("reduction: " + reduction._1)
+//      reduction._1 foreach { x => println(x.canonical) }
+//      reduction = reduce(reduction._1)
+//    }
+    
+    val reductedList = reduction._1
+
+    if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd ))
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
     println("*******\nSUCCESS\n*******\n")
   }
