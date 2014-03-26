@@ -262,7 +262,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     val hash = getHash(exprs)
 
     /**
-     * reduce: 
+     * reduce:
      * exprs: list of expressions to reduce
      * return the list of the reduced expressions and a boolean representing if a reduction has been applied
      */
@@ -287,7 +287,7 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Some(_) =>
           case None =>
         }
-        case rec @ ChoiceJoin(x1, x2, x3) => {println("maybeRec:" + rec+"\nhash:"+hash.get(rec.right));hash.get(rec.right)} match {
+        case rec @ ChoiceJoin(x1, x2, x3) => { println("maybeRec:" + rec + "\nhash:" + hash.get(rec.right)); hash.get(rec.right) } match {
           case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p || x2 == x2p)) =>
             return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true) }
           case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p || x1 == x2p)) =>
@@ -298,7 +298,7 @@ class GlobalProtocol(val exprs: List[expr]) {
         case e @ End(x) => {
           // end should not be substituted until the end
           println("[End] " + e);
-//          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
+          //          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
           //return (exprs,false)
         }
         case _ =>
@@ -311,7 +311,7 @@ class GlobalProtocol(val exprs: List[expr]) {
       val rightHash = HashMap[String, expr]()
 
       println(exprs)
-      
+
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) => {
           leftHash(x1) = m
@@ -320,7 +320,7 @@ class GlobalProtocol(val exprs: List[expr]) {
         case e @ End(x) => {
           leftHash(x) = e
         }
-        case c @  Continue(x1,x2) => {
+        case c @ Continue(x1, x2) => {
           leftHash(x1) = c
           rightHash(x2) = c
         }
@@ -334,104 +334,104 @@ class GlobalProtocol(val exprs: List[expr]) {
           rightHash(x2) = p
           rightHash(x3) = p
         }
-        case cj @ ChoiceJoin(x1,x2,x3) => {
+        case cj @ ChoiceJoin(x1, x2, x3) => {
           leftHash(x1) = cj
           leftHash(x2) = cj
           rightHash(x3) = cj
         }
-        case pj @ ParallelJoin(x1,x2,x3) => {
+        case pj @ ParallelJoin(x1, x2, x3) => {
           leftHash(x1) = pj
           leftHash(x2) = pj
           rightHash(x3) = pj
         }
       }
-      
+
       val startingFlux = 1.0
-      
-      def TReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean,Option[ParallelJoin]) = {
+
+      def TReduction(e: expr, flux: Double, assign: HashMap[expr, Double], toEliminate: Set[expr]): (Set[expr], Boolean, Option[ParallelJoin]) = {
         println("\nTReduction(" + flux + "): " + e)
         println("assign: " + assign)
         println("toEliminate: " + toEliminate)
         e match {
-          case p @ Parallel(x1,x2,x3) => {
-            val (leftSet,leftResult,leftSome) = TReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
-            val (rightSet,rightResult,rightSome) = TReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
+          case p @ Parallel(x1, x2, x3) => {
+            val (leftSet, leftResult, leftSome) = TReduction(leftHash(x2), flux / 2.0, assign, toEliminate)
+            val (rightSet, rightResult, rightSome) = TReduction(leftHash(x3), flux / 2.0, assign, toEliminate)
             // flux closing is done at the right side, thus rightSome is the only posible last 'expr'
             (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult, rightSome)
           }
-          case pj @ ParallelJoin(x1,x2,x3) => {
-            if(! assign.contains(pj)){
+          case pj @ ParallelJoin(x1, x2, x3) => {
+            if (!assign.contains(pj)) {
               assign(pj) = flux
-              (toEliminate += pj,false,None)
-            } else if (flux + assign(pj) != startingFlux){
+              (toEliminate += pj, false, None)
+            } else if (flux + assign(pj) != startingFlux) {
               // Go through and join flows
-              TReduction(leftHash(x3),flux + assign(pj),assign,toEliminate += pj)
+              TReduction(leftHash(x3), flux + assign(pj), assign, toEliminate += pj)
             } else {
               // A T-System has been found
               println("T-System found!!!")
-              (toEliminate += pj,true, Some(pj))
+              (toEliminate += pj, true, Some(pj))
             }
           }
-          case Choice(x1,x2,x3) => (Set(),false,None)
-          case ChoiceJoin(x1,x2,x3) => (Set(), false, None)
-          case End(x) => (Set(),false,None)
-          case Message(x1,_,_,_,_,x2) => throw new Exception("Messages should not exist at this point")
-          case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
+          case Choice(x1, x2, x3) => (Set(), false, None)
+          case ChoiceJoin(x1, x2, x3) => (Set(), false, None)
+          case End(x) => (Set(), false, None)
+          case Message(x1, _, _, _, _, x2) => throw new Exception("Messages should not exist at this point")
+          case Continue(x1, x2) => throw new Exception("Continues should not exist at this point")
         }
       }
-      
-      def SReduction(e : expr, flux : Double, assign : HashMap[expr, Double], toEliminate : Set[expr]) : (Set[expr],Boolean,Option[ChoiceJoin]) = {
+
+      def SReduction(e: expr, flux: Double, assign: HashMap[expr, Double], toEliminate: Set[expr]): (Set[expr], Boolean, Option[ChoiceJoin]) = {
         e match {
-          case p @ Choice(x1,x2,x3) => {
-            val (leftSet,leftResult,leftSome) = SReduction(leftHash(x2),flux / 2.0,assign,toEliminate)
-            val (rightSet,rightResult,rightSome) = SReduction(leftHash(x3),flux / 2.0,assign,toEliminate)
+          case p @ Choice(x1, x2, x3) => {
+            val (leftSet, leftResult, leftSome) = SReduction(leftHash(x2), flux / 2.0, assign, toEliminate)
+            val (rightSet, rightResult, rightSome) = SReduction(leftHash(x3), flux / 2.0, assign, toEliminate)
             // flux closing is done at the right side, thus rightSome is the only posible last 'expr'
             (leftSet ++ rightSet + p ++ toEliminate, leftResult || rightResult, rightSome)
           }
-          case pj @ ChoiceJoin(x1,x2,x3) => {
-            if(! assign.contains(pj)){
+          case pj @ ChoiceJoin(x1, x2, x3) => {
+            if (!assign.contains(pj)) {
               assign(pj) = flux
-              (toEliminate += pj,false,None)
-            } else if (flux + assign(pj) != startingFlux){
+              (toEliminate += pj, false, None)
+            } else if (flux + assign(pj) != startingFlux) {
               // Go through and join flows
-              SReduction(leftHash(x3),flux + assign(pj),assign,toEliminate += pj)
+              SReduction(leftHash(x3), flux + assign(pj), assign, toEliminate += pj)
             } else {
               // A T-System has been found
               println("S-System found!!!")
-              (toEliminate += pj,true, Some(pj))
+              (toEliminate += pj, true, Some(pj))
             }
           }
-          case Parallel(x1,x2,x3) => (Set(),false,None)
-          case ParallelJoin(x1,x2,x3) => (Set(), false, None)
-          case End(x) => (Set(),false,None)
-          case Message(x1,_,_,_,_,x2) => throw new Exception("Messages should not exist at this point")
-          case Continue(x1,x2) => throw new Exception("Continues should not exist at this point")
+          case Parallel(x1, x2, x3) => (Set(), false, None)
+          case ParallelJoin(x1, x2, x3) => (Set(), false, None)
+          case End(x) => (Set(), false, None)
+          case Message(x1, _, _, _, _, x2) => throw new Exception("Messages should not exist at this point")
+          case Continue(x1, x2) => throw new Exception("Continues should not exist at this point")
         }
       }
 
       exprs foreach {
-        case first @ Parallel(x1,x2,x3) => {
-          val (set,result,last) = TReduction(first,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
-          if(result){
+        case first @ Parallel(x1, x2, x3) => {
+          val (set, result, last) = TReduction(first, startingFlux, HashMap[expr, Double](), LinkedHashSet[expr]())
+          if (result) {
             println("SET, FIRST AND LAST")
             println(set)
             println(first)
             println(last)
             println("filtered")
             println(exprs filterNot (e => set.contains(e)))
-            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)),true)
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)), true)
           }
         }
-        case first @ Choice(x1,x2,x3) => {
-          val (set,result,last) = SReduction(first,startingFlux,HashMap[expr, Double](), LinkedHashSet[expr]())
-          if(result){
+        case first @ Choice(x1, x2, x3) => {
+          val (set, result, last) = SReduction(first, startingFlux, HashMap[expr, Double](), LinkedHashSet[expr]())
+          if (result) {
             println("SET, FIRST AND LAST")
             println(set)
             println(first)
             println(last)
             println("filtered")
             println(exprs filterNot (e => set.contains(e)))
-            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)),true)
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)), true)
           }
         }
         case _ => // Do nothing
@@ -439,38 +439,45 @@ class GlobalProtocol(val exprs: List[expr]) {
 
       (exprs, false)
     }
-    println("****************\nSIMPLE REDUCTION\n****************\n")
-    println("reduction: " + exprs)
-    exprs foreach { x => println(x.canonical) }
-    var reduction = reduce(exprs)
+
+    var reduction = (exprs, true)
 
     while (reduction._2) {
-      println("reduction: " + reduction._1)
-      reduction._1 foreach { x => println(x.canonical) }
+
+      println("****************\nSIMPLE REDUCTION\n****************\n")
+      println("reduction: " + exprs)
+      exprs foreach { x => println(x.canonical) }
+      reduction = reduce(reduction._1)
+
+      while (reduction._2) {
+        println("reduction: " + reduction._1)
+        reduction._1 foreach { x => println(x.canonical) }
+        reduction = reduce(reduction._1)
+      }
+
+      println("************\nST REDUCTION\n************\n")
+
+      reduction = STReduction(reduction._1)
+      while (reduction._2) {
+        println("reduction: " + reduction._1)
+        reduction._1 foreach { x => println(x.canonical) }
+        reduction = STReduction(reduction._1)
+      }
+
       reduction = reduce(reduction._1)
     }
-    
-    println("************\nST REDUCTION\n************\n")
-    
-    reduction = STReduction(reduction._1)
-    while (reduction._2) {
-      println("reduction: " + reduction._1)
-      reduction._1 foreach { x => println(x.canonical) }
-      reduction = STReduction(reduction._1)
-    }
-    
-//    println("****************\nSIMPLE REDUCTION (AGAIN)\n****************\n")
-//    reduction = reduce(reduction._1)
-//
-//    while (reduction._2) {
-//      println("reduction: " + reduction._1)
-//      reduction._1 foreach { x => println(x.canonical) }
-//      reduction = reduce(reduction._1)
-//    }
-    
+    //    println("****************\nSIMPLE REDUCTION (AGAIN)\n****************\n")
+    //    reduction = reduce(reduction._1)
+    //
+    //    while (reduction._2) {
+    //      println("reduction: " + reduction._1)
+    //      reduction._1 foreach { x => println(x.canonical) }
+    //      reduction = reduce(reduction._1)
+    //    }
+
     val reductedList = reduction._1
 
-    if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd ))
+    if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd))
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
     println("*******\nSUCCESS\n*******\n")
   }
