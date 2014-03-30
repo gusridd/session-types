@@ -466,14 +466,6 @@ class GlobalProtocol(val exprs: List[expr]) {
 
       reduction = reduce(reduction._1)
     }
-    //    println("****************\nSIMPLE REDUCTION (AGAIN)\n****************\n")
-    //    reduction = reduce(reduction._1)
-    //
-    //    while (reduction._2) {
-    //      println("reduction: " + reduction._1)
-    //      reduction._1 foreach { x => println(x.canonical) }
-    //      reduction = reduce(reduction._1)
-    //    }
 
     val reductedList = reduction._1
 
