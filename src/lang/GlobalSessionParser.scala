@@ -188,6 +188,7 @@ case class Continue(x_1: String, x_2: String) extends expr {
 
 class SanityConditionException(s: String) extends Exception
 class LocalChoiceException(s: String) extends Exception
+class NotConnectedException(s: String) extends Exception
 
 class GlobalProtocol(val exprs: List[expr]) {
 
@@ -441,8 +442,10 @@ class GlobalProtocol(val exprs: List[expr]) {
       (exprs, false)
     }
 
-    var reduction = (exprs, true)
-
+    try{
+      var reduction = (exprs, true)
+    
+    
     while (reduction._2) {
 
       println("****************\nSIMPLE REDUCTION\n****************\n")
@@ -467,12 +470,16 @@ class GlobalProtocol(val exprs: List[expr]) {
 
       reduction = reduce(reduction._1)
     }
+   
 
     val reductedList = reduction._1
 
     if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd))
       throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
     println("*******\nSUCCESS\n*******\n")
+    } catch {
+    case e : java.util.NoSuchElementException => throw e
+    }
   }
 
   def linearityCheck(): Boolean = {

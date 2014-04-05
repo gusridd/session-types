@@ -93,6 +93,11 @@ class Sanity {
     threadReductionString("x_1 + x_2 = x_3 \n x_3 = x_4 + x_2")
     threadReductionString("x_4 + x_2 = x_3 \n x_3 = x_2 + x_1")
   }
+  
+  @Test(expected = classOf[java.util.NoSuchElementException])
+  def testThreadReductionUnconnected() {
+    threadReductionString("x_0 = x_1 + x_2 \n x_4 + x_5 = x_6 \n x_6 = end")
+  }
 
   @Test
   def testReductionFiltering() {
