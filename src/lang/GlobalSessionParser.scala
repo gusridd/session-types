@@ -187,6 +187,7 @@ case class Continue(x_1: String, x_2: String) extends expr {
 }
 
 class SanityConditionException(s: String) extends Exception
+class LocalChoiceException(s: String) extends Exception
 
 class GlobalProtocol(val exprs: List[expr]) {
 
@@ -500,6 +501,10 @@ class GlobalProtocol(val exprs: List[expr]) {
     }) reduce (_ && _)
   }
 
+  def checkLocalChoice() = {
+    
+  }
+  
 }
 
 object Collector {
