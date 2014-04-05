@@ -307,9 +307,51 @@ class GlobalProtocol(val exprs: List[expr]) {
       }
       (exprs, false)
     }
+    
+    def getHashes() : (HashMap[String,lang.expr],HashMap[String,lang.expr]) = {
+      val leftHash = HashMap[String, expr]()
+      val rightHash = HashMap[String, expr]()
+
+      //println(exprs)
+
+      exprs foreach {
+        case m @ Message(x1, _, _, _, _, x2) => {
+          leftHash(x1) = m
+          rightHash(x2) = m
+        }
+        case e @ End(x) => {
+          leftHash(x) = e
+        }
+        case c @ Continue(x1, x2) => {
+          leftHash(x1) = c
+          rightHash(x2) = c
+        }
+        case c @ Choice(x1, x2, x3) => {
+          leftHash(x1) = c
+          rightHash(x2) = c
+          rightHash(x3) = c
+        }
+        case p @ Parallel(x1, x2, x3) => {
+          leftHash(x1) = p
+          rightHash(x2) = p
+          rightHash(x3) = p
+        }
+        case cj @ ChoiceJoin(x1, x2, x3) => {
+          leftHash(x1) = cj
+          leftHash(x2) = cj
+          rightHash(x3) = cj
+        }
+        case pj @ ParallelJoin(x1, x2, x3) => {
+          leftHash(x1) = pj
+          leftHash(x2) = pj
+          rightHash(x3) = pj
+        }
+      }
+      (leftHash,rightHash)
+    }
 
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
-      val leftHash = HashMap[String, expr]()
+      /*val leftHash = HashMap[String, expr]()
       val rightHash = HashMap[String, expr]()
 
       println(exprs)
@@ -347,6 +389,8 @@ class GlobalProtocol(val exprs: List[expr]) {
           rightHash(x3) = pj
         }
       }
+      */
+      val (leftHash,rightHash) = getHashes()
 
       val startingFlux = 1.0
 
