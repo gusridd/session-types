@@ -17,7 +17,8 @@ class ActiveSender {
   }
 
   @Test def testActiveSender() {
-    activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_0","Alice")
+    //activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_0","Alice")
+    activeSenderFromFile("./src/lang/test/greetingDecision.txt","x_1","B")
   }
   
   @Test (expected = classOf[ActiveSender.NonChoiceException])

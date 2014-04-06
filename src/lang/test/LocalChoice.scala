@@ -27,12 +27,12 @@ class LocalChoice {
   
   @Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoice(){
-    localChoiceFromString(new FileReader("nonLocalChoice.txt"))
+    localChoiceFromString(new FileReader("./src/lang/test/nonLocalChoice.txt"))
   }
   
   @Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoiceConfusion(){
-    localChoiceFromString(new FileReader("nonLocalChoiceConfusion.txt"))
+    localChoiceFromString(new FileReader("./src/lang/test/nonLocalChoiceConfusion.txt"))
   }
 
 }

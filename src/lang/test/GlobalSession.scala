@@ -10,8 +10,10 @@ import java.io.Reader
 
 class GlobalSession {
   
+  val path = "./src/lang/test/"
+  
   def getParticipantsFile(filename : String) = {
-    val reader = new FileReader(filename)
+    val reader = new FileReader(path + filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     g.getParticipants
@@ -19,13 +21,13 @@ class GlobalSession {
 
   @Test def testGetParticipants() {
 
-    var participants = getParticipantsFile("./src/lang/test/AlternatingBitProtocol.txt")
+    var participants = getParticipantsFile("AlternatingBitProtocol.txt")
     
     assertEquals(2,participants.size)
     assertTrue(participants.contains("Alice"))
     assertTrue(participants.contains("Bob"))
     
-    participants = getParticipantsFile("./src/lang/test/uniqueStart.txt")
+    participants = getParticipantsFile("uniqueStart.txt")
     
     assertEquals(3,participants.size)
     assertTrue(participants.contains("Seller"))
