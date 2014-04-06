@@ -249,6 +249,59 @@ class GlobalProtocol(val exprs: List[expr]) {
     }
   }
 
+  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+    val leftHash = HashMap[String, expr]()
+    val rightHash = HashMap[String, expr]()
+
+    //println(exprs)
+
+    exprs foreach {
+      case m @ Message(x1, _, _, _, _, x2) => {
+        leftHash(x1) = m
+        rightHash(x2) = m
+      }
+      case e @ End(x) => {
+        leftHash(x) = e
+      }
+      case c @ Continue(x1, x2) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+      }
+      case c @ Choice(x1, x2, x3) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+        rightHash(x3) = c
+      }
+      case p @ Parallel(x1, x2, x3) => {
+        leftHash(x1) = p
+        rightHash(x2) = p
+        rightHash(x3) = p
+      }
+      case cj @ ChoiceJoin(x1, x2, x3) => {
+        leftHash(x1) = cj
+        leftHash(x2) = cj
+        rightHash(x3) = cj
+      }
+      case pj @ ParallelJoin(x1, x2, x3) => {
+        leftHash(x1) = pj
+        leftHash(x2) = pj
+        rightHash(x3) = pj
+      }
+    }
+    (leftHash, rightHash)
+  }
+
+  def getParticipants(): Set[String] = {
+    val s = Set[String]()
+    exprs foreach {
+      case m @ Message(_, a, b, _, _, _) => {
+        (s += a) += b
+      }
+      case _ =>
+    }
+    s
+  }
+
   def threadReduction() = {
 
     def getHash(exprs: List[expr]) = {
@@ -307,48 +360,6 @@ class GlobalProtocol(val exprs: List[expr]) {
       }
       (exprs, false)
     }
-    
-    def getHashes() : (HashMap[String,lang.expr],HashMap[String,lang.expr]) = {
-      val leftHash = HashMap[String, expr]()
-      val rightHash = HashMap[String, expr]()
-
-      //println(exprs)
-
-      exprs foreach {
-        case m @ Message(x1, _, _, _, _, x2) => {
-          leftHash(x1) = m
-          rightHash(x2) = m
-        }
-        case e @ End(x) => {
-          leftHash(x) = e
-        }
-        case c @ Continue(x1, x2) => {
-          leftHash(x1) = c
-          rightHash(x2) = c
-        }
-        case c @ Choice(x1, x2, x3) => {
-          leftHash(x1) = c
-          rightHash(x2) = c
-          rightHash(x3) = c
-        }
-        case p @ Parallel(x1, x2, x3) => {
-          leftHash(x1) = p
-          rightHash(x2) = p
-          rightHash(x3) = p
-        }
-        case cj @ ChoiceJoin(x1, x2, x3) => {
-          leftHash(x1) = cj
-          leftHash(x2) = cj
-          rightHash(x3) = cj
-        }
-        case pj @ ParallelJoin(x1, x2, x3) => {
-          leftHash(x1) = pj
-          leftHash(x2) = pj
-          rightHash(x3) = pj
-        }
-      }
-      (leftHash,rightHash)
-    }
 
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
       /*val leftHash = HashMap[String, expr]()
@@ -390,7 +401,7 @@ class GlobalProtocol(val exprs: List[expr]) {
         }
       }
       */
-      val (leftHash,rightHash) = getHashes()
+      val (leftHash, rightHash) = getHashes()
 
       val startingFlux = 1.0
 
@@ -486,43 +497,41 @@ class GlobalProtocol(val exprs: List[expr]) {
       (exprs, false)
     }
 
-    try{
+    try {
       var reduction = (exprs, true)
-    
-    
-    while (reduction._2) {
-
-      println("****************\nSIMPLE REDUCTION\n****************\n")
-      println("reduction: " + exprs)
-      exprs foreach { x => println(x.canonical) }
-      reduction = reduce(reduction._1)
 
       while (reduction._2) {
-        println("reduction: " + reduction._1)
-        reduction._1 foreach { x => println(x.canonical) }
+
+        println("****************\nSIMPLE REDUCTION\n****************\n")
+        println("reduction: " + exprs)
+        exprs foreach { x => println(x.canonical) }
+        reduction = reduce(reduction._1)
+
+        while (reduction._2) {
+          println("reduction: " + reduction._1)
+          reduction._1 foreach { x => println(x.canonical) }
+          reduction = reduce(reduction._1)
+        }
+
+        println("************\nST REDUCTION\n************\n")
+
+        reduction = STReduction(reduction._1)
+        while (reduction._2) {
+          println("reduction: " + reduction._1)
+          reduction._1 foreach { x => println(x.canonical) }
+          reduction = STReduction(reduction._1)
+        }
+
         reduction = reduce(reduction._1)
       }
 
-      println("************\nST REDUCTION\n************\n")
+      val reductedList = reduction._1
 
-      reduction = STReduction(reduction._1)
-      while (reduction._2) {
-        println("reduction: " + reduction._1)
-        reduction._1 foreach { x => println(x.canonical) }
-        reduction = STReduction(reduction._1)
-      }
-
-      reduction = reduce(reduction._1)
-    }
-   
-
-    val reductedList = reduction._1
-
-    if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd))
-      throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
-    println("*******\nSUCCESS\n*******\n")
+      if (reductedList.length > 0 && !(reductedList.length == 1 && reductedList(0).isEnd))
+        throw new SanityConditionException("Thread correctness: unable to reduce more " + reduction._1)
+      println("*******\nSUCCESS\n*******\n")
     } catch {
-    case e : java.util.NoSuchElementException => throw e
+      case e: java.util.NoSuchElementException => throw e
     }
   }
 
@@ -553,9 +562,9 @@ class GlobalProtocol(val exprs: List[expr]) {
   }
 
   def checkLocalChoice() = {
-    
+
   }
-  
+
 }
 
 object Collector {
