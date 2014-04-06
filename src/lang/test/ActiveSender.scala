@@ -9,14 +9,20 @@ import java.io.Reader
 
 class ActiveSender {
   
-  def activeSenderFromString(reader: Reader) = {
+  def activeSenderFromFile(filename: String, x: String, expected :String) = {
+    val reader = new FileReader(filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    g.checkLocalChoice()
+    assertEquals(expected,ActiveSender(g,x))
   }
 
-  @Test def testSimpleChoice() {
-    activeSenderFromString(new StringReader("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4"))
+  @Test def testActiveSender() {
+    activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_0","Alice")
+  }
+  
+  @Test (expected = classOf[ActiveSender.NonChoiceException])
+  def testNotDefinedForNonChoice(){
+    activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_1","Alice")
   }
   
 
