@@ -13,10 +13,6 @@ object ActiveSender {
     override def toString: String = 
       "NoActiveSenders: No active senders found for " + x
   }
-  class NonUniqueActiveSenderException(x: String, s: Set[String]) extends Exception {
-    override def toString: String = 
-      "NonUniqueActiveSenderException: Active Sender for " + x + " is non singleton " + s
-  }
   
 
   def apply(g: GlobalProtocol, x: String) = {
@@ -30,9 +26,7 @@ object ActiveSender {
         implicit val justConmuted = false
         val activeSenders = g.getParticipants map 
         (p => (p,reduce(g, x1, Set(), Set(p), x2, Set(), Set(p)))) filter (e => e._2)
-        if(activeSenders.size > 1){
-          throw new NonUniqueActiveSenderException(x,activeSenders.map(el => el._1))
-        } else if (activeSenders.size == 0){
+        if (activeSenders.size != 1){
           throw new NoActiveSenders(x)
         } else {
           activeSenders.last._1

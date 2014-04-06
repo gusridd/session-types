@@ -8,24 +8,45 @@ import java.io.StringReader;
 import java.io.Reader
 
 class ActiveSender {
-  
-  def activeSenderFromFile(filename: String, x: String, expected :String) = {
-    val reader = new FileReader(filename)
+
+  val path = "./src/lang/test/"
+
+  def activeSenderFromFile(filename: String, x: String, expected: String) = {
+    val reader = new FileReader(path + filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    assertEquals(expected,ActiveSender(g,x))
+    assertEquals(expected, ActiveSender(g, x))
   }
 
   @Test def testActiveSender() {
-    //activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_0","Alice")
-    activeSenderFromFile("./src/lang/test/greetingDecision.txt","x_1","B")
+    activeSenderFromFile("threadCorrectnessGood1.txt", "x_0", "Alice")
+    activeSenderFromFile("greetingDecision.txt", "x_1", "B")
   }
   
-  @Test (expected = classOf[ActiveSender.NonChoiceException])
-  def testNotDefinedForNonChoice(){
-    activeSenderFromFile("./src/lang/test/threadCorrectnessGood1.txt","x_1","Alice")
-  }
   
+  @Test(expected = classOf[ActiveSender.NoActiveSenders])
+  def testNonLocalChoice() {
+    activeSenderFromFile("nonLocalChoice.txt", "x_0", "Any")
+  }
 
+  @Test(expected = classOf[ActiveSender.NonChoiceException])
+  def testNotDefinedForMessage() {
+    activeSenderFromFile("threadCorrectnessGood1.txt", "x_1", "Any")
+  }
+  
+  @Test(expected = classOf[ActiveSender.NonChoiceException])
+  def testNotDefinedForChoiceJoin() {
+    activeSenderFromFile("threadCorrectnessGood1.txt", "x_1", "Any")
+  }
+  
+  @Test(expected = classOf[ActiveSender.NonChoiceException])
+  def testNotDefinedForParallel() {
+    activeSenderFromFile("threadCorrectnessGood2.txt", "x_0", "Any")
+  }
+  
+  @Test(expected = classOf[ActiveSender.NonChoiceException])
+  def testNotDefinedForParallelJoin() {
+    activeSenderFromFile("threadCorrectnessGood2.txt", "x_4", "Any")
+  }
 
 }
