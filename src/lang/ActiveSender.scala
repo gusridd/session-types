@@ -2,6 +2,7 @@ package lang
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
+import scala.annotation.tailrec
 
 object ActiveSender {
 
@@ -35,7 +36,6 @@ object ActiveSender {
     }
 
   }
-
   def reduce(g: GlobalProtocol, actL: String, setL: Set[String],
     parL: Set[String], actR: String, setR: Set[String],
     parR: Set[String])(implicit justConmuted : Boolean) : Boolean = {

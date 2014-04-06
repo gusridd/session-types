@@ -1,0 +1,16 @@
+		x_0 = Seller -> Broker : Item(String); x_1
+  x_5 + x_1 = x_2
+		x_2 = x_3 + x_6
+		x_3 = Broker -> Client : Offer(Nat); x_4
+		x_4 = Client -> Broker : Counter(Nat); x_5
+		x_6 = x_7 + x_8
+		x_7 = x_9 | x_10
+		x_9 = Broker -> Seller : Noclient; x_17
+	   x_10 = Broker -> Client : Noseller; x_18
+x_17 | x_18 = x_19
+		x_8 = x_12 | x_13
+	   x_12 = Broker -> Seller : Final(Nat); x_14
+	   x_13 = Broker -> Client : Result(Nat); x_15
+x_14 | x_15 = x_16
+x_16 + x_19 = x_20
+	   x_20 = end

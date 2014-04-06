@@ -21,6 +21,9 @@ class ActiveSender {
   @Test def testActiveSender() {
     activeSenderFromFile("threadCorrectnessGood1.txt", "x_0", "Alice")
     activeSenderFromFile("greetingDecision.txt", "x_1", "B")
+    
+    activeSenderFromFile("negotiationWithNoAgreement.txt", "x_2", "Broker")
+    activeSenderFromFile("negotiationWithNoAgreement.txt", "x_6", "Broker")
   }
   
   
