@@ -103,20 +103,4 @@ object ActiveSender {
     }
     tailreduce(actL,setL,parL,actR,setR,parR,false,Stack())
   }
-  /**
-   * boolean solve(Node n) {
-      put node n on the stack;
-      while the stack is not empty {
-        if the node at the top of the stack is a leaf {
-          if it is a goal node, return true
-          else pop it off the stack
-        }
-        else {
-          if the node at the top of the stack has untried children
-            push the next untried child onto the stack
-          else pop the node off the stack
-        }
-      }
-      return false
-    }
-   */
+}
