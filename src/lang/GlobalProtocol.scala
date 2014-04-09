@@ -376,8 +376,5 @@ class GlobalProtocol(val exprs: List[expr]) {
     }) reduce (_ && _)
   }
 
-  def checkLocalChoice() = {
-
-  }
 
 }
