@@ -4,14 +4,19 @@ import scala.collection.immutable.Set
 
 object Receiver {
 
+  class UndefinedReceiverException(xt: List[String], pt: Set[String], xi: String) extends Exception {
+    override def toString: String = 
+      "UndefinedReceiverException: Undefined Rcv(G," + xt + "," + pt + ")(" + xi + ")"
+  }
+
   def apply(g: GlobalProtocol)(x: String) = {
     new output(r(g, List(), Set(), x))
   }
 
   /**
    * The output class express that the equality
-   * Rcv(G)(x_1) = Rcv(G)(x_2) holds if forall(p:l1:xt1),
-   * forall(p:l2:xt2), l1 != l2 or x1p and x2p share a
+   * [A]Rcv(G)(x_1) = [B]Rcv(G)(x_2) holds if forall(p:l1:xt1) in A,
+   * forall(p:l2:xt2) in B, l1 != l2 or x1p and x2p share a
    * non-null suffix
    */
   case class output(s: Set[(String, String, List[String])]) {
@@ -47,6 +52,7 @@ object Receiver {
         case _ => Set.empty
       }
     }
-    throw new Exception("Undefined Rcv(G," + xt + "," + pt + ")(" + xi + ")")
+    // This will happen if the protocol is incomplete
+    throw new UndefinedReceiverException(xt,pt,xi)
   }
 }
