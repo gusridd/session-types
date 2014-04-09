@@ -211,38 +211,7 @@ object Collector {
 
 }
 
-object Rcv {
 
-  def apply(g: GlobalProtocol)(x: String) = {
-    r(g, "_", "_", x)
-  }
-
-  private def r(g: GlobalProtocol, xt: String, pt: String, xi: String): Set[(String, String, String)] = {
-    val it = g.exprs.iterator
-    //println("Rcv(G," + xt+"," + pt + ")(" + xi + ")")
-    while (it.hasNext) {
-      val e = it.next
-      e match {
-        case Message(x, p, pp, _, _, xp) if (x == xi && (pt contains (pp + "·"))) => return r(g, xt, pt, xp)
-        case ParallelJoin(x, xpp, xp) if (x == xi || xpp == xi) => return r(g, xt, pt, xp)
-
-        case Message(x, p, pp, l, _, xp) if (x == xi && !(pt contains (pp + "·"))) => return Set((pp, l, xt)) ++ r(g, xt, pp + "·" + pt, xp)
-
-        case Choice(x, xp, xpp) if (x == xi) => return r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
-        case Parallel(x, xp, xpp) if (x == xi) => return r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
-
-        case ChoiceJoin(x, xp, xpp) if ((x == xi || xp == xi) && (xt contains ("·" + xpp))) => return Set.empty
-        case End(x) if (x == xi) => return Set.empty
-
-        case ChoiceJoin(xp, x, xpp) if (x == xi || xp == xi) && !(xt contains ("·" + xpp)) => return r(g, xt + "·" + xpp, pt, xpp)
-
-        case _ => Set.empty
-      }
-    }
-    throw new Exception("Undefined Rcv(G," + xt + "," + pt + ")(" + xi + ")")
-
-  }
-}
 
 object Lin {
 

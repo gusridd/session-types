@@ -9,10 +9,18 @@ import java.io.Reader
 
 class LocalChoice {
   
+  val path = "./src/lang/test/"
+  
   def localChoiceFromString(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     g.checkLocalChoice()
+  }
+  
+  def getProtocol(reader: Reader) = {
+    val g: GlobalProtocol = GlobalParser.parse(reader)
+    reader.close
+    g
   }
 
   @Test def testSimpleCorrectChoice() {
@@ -33,6 +41,19 @@ class LocalChoice {
   @Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoiceConfusion(){
     localChoiceFromString(new FileReader("./src/lang/test/nonLocalChoiceConfusion.txt"))
+  }
+  
+  
+  /**
+   * Receiver
+   */
+  @Test def testReceiveEmpty() {
+    val g = getProtocol(new FileReader(path + "greetingDecision.txt"))
+    val s1 = Receiver(g)("x_2")
+    val s2 = Receiver(g)("x_3")
+    assertEquals(s1,s2)
+    
+    
   }
 
 }
