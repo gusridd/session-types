@@ -350,31 +350,4 @@ class GlobalProtocol(val exprs: List[expr]) {
     }
   }
 
-  def linearityCheck(): Boolean = {
-    def nonNullSuffix(s1: String, s2: String) = {
-      (s1, s2) match {
-        case ("", _) => false
-        case (_, "") => false
-      }
-    }
-
-    val linFun = Lin(GlobalProtocol.this)(_)
-    exprs map ({
-      case Parallel(x_1, x_2, x_3) => {
-        val l1 = linFun(x_2)
-        val l2 = linFun(x_3)
-        println("l1: " + l1)
-        println("l2: " + l2)
-        l1 forall {
-          case (p1, l1, x1) => l2 forall {
-            case (p2, l2, x2) => l1 != l2
-          }
-        }
-        //        false
-      }
-      case _ => true
-    }) reduce (_ && _)
-  }
-
-
 }
