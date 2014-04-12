@@ -48,7 +48,7 @@ object ActiveSender {
       case End(x) if setR.contains(actR) => true
       case _ if (setL.contains(actL) && setR.contains(actR)) => true
       case ChoiceJoin(x1,x2,x) if (x1 == actL && x2 == actR) || (x2 == actL && x1 == actR) => true
-      case _ if (counter == 3) => reduce(g, actR, setR, parR, actL,setL,parL,0)
+      case _ if (counter == 5) => reduce(g, actR, setR, parR, actL,setL,parL,0)
       /* Recursive cases */
       case ParallelJoin(x1,x2,xp) if reduce(g,xp,setL,parL,actR,setR,parR,counter+1) => true
       case ChoiceJoin(x1,x2,xp) if reduce(g,xp,setL,parL,actR,setR,parR,counter+1) => true
