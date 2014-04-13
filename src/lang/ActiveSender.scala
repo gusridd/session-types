@@ -2,6 +2,7 @@ package lang
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
+import scala.collection.mutable.Stack
 import scala.annotation.tailrec
 
 object ActiveSender {
@@ -40,8 +41,6 @@ object ActiveSender {
     parL: Set[String], actR: String, setR: Set[String],
     parR: Set[String], counter : Int) : Boolean = {
     val (leftHash, rightHash) = g.getHashes
-    val el = leftHash(actL)
-    println(actL + " " + el)
     leftHash(actL) match {
       /* Base cases */
       case End(x) if actL == actR => true
