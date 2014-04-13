@@ -2,8 +2,8 @@ package lang
 
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.Set
 import scala.collection.mutable.LinkedHashSet
+import scala.collection.mutable.Set
 
 class GlobalProtocol(val exprs: List[expr]) {
 
@@ -65,53 +65,57 @@ class GlobalProtocol(val exprs: List[expr]) {
   }
 
   private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-  private var hashCacheR: Option[HashMap[String, lang.expr]] = None 
+  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
 
   def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
     (hashCacheL, hashCacheR) match {
       case (Some(hl), Some(hr)) => return (hl, hr)
       case _ => {
-        val leftHash = HashMap[String, expr]()
-        val rightHash = HashMap[String, expr]()
-
-        exprs foreach {
-          case m @ Message(x1, _, _, _, _, x2) => {
-            leftHash(x1) = m
-            rightHash(x2) = m
-          }
-          case e @ End(x) => {
-            leftHash(x) = e
-          }
-          case c @ Continue(x1, x2) => {
-            leftHash(x1) = c
-            rightHash(x2) = c
-          }
-          case c @ Choice(x1, x2, x3) => {
-            leftHash(x1) = c
-            rightHash(x2) = c
-            rightHash(x3) = c
-          }
-          case p @ Parallel(x1, x2, x3) => {
-            leftHash(x1) = p
-            rightHash(x2) = p
-            rightHash(x3) = p
-          }
-          case cj @ ChoiceJoin(x1, x2, x3) => {
-            leftHash(x1) = cj
-            leftHash(x2) = cj
-            rightHash(x3) = cj
-          }
-          case pj @ ParallelJoin(x1, x2, x3) => {
-            leftHash(x1) = pj
-            leftHash(x2) = pj
-            rightHash(x3) = pj
-          }
-        }
+        val (leftHash,rightHash) = getHashesFromExpr(exprs)
         hashCacheL = Some(leftHash)
         hashCacheR = Some(rightHash)
-        (leftHash, rightHash)
+        (leftHash,rightHash)
+      } 
+    }
+  }
+
+  def getHashesFromExpr(exprs: List[expr] = exprs): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+    val leftHash = HashMap[String, expr]()
+    val rightHash = HashMap[String, expr]()
+    exprs foreach {
+      case m @ Message(x1, _, _, _, _, x2) => {
+        leftHash(x1) = m
+        rightHash(x2) = m
+      }
+      case e @ End(x) => {
+        leftHash(x) = e
+      }
+      case c @ Continue(x1, x2) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+      }
+      case c @ Choice(x1, x2, x3) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+        rightHash(x3) = c
+      }
+      case p @ Parallel(x1, x2, x3) => {
+        leftHash(x1) = p
+        rightHash(x2) = p
+        rightHash(x3) = p
+      }
+      case cj @ ChoiceJoin(x1, x2, x3) => {
+        leftHash(x1) = cj
+        leftHash(x2) = cj
+        rightHash(x3) = cj
+      }
+      case pj @ ParallelJoin(x1, x2, x3) => {
+        leftHash(x1) = pj
+        leftHash(x2) = pj
+        rightHash(x3) = pj
       }
     }
+    (leftHash, rightHash)
   }
 
   def getParticipants(): Set[String] = {
@@ -185,7 +189,7 @@ class GlobalProtocol(val exprs: List[expr]) {
     }
 
     def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
-      val (leftHash, rightHash) = getHashes()
+      val (leftHash, rightHash) = getHashesFromExpr(exprs)
 
       val startingFlux = 1.0
 
@@ -282,26 +286,36 @@ class GlobalProtocol(val exprs: List[expr]) {
     }
 
     try {
+      /**
+       * The first element in the pair represents the current state of the
+       * reduction, the second one if the reduction steps should continue.
+       */
       var reduction = (exprs, true)
+
+      println("****************\nPROTOCOL\n****************\n")
+      exprs foreach { x => println(x.canonical) }
 
       while (reduction._2) {
 
         println("****************\nSIMPLE REDUCTION\n****************\n")
-        println("reduction: " + exprs)
+        //println("reduction: " + exprs)
+        println()
         exprs foreach { x => println(x.canonical) }
         reduction = reduce(reduction._1)
 
         while (reduction._2) {
-          println("reduction: " + reduction._1)
+          //println("reduction: " + reduction._1)
+          println()
           reduction._1 foreach { x => println(x.canonical) }
           reduction = reduce(reduction._1)
         }
 
         println("************\nST REDUCTION\n************\n")
-
+        reduction._1 foreach { x => println(x.canonical) }
         reduction = STReduction(reduction._1)
         while (reduction._2) {
-          println("reduction: " + reduction._1)
+          //println("reduction: " + reduction._1)
+          println()
           reduction._1 foreach { x => println(x.canonical) }
           reduction = STReduction(reduction._1)
         }

@@ -2,8 +2,6 @@ package lang
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
-import scala.collection.mutable.Stack
-import scala.annotation.tailrec
 
 object ActiveSender {
 
