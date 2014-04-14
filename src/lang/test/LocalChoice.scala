@@ -11,7 +11,7 @@ class LocalChoice {
   
   val path = "./src/lang/test/"
   
-  def localChoiceFromReader(reader: Reader) = {
+  def localChoiceFromReader(reader: Reader) : Boolean = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     LocalChoice(g)
