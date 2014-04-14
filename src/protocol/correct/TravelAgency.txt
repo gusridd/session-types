@@ -1,9 +1,9 @@
 x_0 + x_1 = x_2
-x_2 = Client -> Agency : pick; x_3
-x_3 = Agency -> Client: price; x_4
+x_2 = Client -> Agency : Pick; x_3
+x_3 = Agency -> Client: Price; x_4
 x_4 = x_1 + x_5
 x_5 = x_6 + x_8
-x_6 = Client -> Agency : accept; x_7
-x_8 = Client -> Agency : quit; x_9
+x_6 = Client -> Agency : Accept; x_7
+x_8 = Client -> Agency : Quit; x_9
 x_7 + x_9 = x_10
 x_10 = end
