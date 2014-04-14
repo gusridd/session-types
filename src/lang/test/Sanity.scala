@@ -54,28 +54,56 @@ class Sanity {
   def testThreadCorrectnessWrong() {
     threadReductionFile("./src/lang/test/threadCorrectnessWrong.txt")
   }
-
-  @Test
-  def testThreadCorrectnessCorrect() {
+  
+  @Test def testThreadCorrectnessGood1(){
     threadReductionFile("./src/lang/test/threadCorrectnessGood1.txt")
-
+  }
+  
+  @Test def testThreadCorrectnessGood2(){
     threadReductionFile("./src/lang/test/threadCorrectnessGood2.txt")
-
-    //    threadReductionFile("./src/lang/test/AlternatingBitProtocol.txt")
-
-    //    threadReductionFile("./src/lang/test/AlternatingBitProtocol3.txt")
-
+  }
+  
+  @Test(expected = classOf[lang.SanityConditionException])
+  def testAlternatingBitProtocol(){
+    threadReductionFile("./src/lang/test/AlternatingBitProtocol.txt")
+  }
+  
+  @Test(expected = classOf[lang.SanityConditionException])
+  def testAlternatingBitProtocol3(){
+    threadReductionFile("./src/lang/test/AlternatingBitProtocol3.txt")
+  }
+  
+  @Test def testInterleavedChoice(){
     threadReductionFile("./src/lang/test/interleavedChoice.txt")
-
+  }
+  
+  @Test def testInterleavedSAndTSystem(){
     threadReductionFile("./src/lang/test/interleavedSAndTSystem.txt")
-
-    // The next case is special as is a ST-System that does not reduce to empty, but to a S-System
+  }
+  
+  @Test def testRecursionWithEnding(){
     threadReductionFile("./src/lang/test/recursionWithEnding.txt")
   }
 
   @Test
   def testThreadRulesTrans() {
     threadReductionString("x_0 = A -> B : L(U); x_1")
+  }
+  
+  @Test def testHelloWorld(){
+    threadReductionFile("./src/protocol/correct/HelloWorld.txt")
+  }
+  
+  @Test def testOnlineBookStore(){
+    threadReductionFile("./src/protocol/correct/OnlineBookstore.txt")
+  }
+  
+  @Test def testTravelAgency(){
+    threadReductionFile("./src/protocol/correct/TravelAgency.txt")
+  }
+  
+  @Test def testPostOffice(){
+    threadReductionFile("./src/protocol/correct/PostOffice.txt")
   }
 
   @Test
