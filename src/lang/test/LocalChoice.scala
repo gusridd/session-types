@@ -38,6 +38,10 @@ class LocalChoice {
     assertTrue(localChoiceFromReader(new FileReader(path_correct + "PostOffice.txt")))
   }
   
+  @Test def testPostOffice2() {
+    assertTrue(localChoiceFromReader(new FileReader(path_correct + "PostOffice2.txt")))
+  }
+  
   @Test def testTravelAgency() {
     assertTrue(localChoiceFromReader(new FileReader(path_correct + "TravelAgency.txt")))
   }

@@ -38,6 +38,19 @@ class ActiveSender {
     assertEquals("S", ActiveSender(g, "x_27"))
   }
   
+  @Test def testPostOffice2() {
+    val reader = new FileReader("./src/protocol/correct/PostOffice2.txt")
+    val g: GlobalProtocol = GlobalParser.parse(reader)
+    reader.close
+    assertEquals("C", ActiveSender(g, "x_5"))
+    assertEquals("S", ActiveSender(g, "x_7"))
+    assertEquals("C", ActiveSender(g, "x_14"))
+    assertEquals("S", ActiveSender(g, "x_20"))
+    assertEquals("C", ActiveSender(g, "x_23"))
+    assertEquals("C", ActiveSender(g, "x_27"))
+    assertEquals("S", ActiveSender(g, "x_33"))
+  }
+  
   
   @Test(expected = classOf[ActiveSender.NoActiveSenders])
   def testNonLocalChoice() {

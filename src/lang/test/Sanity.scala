@@ -105,6 +105,14 @@ class Sanity {
   @Test def testPostOffice(){
     threadReductionFile("./src/protocol/correct/PostOffice.txt")
   }
+  
+  @Test def testPostOffice2(){
+    threadReductionFile("./src/protocol/correct/PostOffice2.txt")
+  }
+  
+  @Test def testRecursiveChoice(){
+    threadReductionFile("./src/lang/test/RecursiveChoice.txt")
+  }
 
   @Test
   def testThreadRulesPar() {
