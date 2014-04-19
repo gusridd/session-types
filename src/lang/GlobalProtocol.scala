@@ -242,12 +242,6 @@ class GlobalProtocol(val exprs: List[expr]) {
         coverReduction(e, ParallelCover)
       }
 
-      def variableSet(exprs: Set[expr]) = {
-        val s: Set[String] = Set()
-        exprs foreach (e => s ++ e.getVariables)
-        s
-      }
-
       /**
        * Choice graph cover
        */
@@ -255,6 +249,10 @@ class GlobalProtocol(val exprs: List[expr]) {
         coverReduction(e, ChoiceCover)
       }
 
+      /**
+       * This function returns the connected graph, starting at expression e
+       * that is formed only with Choices/ChoiceJoin/Messages/Continue
+       */
       def ChoiceCover(e: expr, s: Set[expr]): Set[expr] = {
         if (s.contains(e)) {
           return s
@@ -269,7 +267,11 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Continue(x1, x2) => Set(e) ++ ChoiceCover(leftHash(x2), s + e)
         }
       }
-
+      
+      /**
+       * This function returns the connected graph, starting at expression e
+       * that is formed only with Parallel/ParallelJoin/Messages/Continue
+       */
       def ParallelCover(e: expr, s: Set[expr]): Set[expr] = {
         if (s.contains(e)) {
           return s
@@ -284,7 +286,9 @@ class GlobalProtocol(val exprs: List[expr]) {
           case Continue(x1, x2) => Set(e) ++ ParallelCover(leftHash(x2), s + e)
         }
       }
-
+      /**
+       * Parallel, Choice and ChoiceJoin are starting points for reductions
+       */
       exprs foreach {
         case e @ Parallel(x1, x2, x3) => {
           val (set, result, first, last) = TReduction(e)
@@ -293,8 +297,6 @@ class GlobalProtocol(val exprs: List[expr]) {
             println(set)
             println(first)
             println(last)
-            println("filtered")
-            println(exprs filterNot (e => set.contains(e)))
             return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
           }
         }
@@ -302,11 +304,7 @@ class GlobalProtocol(val exprs: List[expr]) {
           val (set, result, first, last) = SReduction(e)
           if (result) {
             println("SET, FIRST AND LAST")
-            println(set)
-            println(first)
-            println(last)
-            println("filtered")
-            println(exprs filterNot (e => set.contains(e)))
+            println((set,first,last))
             return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
           }
         }
@@ -314,17 +312,12 @@ class GlobalProtocol(val exprs: List[expr]) {
           val (set, result, first, last) = SReduction(e)
           if (result) {
             println("SET, FIRST AND LAST")
-            println(set)
-            println(first)
-            println(last)
-            println("filtered")
-            println(exprs filterNot (e => set.contains(e)))
+            println((set,first,last))
             return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
           }
         }
         case _ => // Do nothing
       }
-
       (exprs, false)
     }
 
