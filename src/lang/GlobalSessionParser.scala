@@ -79,6 +79,7 @@ sealed trait expr {
   def left: String
   def right: String
   def isEnd = false
+  def getVariables : Set[String]
 }
 
 sealed trait Ternary {
@@ -95,6 +96,7 @@ sealed trait Ternary {
     case _ => false
   }
   override def hashCode = x_1.hashCode + x_2.hashCode + x_3.hashCode
+  def getVariables = Set(x_1,x_2,x_3)
 }
 
 object Ternary {
@@ -107,6 +109,7 @@ case class Message(val x_1: String, val s: String, val r: String, val msg: Strin
   }
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
+  def getVariables = Set(x_1,x_2)
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = Choice
@@ -177,6 +180,7 @@ case class End(x: String) extends expr {
   def left = x
   def right = "end"
   override def isEnd = true
+  def getVariables = Set(x)
 }
 case class Continue(x_1: String, x_2: String) extends expr {
   def substitute(s1: String, s2: String): Continue = {
@@ -184,6 +188,7 @@ case class Continue(x_1: String, x_2: String) extends expr {
   }
   def left = x_1
   def right = x_2
+  def getVariables = Set(x_1,x_2)
 }
 
 class SanityConditionException(s: String) extends Exception

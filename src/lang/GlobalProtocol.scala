@@ -4,6 +4,7 @@ import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.LinkedHashSet
 import scala.collection.mutable.Set
+import scala.annotation.tailrec
 
 class GlobalProtocol(val exprs: List[expr]) {
 
@@ -20,6 +21,10 @@ class GlobalProtocol(val exprs: List[expr]) {
   def sanityCheck() = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     var endCount = 0
+    /**
+     * Appearances of each variable is counted so the sanity conditions become
+     * easy to check.
+     */
     exprs foreach {
       case Message(x1, _, _, _, _, x2) =>
         m(x1) = (m(x1)._1 + 1, m(x1)._2)
@@ -44,16 +49,19 @@ class GlobalProtocol(val exprs: List[expr]) {
         m(x) = (m(x)._1 + 1, m(x)._2)
         endCount = endCount + 1
     }
+    /**
+     * There must exist at most one end variable.
+     */
     if (endCount > 1) throw new SanityConditionException("UniqueEnd: end appears more than once")
-    //    exprs foreach { x => println(x.canonical) }
-    //    println("m")
-    //    println(m)
+
+    /**
+     * Each variable must appear exactly once at the left and the right side
+     * of an equation. Except for the end variable.
+     */
     val unambiguous = m filter {
       case (k, (v1, v2)) if k != x0 => v1 != 1 || v2 != 1
       case _ => false
     }
-    //    println("unambiguous")
-    //    println(unambiguous)
 
     if (!unambiguous.isEmpty) {
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
@@ -71,11 +79,11 @@ class GlobalProtocol(val exprs: List[expr]) {
     (hashCacheL, hashCacheR) match {
       case (Some(hl), Some(hr)) => return (hl, hr)
       case _ => {
-        val (leftHash,rightHash) = getHashesFromExpr(exprs)
+        val (leftHash, rightHash) = getHashesFromExpr(exprs)
         hashCacheL = Some(leftHash)
         hashCacheR = Some(rightHash)
-        (leftHash,rightHash)
-      } 
+        (leftHash, rightHash)
+      }
     }
   }
 
@@ -188,7 +196,7 @@ class GlobalProtocol(val exprs: List[expr]) {
       (exprs, false)
     }
 
-    def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
+    def STReduction2(exprs: List[expr]): (List[expr], Boolean) = {
       val (leftHash, rightHash) = getHashesFromExpr(exprs)
 
       val startingFlux = 1.0
@@ -277,6 +285,216 @@ class GlobalProtocol(val exprs: List[expr]) {
             println("filtered")
             println(exprs filterNot (e => set.contains(e)))
             return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last.get.x_3)), true)
+          }
+        }
+        case _ => // Do nothing
+      }
+
+      (exprs, false)
+    }
+
+    def STReduction(exprs: List[expr]): (List[expr], Boolean) = {
+      val (leftHash, rightHash) = getHashesFromExpr(exprs)
+
+      /**
+       * Parallel graph cover
+       */
+      def TReduction(e: expr): (Set[expr], Boolean, String, String) = {
+        println("TReduction")
+        val possibleSet: Set[expr] = ParallelCover(e, Set())
+        println("ParallelCover for: " + e)
+        possibleSet foreach { x => println(x.canonical) }
+        val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
+        /**
+         * Appearances of each variable is counted so the sanity conditions become
+         * easy to check.
+         */
+        possibleSet foreach {
+          case e@Message(x1, _, _, _, _, x2) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+          case e@Choice(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@ChoiceJoin(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1 + 1, m(x2)._2)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@Parallel(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@ParallelJoin(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1 + 1, m(x2)._2)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@End(x) =>
+            m(x) = (m(x)._1 + 1, m(x)._2)
+        }
+
+        val inputNodes = m filter {
+          case (k, (v1, v2)) => v1 == 1 && v2 == 0
+          case _ => false
+        }
+
+        val outputNodes = m filter {
+          case (k, (v1, v2)) => v1 == 0 && v2 == 1
+          case _ => false
+        }
+        
+        println("inputNodes")
+        inputNodes foreach { x => println(x._1) }
+        println("outputNodes")
+        outputNodes foreach { x => println(x._1) }
+
+        if (inputNodes.size == 1 && outputNodes.size == 1) {
+          (possibleSet, true, inputNodes.head._1, outputNodes.head._1)
+        } else {
+          (Set(), false, "", "")
+        }
+      }
+
+      def variableSet(exprs: Set[expr]) = {
+        val s: Set[String] = Set()
+        exprs foreach (e => s ++ e.getVariables)
+        s
+      }
+
+      /**
+       * Choice graph cover
+       */
+      def SReduction(e: expr): (Set[expr], Boolean, String, String) = {
+        println("SReduction")
+        val possibleSet: Set[expr] = ChoiceCover(e, Set())
+        println("ChoiceCover for: " + e)
+        possibleSet foreach { x => println(x.canonical) }
+        val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
+        /**
+         * Appearances of each variable is counted so the sanity conditions become
+         * easy to check.
+         */
+        possibleSet foreach {
+          case e@Message(x1, _, _, _, _, x2) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+          case e@Choice(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@ChoiceJoin(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1 + 1, m(x2)._2)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@Parallel(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1, m(x2)._2 + 1)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@ParallelJoin(x1, x2, x3) =>
+            println("possibleSet foreach:" + e)
+            m(x1) = (m(x1)._1 + 1, m(x1)._2)
+            m(x2) = (m(x2)._1 + 1, m(x2)._2)
+            m(x3) = (m(x3)._1, m(x3)._2 + 1)
+          case e@End(x) =>
+            println("possibleSet foreach:" + e)
+            m(x) = (m(x)._1 + 1, m(x)._2)
+        }
+
+        val inputNodes = m filter {
+          case (k, (v1, v2)) => v1 == 1 && v2 == 0
+          case _ => false
+        }
+
+        val outputNodes = m filter {
+          case (k, (v1, v2)) => v1 == 0 && v2 == 1
+          case _ => false
+        }
+        println("inputNodes")
+        inputNodes foreach { x => println(x._1) }
+        println("outputNodes")
+        outputNodes foreach { x => println(x._1) }
+
+        if (inputNodes.size == 1 && outputNodes.size == 1) {
+          (possibleSet, true, inputNodes.head._1, outputNodes.head._1)
+        } else {
+          (Set(), false, "","")
+        }
+      }
+
+      def ChoiceCover(e: expr, s: Set[expr]): Set[expr] = {
+        if (s.contains(e)) {
+          return s
+        }
+        e match {
+          case Choice(x1, x2, x3) => ChoiceCover(leftHash(x2), s + e) ++ ChoiceCover(leftHash(x3), s + e)
+          case ChoiceJoin(x1, x2, x3) => ChoiceCover(leftHash(x3), s + e)
+          case Message(x1, _, _, _, _, x2) => ChoiceCover(leftHash(x2), s + e)
+          case Parallel(x1, x2, x3) => s
+          case ParallelJoin(x1, x2, x3) => s
+          case End(x) => s
+          case Continue(x1, x2) => Set(e) ++ ChoiceCover(leftHash(x2), s + e)
+        }
+      }
+
+      def ParallelCover(e: expr, s: Set[expr]): Set[expr] = {
+        if (s.contains(e)) {
+          return s
+        }
+        e match {
+          case Choice(x1, x2, x3) => s
+          case ChoiceJoin(x1, x2, x3) => s
+          case Message(x1, _, _, _, _, x2) => ParallelCover(leftHash(x2), s + e)
+          case Parallel(x1, x2, x3) => ParallelCover(leftHash(x2), s + e) ++ ParallelCover(leftHash(x3), s + e)
+          case ParallelJoin(x1, x2, x3) => ParallelCover(leftHash(x3), s + e)
+          case End(x) => s
+          case Continue(x1, x2) => Set(e) ++ ParallelCover(leftHash(x2), s + e)
+        }
+      }
+
+      exprs foreach {
+        case e @ Parallel(x1, x2, x3) => {
+          val (set, result, first, last) = TReduction(e)
+          if (result) {
+            println("SET, FIRST AND LAST")
+            println(set)
+            println(first)
+            println(last)
+            println("filtered")
+            println(exprs filterNot (e => set.contains(e)))
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
+          }
+        }
+        case e @ Choice(x1, x2, x3) => {
+          val (set, result, first, last) = SReduction(e)
+          if (result) {
+            println("SET, FIRST AND LAST")
+            println(set)
+            println(first)
+            println(last)
+            println("filtered")
+            println(exprs filterNot (e => set.contains(e)))
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
+          }
+        }
+        case e @ ChoiceJoin(x1, x2, x3) => {
+          val (set, result, first, last) = SReduction(e)
+          if (result) {
+            println("SET, FIRST AND LAST")
+            println(set)
+            println(first)
+            println(last)
+            println("filtered")
+            println(exprs filterNot (e => set.contains(e)))
+            return ((exprs filterNot (e => set.contains(e))).map(_.substitute(x1, last)), true)
           }
         }
         case _ => // Do nothing
