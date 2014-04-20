@@ -4,8 +4,8 @@ import org.junit.Assert._
 import org.junit.Test
 import lang._
 import lang.Linearity.lin
-import java.io.FileReader
-import java.io.StringReader;
+import java.io.{FileReader => FR}
+import java.io.{StringReader => SR}
 import java.io.Reader
 
 class LocalChoice {
@@ -24,53 +24,53 @@ class LocalChoice {
   }
 
   @Test def testSimpleCorrectChoice() {
-    assertFalse(localChoiceFromReader(new StringReader("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4")))
+    assertFalse(localChoiceFromReader(new SR("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4")))
   }
 
   @Test def testHelloWorld() {
-    assertTrue(localChoiceFromReader(new FileReader(path_wf + "HelloWorld.txt")))
+    assertTrue(localChoiceFromReader(new FR(path_wf + "HelloWorld.txt")))
   }
   
   @Test def testOnlineBookStore() {
-    assertTrue(localChoiceFromReader(new FileReader(path_wf + "OnlineBookstore.txt")))
+    assertTrue(localChoiceFromReader(new FR(path_wf + "OnlineBookstore.txt")))
   }
   
   @Test def testPostOffice() {
-    assertTrue(localChoiceFromReader(new FileReader(path_wf + "PostOffice.txt")))
+    assertTrue(localChoiceFromReader(new FR(path_wf + "PostOffice.txt")))
   }
   
   @Test def testTravelAgency() {
-    assertTrue(localChoiceFromReader(new FileReader(path_wf + "TravelAgency.txt")))
+    assertTrue(localChoiceFromReader(new FR(path_wf + "TravelAgency.txt")))
   }
 
   @Test def testSimpleIrrelevantCases() {
-    assertTrue(localChoiceFromReader(new StringReader("x_1 = x_2 | x_3 \n x_2 | x_3 = x_4")))
-    assertTrue(localChoiceFromReader(new StringReader("x_1 = end")))
-    assertTrue(localChoiceFromReader(new StringReader("x_1 = x_2 | x_3 \n x_2 | x_3 = x_4 \n x_4 = end")))
+    assertTrue(localChoiceFromReader(new SR("x_1 = x_2 | x_3 \n x_2 | x_3 = x_4")))
+    assertTrue(localChoiceFromReader(new SR("x_1 = end")))
+    assertTrue(localChoiceFromReader(new SR("x_1 = x_2 | x_3 \n x_2 | x_3 = x_4 \n x_4 = end")))
   }
 
   //@Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoice() {
-    assertFalse(localChoiceFromReader(new FileReader("./src/lang/test/nonLocalChoice.txt")))
+    assertFalse(localChoiceFromReader(new FR("./src/lang/test/nonLocalChoice.txt")))
   }
 
   //@Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoiceConfusion() {
-    assertFalse(localChoiceFromReader(new FileReader("./src/lang/test/nonLocalChoiceConfusion.txt")))
+    assertFalse(localChoiceFromReader(new FR("./src/lang/test/nonLocalChoiceConfusion.txt")))
   }
 
   /**
    * Receiver
    */
   @Test def testReceiveGreetingDecision() {
-    val g = getProtocol(new FileReader(path + "greetingDecision.txt"))
+    val g = getProtocol(new FR(path + "greetingDecision.txt"))
     val s1 = Receiver(g)("x_2")
     val s2 = Receiver(g)("x_3")
     assertEquals(s1, s2)
   }
 
   @Test def testReceiveThreadCorrectnessGood() {
-    val g = getProtocol(new FileReader(path + "threadCorrectnessGood1.txt"))
+    val g = getProtocol(new FR(path + "threadCorrectnessGood1.txt"))
     val s1 = Receiver(g)("x_1")
     val s2 = Receiver(g)("x_2")
     assertEquals(s1, s2)

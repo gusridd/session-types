@@ -4,8 +4,8 @@ import org.junit.Assert._
 import org.junit.Test;
 
 import lang._
-import java.io.FileReader
-import java.io.StringReader;
+import java.io.{FileReader => FR}
+import java.io.{StringReader => SR}
 import java.io.Reader
 
 class GlobalSession {
@@ -13,7 +13,7 @@ class GlobalSession {
   val path = "./src/lang/test/"
   
   def getParticipantsFile(filename : String) = {
-    val reader = new FileReader(path + filename)
+    val reader = new FR(path + filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     g.getParticipants

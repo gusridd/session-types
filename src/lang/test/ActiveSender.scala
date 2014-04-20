@@ -3,8 +3,8 @@ package lang.test;
 import org.junit.Assert._
 import org.junit.Test
 import lang._
-import java.io.FileReader
-import java.io.StringReader;
+import java.io.{FileReader => FR}
+import java.io.{StringReader => SR}
 import java.io.Reader
 
 class ActiveSender {
@@ -13,7 +13,7 @@ class ActiveSender {
   val path_wf = "./src/protocol/wellformed/"
 
   def activeSenderFromFile(filename: String, x: String, expected: String) = {
-    val reader = new FileReader(path + filename)
+    val reader = new FR(path + filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     assertEquals(expected, ActiveSender(g, x))
@@ -29,7 +29,7 @@ class ActiveSender {
   
   
   @Test def testPostOffice() {
-    val reader = new FileReader(path_wf+"PostOffice.txt")
+    val reader = new FR(path_wf+"PostOffice.txt")
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     assertEquals("C", ActiveSender(g, "x_5"))

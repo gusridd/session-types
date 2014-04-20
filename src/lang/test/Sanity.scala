@@ -4,8 +4,8 @@ import org.junit.Assert._
 import org.junit.Test;
 
 import lang._
-import java.io.FileReader;
-import java.io.StringReader;
+import java.io.{FileReader => FR}
+import java.io.{StringReader => SR}
 
 class Sanity {
 
@@ -13,14 +13,14 @@ class Sanity {
   val path_wf = "./src/protocol/wellformed/"
 
   def sanityCheckFile(name: String) = {
-    val reader = new FileReader(name)
+    val reader = new FR(name)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     Sanity(g)
   }
 
   def threadReductionFile(name: String) = {
-    val reader = new FileReader(name)
+    val reader = new FR(name)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     implicit val xs = g.xs
@@ -28,7 +28,7 @@ class Sanity {
   }
 
   def threadReductionString(protocol: String) = {
-    val reader = new StringReader(protocol)
+    val reader = new SR(protocol)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     implicit val xs = g.xs

@@ -4,7 +4,7 @@ import org.junit.Assert._
 import org.junit.Test
 import lang._
 import java.io.{FileReader => FR}
-import java.io.{StringReader => SR};
+import java.io.{StringReader => SR}
 import java.io.Reader
 
 class WFGlobalProtocolTest {

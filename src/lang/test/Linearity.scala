@@ -4,8 +4,8 @@ import org.junit.Assert._
 import org.junit.Test
 import lang._
 import lang.Linearity.lin
-import java.io.FileReader
-import java.io.StringReader;
+import java.io.{FileReader => FR}
+import java.io.{StringReader => SR}
 import java.io.Reader
 
 class Linearity {
@@ -23,7 +23,7 @@ class Linearity {
    * Linearity
    */
   @Test def testLinThreadCorrectnessGood() {
-    val g = getProtocol(new FileReader(path + "threadCorrectnessGood2.txt"))
+    val g = getProtocol(new FR(path + "threadCorrectnessGood2.txt"))
 
     val s1 = lin(g)("x_1")
     val s2 = lin(g)("x_2")
@@ -35,34 +35,34 @@ class Linearity {
   }
 
   @Test def testLinNegotiationWitNoAgreement() {
-    val g = getProtocol(new FileReader(path + "negotiationWithNoAgreement.txt"))
+    val g = getProtocol(new FR(path + "negotiationWithNoAgreement.txt"))
     val s1 = lin(g)("x_9")
     val s2 = lin(g)("x_10")
     assertEquals(s1, s2)
   }
   
   @Test def testLinearityHelloWorld(){
-    val g = getProtocol(new FileReader(path_wf + "HelloWorld.txt"))
+    val g = getProtocol(new FR(path_wf + "HelloWorld.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityOnlineBookStore(){
-    val g = getProtocol(new FileReader(path_wf + "OnlineBookstore.txt"))
+    val g = getProtocol(new FR(path_wf + "OnlineBookstore.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityPostOffice(){
-    val g = getProtocol(new FileReader(path_wf + "PostOffice.txt"))
+    val g = getProtocol(new FR(path_wf + "PostOffice.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityTravelAgency(){
-    val g = getProtocol(new FileReader(path_wf + "TravelAgency.txt"))
+    val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testInterleavedSandTSystem(){
-    val g = getProtocol(new FileReader(path + "interleavedSAndTSystem.txt"))
+    val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
     assertTrue(Linearity(g))
   }
 }
