@@ -8,4 +8,7 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
   Sanity(this)
   LocalChoice(this)
   Linearity(this)
+  
+  
+  
 }
