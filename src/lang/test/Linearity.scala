@@ -11,7 +11,7 @@ import java.io.Reader
 class Linearity {
 
   val path = "./src/lang/test/"
-  val path_correct = "./src/protocol/correct/"
+  val path_wf = "./src/protocol/wellformed/"
 
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
@@ -42,22 +42,27 @@ class Linearity {
   }
   
   @Test def testLinearityHelloWorld(){
-    val g = getProtocol(new FileReader(path_correct + "HelloWorld.txt"))
+    val g = getProtocol(new FileReader(path_wf + "HelloWorld.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityOnlineBookStore(){
-    val g = getProtocol(new FileReader(path_correct + "OnlineBookstore.txt"))
+    val g = getProtocol(new FileReader(path_wf + "OnlineBookstore.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityPostOffice(){
-    val g = getProtocol(new FileReader(path_correct + "PostOffice.txt"))
+    val g = getProtocol(new FileReader(path_wf + "PostOffice.txt"))
     assertTrue(Linearity(g))
   }
   
   @Test def testLinearityTravelAgency(){
-    val g = getProtocol(new FileReader(path_correct + "TravelAgency.txt"))
+    val g = getProtocol(new FileReader(path_wf + "TravelAgency.txt"))
+    assertTrue(Linearity(g))
+  }
+  
+  @Test def testInterleavedSandTSystem(){
+    val g = getProtocol(new FileReader(path + "interleavedSAndTSystem.txt"))
     assertTrue(Linearity(g))
   }
 }

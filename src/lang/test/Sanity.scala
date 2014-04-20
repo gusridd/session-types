@@ -9,25 +9,30 @@ import java.io.StringReader;
 
 class Sanity {
 
+  val path = "./src/lang/test/"
+  val path_wf = "./src/protocol/wellformed/"
+
   def sanityCheckFile(name: String) = {
     val reader = new FileReader(name)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    g.sanityCheck()
+    Sanity(g)
   }
 
   def threadReductionFile(name: String) = {
     val reader = new FileReader(name)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    g.threadReduction()
+    implicit val xs = g.xs
+    Sanity.threadReduction(g.exprs)
   }
 
   def threadReductionString(protocol: String) = {
     val reader = new StringReader(protocol)
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    g.threadReduction()
+    implicit val xs = g.xs
+    Sanity.threadReduction(g.exprs)
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
@@ -54,34 +59,34 @@ class Sanity {
   def testThreadCorrectnessWrong() {
     threadReductionFile("./src/lang/test/threadCorrectnessWrong.txt")
   }
-  
-  @Test def testThreadCorrectnessGood1(){
+
+  @Test def testThreadCorrectnessGood1() {
     threadReductionFile("./src/lang/test/threadCorrectnessGood1.txt")
   }
-  
-  @Test def testThreadCorrectnessGood2(){
+
+  @Test def testThreadCorrectnessGood2() {
     threadReductionFile("./src/lang/test/threadCorrectnessGood2.txt")
   }
-  
+
   @Test(expected = classOf[lang.SanityConditionException])
-  def testAlternatingBitProtocol(){
+  def testAlternatingBitProtocol() {
     threadReductionFile("./src/lang/test/AlternatingBitProtocol.txt")
   }
-  
+
   @Test(expected = classOf[lang.SanityConditionException])
-  def testAlternatingBitProtocol3(){
+  def testAlternatingBitProtocol3() {
     threadReductionFile("./src/lang/test/AlternatingBitProtocol3.txt")
   }
-  
-  @Test def testInterleavedChoice(){
+
+  @Test def testInterleavedChoice() {
     threadReductionFile("./src/lang/test/interleavedChoice.txt")
   }
-  
-  @Test def testInterleavedSAndTSystem(){
+
+  @Test def testInterleavedSAndTSystem() {
     threadReductionFile("./src/lang/test/interleavedSAndTSystem.txt")
   }
-  
-  @Test def testRecursionWithEnding(){
+
+  @Test def testRecursionWithEnding() {
     threadReductionFile("./src/lang/test/recursionWithEnding.txt")
   }
 
@@ -89,24 +94,24 @@ class Sanity {
   def testThreadRulesTrans() {
     threadReductionString("x_0 = A -> B : L(U); x_1")
   }
-  
-  @Test def testHelloWorld(){
-    threadReductionFile("./src/protocol/correct/HelloWorld.txt")
+
+  @Test def testHelloWorld() {
+    threadReductionFile(path_wf + "HelloWorld.txt")
   }
-  
-  @Test def testOnlineBookStore(){
-    threadReductionFile("./src/protocol/correct/OnlineBookstore.txt")
+
+  @Test def testOnlineBookStore() {
+    threadReductionFile(path_wf + "OnlineBookstore.txt")
   }
-  
-  @Test def testTravelAgency(){
-    threadReductionFile("./src/protocol/correct/TravelAgency.txt")
+
+  @Test def testTravelAgency() {
+    threadReductionFile(path_wf + "TravelAgency.txt")
   }
-  
-  @Test def testPostOffice(){
-    threadReductionFile("./src/protocol/correct/PostOffice.txt")
+
+  @Test def testPostOffice() {
+    threadReductionFile(path_wf + "PostOffice.txt")
   }
-  
-  @Test def testRecursiveChoice(){
+
+  @Test def testRecursiveChoice() {
     threadReductionFile("./src/lang/test/RecursiveChoice.txt")
   }
 
@@ -125,7 +130,7 @@ class Sanity {
     threadReductionString("x_1 + x_2 = x_3 \n x_3 = x_4 + x_2")
     threadReductionString("x_4 + x_2 = x_3 \n x_3 = x_2 + x_1")
   }
-  
+
   @Test(expected = classOf[java.util.NoSuchElementException])
   def testThreadReductionUnconnected() {
     threadReductionString("x_0 = x_1 + x_2 \n x_4 + x_5 = x_6 \n x_6 = end")

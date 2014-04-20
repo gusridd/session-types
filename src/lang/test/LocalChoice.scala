@@ -11,7 +11,7 @@ import java.io.Reader
 class LocalChoice {
 
   val path = "./src/lang/test/"
-  val path_correct = "./src/protocol/correct/"
+  val path_wf = "./src/protocol/wellformed/"
 
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
@@ -28,19 +28,19 @@ class LocalChoice {
   }
 
   @Test def testHelloWorld() {
-    assertTrue(localChoiceFromReader(new FileReader(path_correct + "HelloWorld.txt")))
+    assertTrue(localChoiceFromReader(new FileReader(path_wf + "HelloWorld.txt")))
   }
   
   @Test def testOnlineBookStore() {
-    assertTrue(localChoiceFromReader(new FileReader(path_correct + "OnlineBookstore.txt")))
+    assertTrue(localChoiceFromReader(new FileReader(path_wf + "OnlineBookstore.txt")))
   }
   
   @Test def testPostOffice() {
-    assertTrue(localChoiceFromReader(new FileReader(path_correct + "PostOffice.txt")))
+    assertTrue(localChoiceFromReader(new FileReader(path_wf + "PostOffice.txt")))
   }
   
   @Test def testTravelAgency() {
-    assertTrue(localChoiceFromReader(new FileReader(path_correct + "TravelAgency.txt")))
+    assertTrue(localChoiceFromReader(new FileReader(path_wf + "TravelAgency.txt")))
   }
 
   @Test def testSimpleIrrelevantCases() {

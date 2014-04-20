@@ -10,6 +10,7 @@ import java.io.Reader
 class ActiveSender {
 
   val path = "./src/lang/test/"
+  val path_wf = "./src/protocol/wellformed/"
 
   def activeSenderFromFile(filename: String, x: String, expected: String) = {
     val reader = new FileReader(path + filename)
@@ -28,7 +29,7 @@ class ActiveSender {
   
   
   @Test def testPostOffice() {
-    val reader = new FileReader("./src/protocol/correct/PostOffice.txt")
+    val reader = new FileReader(path_wf+"PostOffice.txt")
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
     assertEquals("C", ActiveSender(g, "x_5"))
