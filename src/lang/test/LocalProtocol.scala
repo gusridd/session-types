@@ -36,14 +36,17 @@ class LocalProtocol {
   
   @Test def testOnlineBookStore() {
     val g = getProtocol(new FR(path_wf + "OnlineBookstore.txt"))
+    fail
   }
   
   @Test def testPostOffice() {
     val g = getProtocol(new FR(path_wf + "PostOffice.txt"))
+    fail
   }
   
   @Test def testTravelAgency() {
     val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
+    fail
   }
 
 
