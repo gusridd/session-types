@@ -11,9 +11,7 @@ class GlobalProtocol(val exprs: List[expr]) {
 
   val x0: String = "x_0"
   private val end: String = "end"
-  val xs: HashSet[String] = HashSet() ++ Collector.collectStateVariables(GlobalProtocol.this)
-
-  //  sanityCheck()
+  val xs: HashSet[String] = HashSet() ++ exprs.flatMap(e => e.getVariables)
 
   override def toString(): String = exprs.toString
 
