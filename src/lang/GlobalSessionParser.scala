@@ -182,9 +182,9 @@ case class End(x: String) extends expr {
   override def isEnd = true
   def getVariables = Set(x)
 }
-case class Continue(x_1: String, x_2: String) extends expr {
-  def substitute(s1: String, s2: String): Continue = {
-    Continue(x_1.sub(s1, s2), x_2.sub(s1, s2))
+case class Indirection(x_1: String, x_2: String) extends expr {
+  def substitute(s1: String, s2: String): Indirection = {
+    Indirection(x_1.sub(s1, s2), x_2.sub(s1, s2))
   }
   def left = x_1
   def right = x_2
@@ -237,7 +237,7 @@ object Lin {
         map(x2) = pj
       }
       case e @ End(x) => map(x) = e
-      case c @ Continue(x1, x2) => map(x1) = c
+      case c @ Indirection(x1, x2) => map(x1) = c
     }
   }
 

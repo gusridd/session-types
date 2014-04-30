@@ -73,7 +73,7 @@ class GlobalProtocol(val exprs: List[expr]) {
       case e @ End(x) => {
         leftHash(x) = e
       }
-      case c @ Continue(x1, x2) => {
+      case c @ Indirection(x1, x2) => {
         leftHash(x1) = c
         rightHash(x2) = c
       }

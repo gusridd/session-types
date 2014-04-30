@@ -36,6 +36,17 @@ class LocalProtocol {
   
   @Test def testOnlineBookStore() {
     val g = getProtocol(new FR(path_wf + "OnlineBookstore.txt"))
+    
+    val localBuyer1 = g.localProjection("Buyer1").toSet
+    val localBuyer2 = g.localProjection("Buyer2").toSet
+    val localSeller = g.localProjection("Seller").toSet
+    
+    assertTrue(localBuyer1.contains(Send("x_0","Seller","Book","","x_1")))
+    assertTrue(localBuyer1.contains(Receive("x_1","Seller","Price","","x_2")))
+    assertTrue(localBuyer1.contains(Send("x_2","Buyer2","Quote","","x_3")))
+    
+    localBuyer1 foreach (e => println(e))
+    
     fail
   }
   

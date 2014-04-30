@@ -30,7 +30,7 @@ class Substitution {
   }
   
   @Test def testContinueSubstitution() {
-    val c = Continue("x_10","x_11")
+    val c = Indirection("x_10","x_11")
     val nc1 = c.substitute("x_10", "x_4")
 
     assertEquals(nc1.x_1, "x_4")

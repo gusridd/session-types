@@ -84,7 +84,7 @@ object Sanity {
       case e @ End(x) => {
         leftHash(x) = e
       }
-      case c @ Continue(x1, x2) => {
+      case c @ Indirection(x1, x2) => {
         leftHash(x1) = c
         rightHash(x2) = c
       }
@@ -237,7 +237,7 @@ object Sanity {
           case Parallel(x1, x2, x3) => s
           case ParallelJoin(x1, x2, x3) => s
           case End(x) => s
-          case Continue(x1, x2) => Set(e) ++ ChoiceCover(leftHash(x2), s + e)
+          case Indirection(x1, x2) => Set(e) ++ ChoiceCover(leftHash(x2), s + e)
         }
       }
 
@@ -256,7 +256,7 @@ object Sanity {
           case Parallel(x1, x2, x3) => ParallelCover(leftHash(x2), s + e) ++ ParallelCover(leftHash(x3), s + e)
           case ParallelJoin(x1, x2, x3) => ParallelCover(leftHash(x3), s + e)
           case End(x) => s
-          case Continue(x1, x2) => Set(e) ++ ParallelCover(leftHash(x2), s + e)
+          case Indirection(x1, x2) => Set(e) ++ ParallelCover(leftHash(x2), s + e)
         }
       }
       /**
