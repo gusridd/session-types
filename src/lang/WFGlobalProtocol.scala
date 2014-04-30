@@ -13,7 +13,16 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
 
   def localProjection(p: String): Iterable[localExpr] = {
     getParticipants().find(_ == p) match {
-      case Some(pp) => lp(p)
+      case Some(pp) => {
+        var localProtocol = lp(p)
+        localProtocol foreach ( e => e match {
+          case i @ LocalProtocol.Indirection(x1,x2) => {
+            localProtocol = (localProtocol filterNot (_ == i)).map(_.substitute(x1, x2))
+          }
+          case _ =>
+        })
+        localProtocol
+      }
       case None =>
         throw new Exception("Trying to project a non-existant participant " + p)
     }
