@@ -57,7 +57,15 @@ class GlobalParser {
     parseString("x_ = end")
     parseString("y_0 = end")
     parseString("x0 = end")
+    parseString("x_0 = ind")
+    
     parseString("x_0 = Me -> World : Say(Hello) x_1")
+    parseString("x0 = Me -> World : Say(Hello) x_1")
+    parseString("x_0 = Me -> World : Say(Hello) x1")
+    parseString("x_0 = me -> World : Say(Hello) x_1")
+    parseString("x_0 = Me -> world : Say(Hello) x_1")
+    parseString("x_0 = Me -> World : say(Hello) x_1")
+    parseString("x_0 = Me -> World : Say(hello) x_1")
 
   }
 
