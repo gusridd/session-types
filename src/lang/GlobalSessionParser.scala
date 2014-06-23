@@ -5,18 +5,19 @@ import scala.util.parsing.input.Positional
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.Map
 import scala.util.matching.UnanchoredRegex
+import scala.util.matching.Regex
 import scala.math.Ordering.String
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
 import scala.collection.mutable.LinkedHashSet
 
-class GlobalSessionParser extends JavaTokenParsers with Positional {
+class GlobalSessionParser extends JavaTokenParsers {
 
   import scala.math.Ordering.String
 
   def global: Parser[GlobalProtocol] = rep(expr) ^^ (x => new GlobalProtocol(x))
 
-  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end) ^^ (x => x)
+  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end | failure("illegal start of protocol")) ^^ (x => x)
 
   def message: Parser[Message] = (messageWithType | messageWithoutType | failure("illegal start of message")) ^^ (x => x)
 
@@ -28,30 +29,29 @@ class GlobalSessionParser extends JavaTokenParsers with Positional {
     case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ x2 => Message(x1, s, r, m, "", x2)
   }
 
-  def choice: Parser[Choice] = xid ~ "=" ~ xid ~ "+" ~ xid ^^ {
+  def choice: Parser[Choice] = (xid ~ "=" ~ xid ~ "+" ~ xid | failure("illegal start of choice")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 =>
       Choice(x1, x2, x3)
-
   }
 
-  def choiceJoin: Parser[ChoiceJoin] = xid ~ "+" ~ xid ~ "=" ~ xid ^^ {
+  def choiceJoin: Parser[ChoiceJoin] = (xid ~ "+" ~ xid ~ "=" ~ xid | failure("illegal start of choiceJoin")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 =>
       ChoiceJoin(x1, x2, x3)
   }
 
-  def parallel: Parser[Parallel] = xid ~ "=" ~ xid ~ "|" ~ xid ^^ {
+  def parallel: Parser[Parallel] = (xid ~ "=" ~ xid ~ "|" ~ xid | failure("illegal start of parallel")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 => Parallel(x1, x2, x3)
   }
 
-  def parallelJoin: Parser[ParallelJoin] = xid ~ "|" ~ xid ~ "=" ~ xid ^^ {
+  def parallelJoin: Parser[ParallelJoin] = (xid ~ "|" ~ xid ~ "=" ~ xid | failure("illegal start of parallelJoin")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(x1, x2, x3)
   }
 
-  def end: Parser[End] = xid ~ "=" ~ "end" ^^ { case x ~ _ ~ _ => new End(x) }
+  def end: Parser[End] = (xid ~ "=" ~ "end" | failure("illegal start of end")) ^^ { case x ~ _ ~ _ => new End(x) }
 
-  def xid: Parser[String] = """x_[0-9]+""".r ^^ { _.toString() }
+  def xid: Parser[String] = ("""x_[0-9]+""".r | failure("illegal start of xid")) ^^ { _.toString() }
 
-  def id: Parser[String] = """[A-Z][a-z0-9]*""".r ^^ { _.toString() }
+  def id: Parser[String] = ("""[A-Z][a-z0-9]*""".r | failure("illegal start of id")) ^^ { _.toString() }
 
 }
 
@@ -76,11 +76,11 @@ object GlobalParser extends GlobalSessionParser {
         gp
       }
       case Failure(msg, next) => {
-        println("[" + next.pos +  "] failure:" + msg)
+        println("[" + next.pos +  "] failure: " + msg)
         new GlobalProtocol(List.empty)
       }
       case Error(msg, next) => {
-        println("[" + next.pos +  "] error:" + msg)
+        println("[" + next.pos +  "] error: " + msg)
         new GlobalProtocol(List.empty)
       }
     }

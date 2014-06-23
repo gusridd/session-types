@@ -33,14 +33,31 @@ class GlobalParser {
     parseString("x_0    = end")
     parseString("   x_0 = end")
     parseString("x_0 = end   ")
+    
+    parseString("x_0 = Me -> World : Say(Hello); x_1")
+    parseString("  x_0 = Me -> World : Say(Hello); x_1")
+    parseString("x_0   = Me -> World : Say(Hello); x_1")
+    parseString("x_0 =   Me -> World : Say(Hello); x_1")
+    parseString("x_0 = Me   -> World : Say(Hello); x_1")
+    parseString("x_0 = Me ->   World : Say(Hello); x_1")
+    parseString("x_0 = Me -> World   : Say(Hello); x_1")
+    parseString("x_0 = Me -> World :   Say(Hello); x_1")
+    parseString("x_0 = Me -> World : Say(  Hello); x_1")
+    parseString("x_0 = Me -> World : Say(Hello  ); x_1")
+    parseString("x_0 = Me -> World : Say(Hello)  ; x_1")
+    parseString("x_0 = Me -> World : Say(Hello);   x_1")
+    parseString("x_0 = Me -> World : Say(Hello); x_1  ")
 
   }
   
   @Test def testParseWithError() {
 	
-    val p = parseString("x_0 = Me -> World : Say(Hello) x_1")
-    
-
+    parseString("x_0 = endo")
+    parseString("x_0  end")
+    parseString("x_ = end")
+    parseString("y_0 = end")
+    parseString("x0 = end")
+    parseString("x_0 = Me -> World : Say(Hello) x_1")
 
   }
 
