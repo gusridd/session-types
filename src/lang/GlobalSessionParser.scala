@@ -1,6 +1,7 @@
 package lang
 
 import scala.util.parsing.combinator.JavaTokenParsers
+import scala.util.parsing.input.Positional
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.Map
 import scala.util.matching.UnanchoredRegex
@@ -9,27 +10,28 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
 import scala.collection.mutable.LinkedHashSet
 
-class GlobalSessionParser extends JavaTokenParsers {
+class GlobalSessionParser extends JavaTokenParsers with Positional {
 
   import scala.math.Ordering.String
 
   def global: Parser[GlobalProtocol] = rep(expr) ^^ (x => new GlobalProtocol(x))
 
-  def expr: Parser[expr] = (message | choice | choiceJoin | parallel | parallelJoin | end) ^^ (x => x)
+  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end) ^^ (x => x)
 
-  def message: Parser[Message] = (messageWithType | messageWithoutType) ^^ (x => x)
+  def message: Parser[Message] = (messageWithType | messageWithoutType | failure("illegal start of message")) ^^ (x => x)
 
-  def messageWithType: Parser[Message] = xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ "(" ~ id ~ ")" ~ ";" ~ xid ^^ {
+  def messageWithType: Parser[Message] = (xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ "(" ~ id ~ ")" ~ ";" ~ xid | failure("illegal start of typed message")) ^^ {
     case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ t ~ _ ~ _ ~ x2 => Message(x1, s, r, m, t, x2)
   }
 
-  def messageWithoutType: Parser[Message] = xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ ";" ~ xid ^^ {
+  def messageWithoutType: Parser[Message] = (xid ~ "=" ~ id ~ "->" ~ id ~ ":" ~ id ~ ";" ~ xid | failure("illegal start of simple message")) ^^ {
     case x1 ~ _ ~ s ~ _ ~ r ~ _ ~ m ~ _ ~ x2 => Message(x1, s, r, m, "", x2)
   }
 
   def choice: Parser[Choice] = xid ~ "=" ~ xid ~ "+" ~ xid ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 =>
       Choice(x1, x2, x3)
+
   }
 
   def choiceJoin: Parser[ChoiceJoin] = xid ~ "+" ~ xid ~ "=" ~ xid ^^ {
@@ -69,17 +71,29 @@ class identifier(self: String) {
 
 object GlobalParser extends GlobalSessionParser {
   def parse(reader: java.io.Reader): GlobalProtocol = {
-    parseAll(global, reader).get
+    parseAll(global, reader) match {
+      case Success(gp, _) => {
+        gp
+      }
+      case Failure(msg, next) => {
+        println("[" + next.pos +  "] failure:" + msg)
+        new GlobalProtocol(List.empty)
+      }
+      case Error(msg, next) => {
+        println("[" + next.pos +  "] error:" + msg)
+        new GlobalProtocol(List.empty)
+      }
+    }
   }
 }
 
-sealed trait expr {
+sealed trait expr extends Positional {
   def canonical(): String = left + " = " + right
   def substitute(s1: String, s2: String): expr
   def left: String
   def right: String
   def isEnd = false
-  def getVariables : Set[String]
+  def getVariables: Set[String]
 }
 
 sealed trait Ternary {
@@ -96,7 +110,7 @@ sealed trait Ternary {
     case _ => false
   }
   override def hashCode = x_1.hashCode + x_2.hashCode + x_3.hashCode
-  def getVariables = Set(x_1,x_2,x_3)
+  def getVariables = Set(x_1, x_2, x_3)
 }
 
 object Ternary {
@@ -109,7 +123,7 @@ case class Message(val x_1: String, val s: String, val r: String, val msg: Strin
   }
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
-  def getVariables = Set(x_1,x_2)
+  def getVariables = Set(x_1, x_2)
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = Choice
@@ -188,7 +202,7 @@ case class Indirection(x_1: String, x_2: String) extends expr {
   }
   def left = x_1
   def right = x_2
-  def getVariables = Set(x_1,x_2)
+  def getVariables = Set(x_1, x_2)
 }
 
 class SanityConditionException(s: String) extends Exception
