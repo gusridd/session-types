@@ -51,7 +51,7 @@ class GlobalSessionParser extends JavaTokenParsers {
 
   def xid: Parser[String] = ("""x_[0-9]+""".r | failure("illegal start of xid")) ^^ { _.toString() }
 
-  def id: Parser[String] = ("""[A-Z][a-z0-9]*""".r | failure("illegal start of id")) ^^ { _.toString() }
+  def id: Parser[String] = ("""[A-Z][A-Za-z0-9\-_]*""".r | failure("illegal start of id")) ^^ { _.toString() }
 
 }
 
