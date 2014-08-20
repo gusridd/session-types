@@ -41,3 +41,6 @@ local.properties
 *.launch
 .buildpath
 .cache
+
+project/
+target/
