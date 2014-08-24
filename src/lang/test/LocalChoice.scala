@@ -7,6 +7,7 @@ import lang.Linearity.lin
 import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
+import scala.collection.immutable.Set
 
 class LocalChoice {
 
@@ -66,18 +67,38 @@ class LocalChoice {
   /**
    * Receiver
    */
-  @Test def testReceiveGreetingDecision() {
+  @Test def testReceiveGreetingDecisionEquality() {
     val g = getProtocol(new FR(path + "greetingDecision.txt"))
     val s1 = Receiver(g)("x_2")
     val s2 = Receiver(g)("x_3")
+    
     assertEquals(s1, s2)
   }
 
-  @Test def testReceiveThreadCorrectnessGood() {
+  @Test def testReceiveThreadCorrectnessGoodEquality() {
     val g = getProtocol(new FR(path + "threadCorrectnessGood1.txt"))
     val s1 = Receiver(g)("x_1")
     val s2 = Receiver(g)("x_2")
     assertEquals(s1, s2)
   }
+  
+  @Test def testReceiveChoiceNonReceiveOutput(){
+    val g = getProtocol(new FR(path + "choiceNonReceive.txt"))
+    val s1 = Receiver(g)("x_1")
+    val s2 = Receiver(g)("x_2")
+    
+    // This is to ensure that the Receive is actually working
+    assertEquals(Set(("B","Hi",List())),s1.s)
+    assertEquals(Set(("C","Hello",List())),s2.s)
+  }
+  
+  @Test def testReceiveChoiceNonReceiveEquality(){
+    val g = getProtocol(new FR(path + "choiceNonReceive.txt"))
+    val s1 = Receiver(g)("x_1")
+    val s2 = Receiver(g)("x_2") 
+    assertEquals(s1, s2)
+  }
+  
+  
 
 }

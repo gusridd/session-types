@@ -41,6 +41,13 @@ class ActiveSender {
     assertEquals("S", ActiveSender(g, "x_33"))
   }
   
+  @Test def testChoiceNonReceive() {
+    val reader = new FR(path + "choiceNonReceive.txt")
+    val g: GlobalProtocol = GlobalParser.parse(reader)
+    reader.close
+    assertEquals("A", ActiveSender(g,"x_0"))
+  }
+  
   
   @Test(expected = classOf[ActiveSender.NoActiveSenders])
   def testNonLocalChoice() {
