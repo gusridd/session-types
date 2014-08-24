@@ -99,6 +99,37 @@ class LocalChoice {
     assertEquals(s1, s2)
   }
   
+  @Test def testPostOfficeEquality(){
+    val g = getProtocol(new FR(path_wf + "PostOffice.txt"))
+    val s9 = Receiver(g)("x_9")
+    val s6 = Receiver(g)("x_6") 
+    assertEquals(s9, s6)
+    
+    val s13 = Receiver(g)("x_13")
+    val s8 = Receiver(g)("x_8") 
+    assertEquals(s13, s8)
+    
+    val s15 = Receiver(g)("x_15")
+    val s19 = Receiver(g)("x_19") 
+    assertEquals(s15, s19)
+    
+    val s21 = Receiver(g)("x_21")
+    val s39 = Receiver(g)("x_39") 
+    assertEquals(s21, s39)
+    
+    val s24 = Receiver(g)("x_24")
+    val s27 = Receiver(g)("x_27") 
+    assertEquals(s24, s27)
+    
+    val s28 = Receiver(g)("x_28")
+    val s32 = Receiver(g)("x_32") 
+    assertEquals(s28, s32)
+    
+    val s34 = Receiver(g)("x_34")
+    val s37 = Receiver(g)("x_37") 
+    assertEquals(s34, s37)
+  }
+  
   
 
 }
