@@ -69,7 +69,19 @@ class identifier(self: String) {
 
 object GlobalParser extends GlobalSessionParser {
   def parse(reader: java.io.Reader): GlobalProtocol = {
-    parseAll(global, reader).get
+    parseAll(global, reader) match {
+      case Success(gp, _) => {
+        gp
+      }
+      case Failure(msg, next) => {
+        println("[" + next.pos + "] failure: " + msg)
+        throw new Exception("Parser error: [" + next.pos + "] " + msg)
+      }
+      case Error(msg, next) => {
+        println("[" + next.pos + "] error: " + msg)
+        throw new Exception("Parser error: [" + next.pos + "] " + msg)
+      }
+    }
   }
 }
 
@@ -79,7 +91,7 @@ sealed trait expr {
   def left: String
   def right: String
   def isEnd = false
-  def getVariables : Set[String]
+  def getVariables: Set[String]
 }
 
 sealed trait Ternary {
@@ -96,7 +108,7 @@ sealed trait Ternary {
     case _ => false
   }
   override def hashCode = x_1.hashCode + x_2.hashCode + x_3.hashCode
-  def getVariables = Set(x_1,x_2,x_3)
+  def getVariables = Set(x_1, x_2, x_3)
 }
 
 object Ternary {
@@ -109,7 +121,7 @@ case class Message(val x_1: String, val s: String, val r: String, val msg: Strin
   }
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
-  def getVariables = Set(x_1,x_2)
+  def getVariables = Set(x_1, x_2)
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = Choice
@@ -188,7 +200,7 @@ case class Indirection(x_1: String, x_2: String) extends expr {
   }
   def left = x_1
   def right = x_2
-  def getVariables = Set(x_1,x_2)
+  def getVariables = Set(x_1, x_2)
 }
 
 class SanityConditionException(s: String) extends Exception
