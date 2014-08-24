@@ -15,9 +15,10 @@ object Receiver {
 
   private def r(g: GlobalProtocol, xt: List[String], pt: Set[String], xi: String): Set[(String, String, List[String])] = {
     val it = g.exprs.iterator
-    while (it.hasNext) {
-      val e = it.next
-      e match {
+//    println("Rcv(G," + xt + "," +pt + ")("+xi+")")
+    val (lHash,rHash) = g.getHashes
+    val e = lHash(xi)
+    e match {
         case Message(x, p, pp, _, _, xp) if (x == xi && (pt contains pp)) => return r(g, xt, pt, xp)
         case ParallelJoin(x, xpp, xp) if (x == xi || xpp == xi) => return r(g, xt, pt, xp)
         case Message(x, p, pp, l, _, xp) if (x == xi && !(pt contains pp)) => return Set((pp, l, xt)) ++ r(g, xt, pt + pp, xp)
@@ -28,7 +29,6 @@ object Receiver {
         case ChoiceJoin(xp, x, xpp) if (x == xi || xp == xi) && !(xt contains xpp) => return r(g, xt :+ xpp, pt, xpp)
         case _ => return Set.empty
       }
-    }
     // This will happen if the protocol is incomplete
     throw new UndefinedReceiverException(xt, pt, xi)
   }
