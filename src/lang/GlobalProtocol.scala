@@ -6,8 +6,9 @@ import scala.collection.mutable.Map
 import scala.collection.mutable.LinkedHashSet
 import scala.collection.mutable.Set
 import scala.annotation.tailrec
+import scala.util.parsing.input.Positional
 
-class GlobalProtocol(val exprs: List[expr]) {
+class GlobalProtocol(val exprs: List[expr]) extends Positional {
 
   val x0: String = "x_0"
   private val end: String = "end"

@@ -46,4 +46,9 @@ class WFGlobalProtocolTest {
   @Test def testInterleavedSAndTSystem() {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
   }
+  
+  @Test(expected = classOf[lang.SanityConditionException])
+  def testSPARQLv1(){
+    val g = getProtocol(new FR(path + "SPARQLv1.txt"))
+  }
 }

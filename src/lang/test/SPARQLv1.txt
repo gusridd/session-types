@@ -1,0 +1,16 @@
+x_0 = x_1 + x_3
+x_1 = C -> S: QueryGET; x_8
+x_2 = x_3 + x_5
+x_3 = C -> S: QueryPOST; x_4
+x_4 = C -> S: BodymsgPOST; x_6
+x_5 = C -> S: BodymsgEncodedPost; x_7
+x_6 + x_7 = x_9
+x_8 + x_9 = x_10
+x_10 = x_11 + x_12
+x_11 = S -> C: Error; x_18
+x_12 = x_13 + x_14
+x_13 = S -> C: RespGrafo; x_15
+x_14 = S -> C: RespDocument; x_16
+x_15 + x_16 = x_17
+x_17 + x_18 = x_19
+x_19 = end

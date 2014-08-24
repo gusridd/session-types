@@ -35,11 +35,16 @@ object Sanity {
     }
 
     if (!unambiguous.isEmpty) {
+      print("Unanbiguity at: " + unambiguous.head._1)
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
     }
 
+    if(!m.contains(x0)){
+      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
+    }
+    
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
-      throw new SanityConditionException("Unique start: x_0 must appear exactly once, on the left-hand side")
+      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
     }
     threadReduction(exprs)
     true
