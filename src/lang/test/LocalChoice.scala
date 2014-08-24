@@ -25,7 +25,7 @@ class LocalChoice {
   }
 
   @Test def testSimpleCorrectChoice() {
-    assertFalse(localChoiceFromReader(new SR("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4")))
+    assertFalse(localChoiceFromReader(new SR("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4 \n x_4 = end")))
   }
 
   @Test def testHelloWorld() {
@@ -85,8 +85,8 @@ class LocalChoice {
   @Test def testReceiveChoiceNonReceiveOutput(){
     val g = getProtocol(new FR(path + "choiceNonReceive.txt"))
     val s1 = Receiver(g)("x_1")
-    val s2 = Receiver(g)("x_2")
-    
+    val s2 = Receiver(g)("x_3")
+
     // This is to ensure that the Receive is actually working
     assertEquals(Set(("B","Hi",List())),s1.s)
     assertEquals(Set(("C","Hello",List())),s2.s)
