@@ -58,6 +58,10 @@ class LocalChoice {
   def testNonLocalChoiceConfusion() {
     assertFalse(localChoiceFromReader(new FR("./src/lang/test/nonLocalChoiceConfusion.txt")))
   }
+  
+  @Test def testNonLocalChoiceMultiple(){
+    assertFalse(localChoiceFromReader(new FR("./src/lang/test/choiceNonReceive.txt")))
+  }
 
   /**
    * Receiver
