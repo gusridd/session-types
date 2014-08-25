@@ -4,6 +4,9 @@ object LocalChoice {
   def apply(g: GlobalProtocol): Boolean = {
     try {
       g.exprs forall (e => e match {
+        /**
+         * Notice that Receiver(g)(x) returns an Output object that handles the equality relation ==
+         */
         case Choice(x, xp, xpp) => Receiver(g)(xp) == Receiver(g)(xpp) && uniqueActiveSender(g, x)
         case _ => true
       })
