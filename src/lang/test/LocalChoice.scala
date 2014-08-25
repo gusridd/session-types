@@ -130,6 +130,20 @@ class LocalChoice {
     assertEquals(s34, s37)
   }
   
+  @Test def testTravelAgencyEquality(){
+    val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
+    
+    val s1 = Receiver(g)("x_1")
+    println("s1: " + s1)
+    val s5 = Receiver(g)("x_5")
+    println("s5: " + s5)
+    assertEquals(s1, s5)
+    
+    val s6 = Receiver(g)("x_6")
+    val s8 = Receiver(g)("x_8") 
+    assertEquals(s6, s8)
+  }
+  
   
 
 }
