@@ -17,15 +17,19 @@ class GlobalSession extends PathInfo{
     g.getParticipants
   }
 
-  @Test def testGetParticipants() {
+  @Test def testGetParticipantsAlternatingBitProtocol() {
 
-    var participants = getParticipantsFile("AlternatingBitProtocol.txt")
+    val participants = getParticipantsFile("AlternatingBitProtocol.txt")
     
     assertEquals(2,participants.size)
     assertTrue(participants.contains("Alice"))
     assertTrue(participants.contains("Bob"))
-    
-    participants = getParticipantsFile("uniqueStart.txt")
+
+  }
+  
+  @Test def testGetParticipantsUniqueStart() {
+
+    val participants = getParticipantsFile("uniqueStart.txt")
     
     assertEquals(3,participants.size)
     assertTrue(participants.contains("Seller"))
