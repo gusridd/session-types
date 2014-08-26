@@ -87,7 +87,7 @@ object GlobalParser extends GlobalSessionParser {
   }
 }
 
-sealed trait expr extends Positional {
+trait expr extends Positional {
   def canonical(): String = left + " = " + right
   def substitute(s1: String, s2: String): expr
   def left: String
