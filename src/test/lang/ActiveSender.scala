@@ -1,4 +1,4 @@
-package lang.test;
+package test.lang;
 
 import org.junit.Assert._
 import org.junit.Test
@@ -7,10 +7,7 @@ import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
 
-class ActiveSender {
-
-  val path = "./src/lang/test/"
-  val path_wf = "./src/protocol/wellformed/"
+class ActiveSender extends PathInfo {
 
   def activeSenderFromFile(filename: String, x: String, expected: String) = {
     val reader = new FR(path + filename)

@@ -1,4 +1,4 @@
-package lang.test;
+package test.lang;
 
 import org.junit.Assert._
 import org.junit.Test;
@@ -7,10 +7,7 @@ import lang._
 import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 
-class Sanity {
-
-  val path = "./src/lang/test/"
-  val path_wf = "./src/protocol/wellformed/"
+class Sanity extends PathInfo {
 
   def sanityCheckFile(name: String) = {
     val reader = new FR(name)
@@ -37,57 +34,57 @@ class Sanity {
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testUnambiguityLeftSide() {
-    sanityCheckFile("./src/lang/test/ambiguousLeftSide.txt")
+    sanityCheckFile(path + "ambiguousLeftSide.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testUnambiguityRightSide() {
-    sanityCheckFile("./src/lang/test/ambiguousRightSide.txt")
+    sanityCheckFile(path + "ambiguousRightSide.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testUniqueStart() {
-    sanityCheckFile("./src/lang/test/uniqueStart.txt")
+    sanityCheckFile(path + "uniqueStart.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testUniqueEnd() {
-    sanityCheckFile("./src/lang/test/uniqueEnd.txt")
+    sanityCheckFile(path + "uniqueEnd.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testThreadCorrectnessWrong() {
-    threadReductionFile("./src/lang/test/threadCorrectnessWrong.txt")
+    threadReductionFile(path + "threadCorrectnessWrong.txt")
   }
 
   @Test def testThreadCorrectnessGood1() {
-    threadReductionFile("./src/lang/test/threadCorrectnessGood1.txt")
+    threadReductionFile(path + "threadCorrectnessGood1.txt")
   }
 
   @Test def testThreadCorrectnessGood2() {
-    threadReductionFile("./src/lang/test/threadCorrectnessGood2.txt")
+    threadReductionFile(path + "threadCorrectnessGood2.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testAlternatingBitProtocol() {
-    threadReductionFile("./src/lang/test/AlternatingBitProtocol.txt")
+    threadReductionFile(path + "AlternatingBitProtocol.txt")
   }
 
   @Test(expected = classOf[lang.SanityConditionException])
   def testAlternatingBitProtocol3() {
-    threadReductionFile("./src/lang/test/AlternatingBitProtocol3.txt")
+    threadReductionFile(path + "AlternatingBitProtocol3.txt")
   }
 
   @Test def testInterleavedChoice() {
-    threadReductionFile("./src/lang/test/interleavedChoice.txt")
+    threadReductionFile(path + "interleavedChoice.txt")
   }
 
   @Test def testInterleavedSAndTSystem() {
-    threadReductionFile("./src/lang/test/interleavedSAndTSystem.txt")
+    threadReductionFile(path + "interleavedSAndTSystem.txt")
   }
 
   @Test def testRecursionWithEnding() {
-    threadReductionFile("./src/lang/test/recursionWithEnding.txt")
+    threadReductionFile(path + "recursionWithEnding.txt")
   }
 
   @Test
@@ -112,7 +109,7 @@ class Sanity {
   }
 
   @Test def testRecursiveChoice() {
-    threadReductionFile("./src/lang/test/RecursiveChoice.txt")
+    threadReductionFile(path + "RecursiveChoice.txt")
   }
 
   @Test

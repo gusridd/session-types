@@ -2,10 +2,11 @@ package lang.aspect
 
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.input.Positional
+import lang.GlobalProtocol
 
 class AspectParser extends JavaTokenParsers {
 
-  
+  def globalWithAspects = 3
   
   
 }
@@ -19,3 +20,6 @@ class AspectParser extends JavaTokenParsers {
 
 
 sealed trait aspectAST extends Positional
+
+
+case class GlobalAspectualSessionType(g: GlobalProtocol)

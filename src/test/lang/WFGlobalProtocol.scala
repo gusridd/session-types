@@ -1,4 +1,4 @@
-package lang.test;
+package test.lang;
 
 import org.junit.Assert._
 import org.junit.Test
@@ -7,10 +7,7 @@ import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
 
-class WFGlobalProtocolTest {
-
-  val path = "./src/lang/test/"
-  val path_wf = "./src/protocol/wellformed/"
+class WFGlobalProtocolTest extends PathInfo {
 
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)

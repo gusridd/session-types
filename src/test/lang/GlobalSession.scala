@@ -1,4 +1,4 @@
-package lang.test;
+package test.lang;
 
 import org.junit.Assert._
 import org.junit.Test;
@@ -8,9 +8,7 @@ import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
 
-class GlobalSession {
-  
-  val path = "./src/lang/test/"
+class GlobalSession extends PathInfo{
   
   def getParticipantsFile(filename : String) = {
     val reader = new FR(path + filename)

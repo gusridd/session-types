@@ -1,4 +1,4 @@
-package lang.test;
+package test.lang;
 
 import org.junit.Assert._
 import org.junit.Test
@@ -9,10 +9,7 @@ import java.io.{StringReader => SR}
 import java.io.Reader
 import scala.collection.immutable.Set
 
-class LocalChoice {
-
-  val path = "./src/lang/test/"
-  val path_wf = "./src/protocol/wellformed/"
+class LocalChoice extends PathInfo {
 
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
@@ -52,16 +49,16 @@ class LocalChoice {
 
   //@Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoice() {
-    assertFalse(localChoiceFromReader(new FR("./src/lang/test/nonLocalChoice.txt")))
+    assertFalse(localChoiceFromReader(new FR(path + "nonLocalChoice.txt")))
   }
 
   //@Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoiceConfusion() {
-    assertFalse(localChoiceFromReader(new FR("./src/lang/test/nonLocalChoiceConfusion.txt")))
+    assertFalse(localChoiceFromReader(new FR(path + "nonLocalChoiceConfusion.txt")))
   }
   
   @Test def testNonLocalChoiceMultiple(){
-    assertFalse(localChoiceFromReader(new FR("./src/lang/test/choiceNonReceive.txt")))
+    assertFalse(localChoiceFromReader(new FR(path + "choiceNonReceive.txt")))
   }
 
   /**
