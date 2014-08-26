@@ -1,3 +1,3 @@
-package object lang {
+/*package object lang {
 	implicit def stringToIdentifier(s: String) = new identifier(s)
-}
+}*/

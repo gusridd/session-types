@@ -58,16 +58,6 @@ class GlobalSessionParser extends JavaTokenParsers {
 /**
  * Class for treating Strings like identifiers
  */
-class identifier(self: String) {
-  def sub(target: String, replacement: String): String =
-    if (self == target) replacement else self
-
-  def minimum(other: String): String =
-    if (self < other) self else other
-
-  def maximum(other: String): String =
-    if (self > other) self else other
-}
 
 object GlobalParser extends GlobalSessionParser {
   def parse(reader: java.io.Reader): GlobalProtocol = {
@@ -89,14 +79,26 @@ object GlobalParser extends GlobalSessionParser {
 
 trait expr extends Positional {
   def canonical(): String = left + " = " + right
-  def substitute(s1: String, s2: String): expr
+  def substitute(s1: String, s2: String): this.type
   def left: String
   def right: String
   def isEnd = false
   def getVariables: Set[String]
+
+  implicit class identifier(self: String) {
+    def sub(target: String, replacement: String): String =
+      if (self == target) replacement else self
+
+    def minimum(other: String): String =
+      if (self < other) self else other
+
+    def maximum(other: String): String =
+      if (self > other) self else other
+  }
 }
 
 sealed trait Ternary {
+  self: expr =>
   type T
   protected val x_1: String
   protected val x_2: String
