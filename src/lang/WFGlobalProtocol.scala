@@ -15,7 +15,7 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
     getParticipants().find(_ == p) match {
       case Some(pp) => {
         var localProtocol = lp(p)
-        localProtocol foreach ( e => e match {
+        localProtocol foreach ( {
           case i @ LocalProtocol.Indirection(x1,x2) => {
             localProtocol = (localProtocol filterNot (_ == i)).map(_.substitute(x1, x2))
           }

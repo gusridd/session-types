@@ -65,6 +65,7 @@ object AspectParser extends AspectParser {
  */
 
 sealed trait aspectualAST extends expr with Positional {
+  type Self = aspectualAST
   def left = ""
   def right = ""
   def substitute(s1: String, s2: String) = this
@@ -79,7 +80,7 @@ case class AdviceTransition(x1: String, x2: String) extends aspectualAST {
   override def left = x1
   override def right = "proceed;" + x2
   override def getVariables = scala.collection.mutable.Set(x1, x2)
-  def substitute(s1: String, s2: String) = AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
+  def substitute(s1: String, s2: String): AdviceTransition = AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
 }
 //InternalChoice(x1.sub(s1,s2),x2.sub(s1,s2),x3.sub(s1,s2))
 /**

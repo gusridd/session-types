@@ -78,8 +78,9 @@ object GlobalParser extends GlobalSessionParser {
 }
 
 trait expr extends Positional {
+  type Self <: expr
   def canonical(): String = left + " = " + right
-  def substitute(s1: String, s2: String): this.type
+  def substitute(s1: String, s2: String): Self
   def left: String
   def right: String
   def isEnd = false
@@ -97,14 +98,14 @@ trait expr extends Positional {
   }
 }
 
-sealed trait Ternary {
-  self: expr =>
+sealed trait Ternary extends expr {
+  //self: expr[Ternary] =>
   type T
   protected val x_1: String
   protected val x_2: String
   protected val x_3: String
-  protected def construct(x1: String, x2: String, x3: String): T
-  def substitute(s1: String, s2: String): T = {
+  protected def construct(x1: String, x2: String, x3: String): Self
+  def substitute(s1: String, s2: String): Self = {
     construct(x_1.sub(s1, s2), x_2.sub(s1, s2), x_3.sub(s1, s2))
   }
   override def equals(c: Any) = c match {
@@ -120,15 +121,16 @@ object Ternary {
 }
 
 case class Message(val x_1: String, val s: String, val r: String, val msg: String, val t: String, val x_2: String) extends expr {
-  def substitute(s1: String, s2: String): Message = {
+  type Self = Message
+  def substitute(s1: String, s2: String) = {
     Message(x_1.sub(s1, s2), s, r, msg, t, x_2.sub(s1, s2))
   }
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
   def getVariables = Set(x_1, x_2)
 }
-class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
-  type T = Choice
+class Choice private (val x_1: String, val x_2: String, val x_3: String) extends Ternary {
+  type Self = Choice
   protected def construct(x_1: String, x_2: String, x_3: String) = Choice(x_1, x_2, x_3)
   override def toString(): String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def left = x_1
@@ -143,8 +145,8 @@ object Choice {
 
   def unapply(c: Choice): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
 }
-class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
-  type T = ChoiceJoin
+class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) extends Ternary {
+  type Self = ChoiceJoin
   override def toString(): String = "ChoiceJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
   protected def construct(x_1: String, x_2: String, x_3: String) = ChoiceJoin(x_1, x_2, x_3)
   def left = x_1 + " + " + x_2
@@ -160,8 +162,8 @@ object ChoiceJoin {
   def unapply(c: ChoiceJoin): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
 }
 
-class Parallel private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
-  type T = Parallel
+class Parallel private (val x_1: String, val x_2: String, val x_3: String) extends Ternary {
+  type Self = Parallel
   override def toString(): String = "Parallel(" + x_1 + "," + x_2 + "," + x_3 + ")"
   protected def construct(x_1: String, x_2: String, x_3: String) = Parallel(x_1, x_2, x_3)
   def left = x_1
@@ -173,8 +175,8 @@ object Parallel {
   def unapply(c: Parallel): Option[(String, String, String)] = Option(c.x_1, c.x_2, c.x_3)
 }
 
-class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
-  type T = ParallelJoin
+class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) extends Ternary {
+  type Self = ParallelJoin
   override def toString(): String = "ParallelJoin(" + x_1 + "," + x_2 + "," + x_3 + ")"
   protected def construct(x_1: String, x_2: String, x_3: String) = ParallelJoin(x_1, x_2, x_3)
   def left = x_1 + " | " + x_2

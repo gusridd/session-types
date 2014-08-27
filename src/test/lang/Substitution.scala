@@ -45,7 +45,7 @@ class Substitution {
   @Test def testChoiceSubstitution() {
     val c = Choice("x_1", "x_2", "x_3")
     val nc1 = c.substitute("x_1", "x_4")
-
+ 
     assertEquals(nc1.x_1, "x_4")
     assertEquals(nc1.x_2, "x_2")
     assertEquals(nc1.x_3, "x_3")
