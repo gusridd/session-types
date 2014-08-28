@@ -66,24 +66,16 @@ object AspectParser extends AspectParser {
  * AST definitions for the AspectParser
  */
 
-trait aspectualAST extends expr with Positional {
-  /*
-  def left = ""
-  def right = ""
-  def substitute(s1: String, s2: String) = this
-  def getVariables = scala.collection.mutable.Set()
-  
-  */
-}
+trait AspectualAST extends expr with Positional 
 
-case class Pointcut(s: String, r: String, l: String, t: String) extends aspectualAST {
+case class Pointcut(s: String, r: String, l: String, t: String) extends AspectualAST {
   def left = throw new Exception("left called on Pointcut")
   def right = throw new Exception("right called on Pointcut")
   def substitute(s1: String, s2: String) = this
   def getVariables = scala.collection.mutable.Set()
 }
 
-case class Advice(ls: List[expr]) extends aspectualAST {
+case class Advice(ls: List[expr]) extends AspectualAST {
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
   def substitute(s1: String, s2: String) = {
@@ -92,7 +84,7 @@ case class Advice(ls: List[expr]) extends aspectualAST {
   def getVariables = ls.flatMap(_.getVariables).to
 }
 
-case class AdviceTransition(x1: String, x2: String) extends aspectualAST {
+case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
   override def left = x1
   override def right = "proceed;" + x2
   def substitute(s1: String, s2: String) = {
