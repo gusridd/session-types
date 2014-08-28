@@ -21,8 +21,13 @@ class AspectParser extends GlobalSessionParser {
   def pointcuts: Parser[List[Pointcut]] = "pointcut:" ~ repsep(pointcut, "+") ^^
     { case _ ~ pcs => pcs }
 
-  def pointcut: Parser[Pointcut] = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ~ "(" ~ qNameWildcard ~ ")" ^^
+  def pointcut: Parser[Pointcut] = (poincutWithPayloadType | poincutWithoutPayloadType ) ^^ { p => p }
+  
+  def poincutWithPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ~ "(" ~ qNameWildcard ~ ")" ^^
     { case p ~ _ ~ pp ~ _ ~ l ~ _ ~ t ~ _ => new Pointcut(p, pp, l, t) }
+  
+  def poincutWithoutPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ^^
+    { case p ~ _ ~ pp ~ _ ~ l => new Pointcut(p, pp, l, "") }
 
   def advice: Parser[Advice] = "advice:" ~ rep(expr | advTransition) ^^
     { case _ ~ ls => new Advice(ls) }

@@ -6,7 +6,7 @@ SessionAspect Authentication {
 			  x_1 = B -> A: Auth; x_3
 			  x_3 = x_4 + x_5
 			  x_4 = A -> B : Retry; x_2
-			  x_5: A -> B: OK; x_6
+			  x_5 = A -> B: OK; x_6
 			  x_6 = proceed; x_7
 			  x_7 = end
 }

@@ -6,6 +6,6 @@ SessionAspect Negotiation {
 			  x_1 + x_2 =  x_3
 			  x_3 = x_4 + x_5
 			  x_4 = B -> C : Offer; x_6
-			  x_6: C -> B: Counter; x_2
+			  x_6 = C -> B: Counter; x_2
 			  x_5 = end
 }
