@@ -3,21 +3,62 @@ package lang.aspect
 import lang.GlobalProtocol
 import lang.expr
 import lang.Message
+import lang.End
+import lang.Indirection
 import lang.LocalProtocol.Send
+import scala.annotation.tailrec
 
 object Weaver {
-	def naiveGlobalWeaving(aspects: List[Aspect], exprs : List[expr]): List[expr] = aspects match {
-	  case aspect :: aRest => exprs
-	  case Nil => exprs
-	}
-	
-	/**
-	 * Pointcut Matching
-	 */
-	private[this] def pointcutMatchGlobal(pcs: List[Pointcut], e: expr) = e match {
-	  case Message(x1,s1,r1,l1,t1,x2) => pcs exists {
-	    case Pointcut(s2,r2,l2,t2) => s1 == s2 && r1 == r2 && (l2 == "*" || l2 == l1) && (t2 == "*" || t2 == t1)
-	  }
-	  case _ => false
-	}
+
+  def naiveGlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
+    case aspect :: aRest => {
+      val matches = exprs filter { e => pointcutMatchGlobal(aspect.pc, e) }
+      matches flatMap ({
+        case m @ Message(x, s, r, l, u, xp) => {
+          /**
+           *  Tagging is made and the 'proceed' keyword
+           *  is replaced by the actual message and
+           *  end is replaced by xp, which is the ending
+           *  variable from the message
+           */
+          (localize(aspect.adv, x) map ({
+            case AdviceTransition(x1, x2) => m
+            case End(xe) => Indirection(xe, xp)
+            case e => e
+          })) :+ Indirection(x, format(x, "x_0"))
+        }
+        case _ => throw new Exception("Weaving only matches messages")
+      })
+    }
+    case Nil => exprs
+  }
+
+  /**
+   * Pointcut Matching
+   */
+  private[this] def pointcutMatchGlobal(pcs: List[Pointcut], e: expr) = e match {
+    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
+      case Pointcut(s2, r2, l2, t2) => s1 == s2 && r1 == r2 && (l2 == "*" || l2 == l1) && (t2 == "*" || t2 == t1)
+    }
+    case _ => false
+  }
+
+  /**
+   * Function responsible for maintaining the uniqueness of states
+   * when the advice is inserted several times within the same
+   * global session.
+   */
+  private[this] def localize(adv: Advice, x: String): List[expr] = {
+    val xs: Set[String] = (adv.ls flatMap (_.getVariables)).to
+
+    @tailrec def loc(exprs: List[expr], replacements: List[String]): List[expr] =
+      replacements match {
+        case xp :: xps => loc(exprs map (_.substitute(xp, format(x, xp))), xps)
+        case Nil => exprs
+      }
+
+    loc(adv.ls, xs.to)
+  }
+
+  private[this] def format(x: String, xp: String): String = x + "[" + xp + "]"
 }
