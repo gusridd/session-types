@@ -4,6 +4,9 @@ import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.input.Positional
 import lang.GlobalProtocol
 import lang.GlobalSessionParser
+import lang.expr
+import lang.Identifier
+import lang.stringToIdentifier
 
 /**
  * Parser for Aspectual Session Types
@@ -63,20 +66,38 @@ object AspectParser extends AspectParser {
  * AST definitions for the AspectParser
  */
 
-sealed trait aspectualAST extends lang.expr with Positional {
+trait aspectualAST extends expr with Positional {
+  /*
   def left = ""
   def right = ""
   def substitute(s1: String, s2: String) = this
   def getVariables = scala.collection.mutable.Set()
+  
+  */
 }
 
-case class Pointcut(s: String, r: String, l: String, t: String) extends aspectualAST
+case class Pointcut(s: String, r: String, l: String, t: String) extends aspectualAST {
+  def left = throw new Exception("left called on Pointcut")
+  def right = throw new Exception("right called on Pointcut")
+  def substitute(s1: String, s2: String) = this
+  def getVariables = scala.collection.mutable.Set()
+}
 
-case class Advice(ls: List[lang.expr]) extends aspectualAST
+case class Advice(ls: List[expr]) extends aspectualAST {
+  def left = throw new Exception("left called on Advice")
+  def right = throw new Exception("right called on Advice")
+  def substitute(s1: String, s2: String) = {
+    new Advice(ls map (_.substitute(s1, s2)))
+  }
+  def getVariables = ls.flatMap(_.getVariables).to
+}
 
 case class AdviceTransition(x1: String, x2: String) extends aspectualAST {
   override def left = x1
   override def right = "proceed;" + x2
+  def substitute(s1: String, s2: String) = {
+    new AdviceTransition(x1.sub(s1,s2),x2.sub(s1,s2))
+  }
   override def getVariables = scala.collection.mutable.Set(x1,x2)
 }
 
