@@ -5,7 +5,7 @@ package lang
  * gives them the ability to compare to each other and
  * to give a nice way to fully replace them.
  */
-class identifier(self: String) {
+class Identifier(self: String) {
   def sub(target: String, replacement: String): String =
     if (self == target) replacement else self
 
