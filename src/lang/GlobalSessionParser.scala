@@ -55,19 +55,7 @@ class GlobalSessionParser extends JavaTokenParsers {
 
 }
 
-/**
- * Class for treating Strings like identifiers
- */
-class identifier(self: String) {
-  def sub(target: String, replacement: String): String =
-    if (self == target) replacement else self
 
-  def minimum(other: String): String =
-    if (self < other) self else other
-
-  def maximum(other: String): String =
-    if (self > other) self else other
-}
 
 object GlobalParser extends GlobalSessionParser {
   def parse(reader: java.io.Reader): GlobalProtocol = {
