@@ -31,6 +31,10 @@ class WFGlobalProtocolTest extends PathInfo {
   @Test def testLinearityTravelAgency() {
     val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
   }
+  
+  @Test def testLinearitySimpleTrade() {
+    val g = getProtocol(new FR(path_wf + "SimpleTrade.txt"))
+  }
 
   @Test def testInterleavedSandTSystem() {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
