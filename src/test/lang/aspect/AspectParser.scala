@@ -5,8 +5,9 @@ import org.junit.Test
 import lang.aspect.AspectParser
 import java.io.{ FileReader => FR }
 import java.io.{ StringReader => SR }
+import test.lang.PathInfo
 
-class Parser {
+class Parser extends PathInfo {
 
   @Test def testParseBasisAspect() {
     val parsed = AspectParser.parse(new SR(
@@ -84,6 +85,18 @@ class Parser {
     	  }"""))
     	  
     println(parsed)
+  }
+  
+  @Test def testParseAuthentication() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+  }
+  
+  @Test def testParseLogging() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
+  }
+  
+  @Test def testParseNegotiation() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
   }
 
 }
