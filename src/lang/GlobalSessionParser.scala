@@ -55,8 +55,6 @@ class GlobalSessionParser extends JavaTokenParsers {
 
 }
 
-
-
 object GlobalParser extends GlobalSessionParser {
   def parse(reader: java.io.Reader): GlobalProtocol = {
     parseAll(global, reader) match {
@@ -196,11 +194,20 @@ case class Indirection(x_1: String, x_2: String) extends expr {
 abstract class WFConditionException extends Exception
 
 class SanityConditionException(s: String) extends WFConditionException
-object SanityConditionException {def apply() = new SanityConditionException("")}
+object SanityConditionException {
+  def apply() = new SanityConditionException("")
+  def apply(s: String) = new SanityConditionException(s)
+}
 class LocalChoiceConditionException(s: String) extends WFConditionException
-object LocalChoiceConditionException {def apply() = new LocalChoiceConditionException("")}
+object LocalChoiceConditionException {
+  def apply() = new LocalChoiceConditionException("")
+  def apply(s: String) = new LocalChoiceConditionException(s)
+}
 class LinearityConditionException(s: String) extends WFConditionException
-object LinearityConditionException {def apply() = new LinearityConditionException("")}
+object LinearityConditionException {
+  def apply() = new LinearityConditionException("")
+  def apply(s: String) = new LinearityConditionException(s)
+}
 
 class NotConnectedException(s: String) extends Exception
 
