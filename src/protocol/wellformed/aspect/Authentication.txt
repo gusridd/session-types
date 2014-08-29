@@ -2,11 +2,11 @@ SessionAspect Authentication {
 	pointcut: 
 		B -> S : * +  B -> C: *
 	advice: 
-			  x_0 + x_2 = x_1
-			  x_1 = B -> A: Auth; x_3
-			  x_3 = x_4 + x_5
-			  x_4 = A -> B : Retry; x_2
-			  x_5 = A -> B: OK; x_6
+    	x_0 + x_5 = x_1
+			  x_1 = B -> A: Auth(String); x_2
+			  x_2 = x_3 + x_4
+			  x_3 = A -> B : Retry; x_5
+			  x_4 = A -> B: OK; x_6
 			  x_6 = proceed; x_7
 			  x_7 = end
 }
