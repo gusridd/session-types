@@ -147,5 +147,22 @@ class Sanity extends PathInfo {
     println(filtered2)
     assert(filtered2.size == 0)
   }
+  
+  @Test def testSanityRecursiveChoice(){
+    val protocol = """
+    x_1^x_0 + x_6^x_0 = x_2^x_0
+    		  x_2^x_0 = x_4^x_0 + x_6^x_0
+    		  x_4^x_0 = x_6
+    			  x_0 = x_1^x_0
+    			  x_6 = end  
+    """
+    val g = new GlobalProtocol(List
+        (ChoiceJoin("x_1^x_0","x_6^x_0","x_2^x_0"), 
+            Choice("x_2^x_0","x_4^x_0","x_6^x_0"), 
+            Indirection("x_4^x_0","x_6"), 
+            Indirection("x_0","x_1^x_0"), 
+            End("x_6") ))
+    assertTrue(Sanity(g))
+  }
 
 }

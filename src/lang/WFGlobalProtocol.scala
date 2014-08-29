@@ -51,6 +51,7 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
       case End(x) => LocalProtocol.End(x)
     })
   }
+ 
 
 }
 
