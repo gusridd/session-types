@@ -15,7 +15,7 @@ object Linearity {
   }
 
   def lin(g: GlobalProtocol)(x: String) = {
-    new Output(l(g, List(), List(), x))
+    new ReceiverOutput(l(g, List(), List(), x))
   }
 
   private def l(g: GlobalProtocol, xt: List[String], pt: List[String], xi: String): Set[(String, String, List[String])] = {

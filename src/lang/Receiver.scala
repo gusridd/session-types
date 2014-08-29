@@ -10,7 +10,7 @@ object Receiver {
   }
 
   def apply(g: GlobalProtocol)(x: String) = {
-    new Output(r(g, List(), Set(), x))
+    new ReceiverOutput(r(g, List(), Set(), x))
   }
 
   private def r(g: GlobalProtocol, xt: List[String], pt: Set[String], xi: String): Set[(String, String, List[String])] = {
