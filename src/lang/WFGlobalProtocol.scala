@@ -7,9 +7,9 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
    * Any Well-formed Global Protocol must comply with the sanity, local
    * choice and linearity conditions.
    */
-  Sanity(this)
-  LocalChoice(this)
-  Linearity(this)
+  if(!Sanity(this)) throw SanityConditionException()
+  if(!LocalChoice(this)) throw LocalChoiceConditionException()
+  if(!Linearity(this)) throw LinearityConditionException()
 
   def localProjection(p: String): Iterable[localExpr] = {
     getParticipants().find(_ == p) match {

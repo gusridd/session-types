@@ -2,6 +2,9 @@ package lang.aspect
 
 import lang.WFGlobalProtocol
 import lang.SanityConditionException
+import lang.LocalChoiceConditionException
+import lang.LinearityConditionException
+import lang.WFConditionException
 
 /**
  * This object checks the next property: Let A be an aspect ang G be a 
@@ -16,7 +19,11 @@ object PointcutLinearity {
 	    new WFGlobalProtocol(Weaver.naiveGlobalWeaving(List(aspect), g.exprs))
 	    true
 	  } catch {
-	    case e: SanityConditionException => false
+	    /**
+	     * If the instantiation of the object fails for wf condition reasons,
+	     * then is not poincut-linear. Any other reason should be thrown.
+	     */
+	    case e: WFConditionException => false
 	  }
 	}
 	

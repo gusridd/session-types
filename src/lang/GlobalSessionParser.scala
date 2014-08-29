@@ -193,7 +193,14 @@ case class Indirection(x_1: String, x_2: String) extends expr {
   def getVariables = Set(x_1, x_2)
 }
 
-class SanityConditionException(s: String) extends Exception
-class LocalChoiceException(s: String) extends Exception
+abstract class WFConditionException extends Exception
+
+class SanityConditionException(s: String) extends WFConditionException
+object SanityConditionException {def apply() = new SanityConditionException("")}
+class LocalChoiceConditionException(s: String) extends WFConditionException
+object LocalChoiceConditionException {def apply() = new LocalChoiceConditionException("")}
+class LinearityConditionException(s: String) extends WFConditionException
+object LinearityConditionException {def apply() = new LinearityConditionException("")}
+
 class NotConnectedException(s: String) extends Exception
 
