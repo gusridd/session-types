@@ -185,6 +185,7 @@ object Sanity {
           //          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
           //return (exprs,false)
         }
+        case i@Indirection(x1,x2) => return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true)
         case _ =>
       }
       (exprs, false)
