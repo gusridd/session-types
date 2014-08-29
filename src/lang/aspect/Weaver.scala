@@ -12,8 +12,8 @@ object Weaver {
 
   def naiveGlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
-      val matches = exprs filter { e => pointcutMatchGlobal(aspect.pc, e) }
-      matches flatMap ({
+      val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
+      (matches flatMap ({
         case m @ Message(x, s, r, l, u, xp) => {
           /**
            *  Tagging is made and the 'proceed' keyword
@@ -28,7 +28,7 @@ object Weaver {
           })) :+ Indirection(x, format(x, "x_0"))
         }
         case _ => throw new Exception("Weaving only matches messages")
-      })
+      })) ++ rest
     }
     case Nil => exprs
   }
@@ -60,5 +60,5 @@ object Weaver {
     loc(adv.ls, xs.to)
   }
 
-  private[this] def format(x: String, xp: String): String = x + "[" + xp + "]"
+  private[this] def format(x: String, xp: String): String = xp + "[" + x + "]"
 }
