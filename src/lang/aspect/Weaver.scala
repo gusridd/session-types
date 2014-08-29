@@ -22,7 +22,7 @@ object Weaver {
            *  variable from the message
            */
           (localize(aspect.adv, x) map ({
-            case AdviceTransition(x1, x2) => m
+            case AdviceTransition(x1, x2) => Message(x1,s,r,l,u,x2)
             case End(xe) => Indirection(xe, xp)
             case e => e
           })) :+ Indirection(x, format(x, "x_0"))
@@ -38,7 +38,8 @@ object Weaver {
    */
   private[this] def pointcutMatchGlobal(pcs: List[Pointcut], e: expr) = e match {
     case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
-      case Pointcut(s2, r2, l2, t2) => s1 == s2 && r1 == r2 && (l2 == "*" || l2 == l1) && (t2 == "*" || t2 == t1)
+      case Pointcut(s2, r2, l2, t2) if(s1 == s2 && r1 == r2) => l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
+      case _ => false
     }
     case _ => false
   }
@@ -60,5 +61,5 @@ object Weaver {
     loc(adv.ls, xs.to)
   }
 
-  private[this] def format(x: String, xp: String): String = xp + "[" + x + "]"
+  private[this] def format(x: String, xp: String): String = xp + "^" + x
 }
