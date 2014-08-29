@@ -96,6 +96,17 @@ class LocalChoice extends PathInfo {
     assertEquals(s1, s2)
   }
   
+  @Test def testReceiveRecursiveChoice(){
+    val g = getProtocol(new FR(path + "RecursiveChoice.txt"))
+    val s3 = Receiver(g)("x_3")
+    val s4 = Receiver(g)("x_4") 
+    assertEquals(s3, s4)
+    
+    val s5 = Receiver(g)("x_5")
+    val s1 = Receiver(g)("x_1") 
+    assertEquals(s5, s1)
+  }
+  
   @Test def testPostOfficeEquality(){
     val g = getProtocol(new FR(path_wf + "PostOffice.txt"))
     val s9 = Receiver(g)("x_9")

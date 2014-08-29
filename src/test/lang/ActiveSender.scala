@@ -45,10 +45,15 @@ class ActiveSender extends PathInfo {
     assertEquals("A", ActiveSender(g,"x_0"))
   }
   
-  
   @Test(expected = classOf[ActiveSender.NoActiveSenders])
   def testNonLocalChoice() {
     activeSenderFromFile("nonLocalChoice.txt", "x_0", "Any")
+  }
+  
+  
+  @Test(expected = classOf[ActiveSender.NoActiveSenders])
+  def testRecursiveChoice() {
+    activeSenderFromFile("RecursiveChoice.txt", "x_2", "")
   }
 
   @Test(expected = classOf[ActiveSender.NonChoiceException])

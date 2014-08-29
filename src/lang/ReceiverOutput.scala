@@ -8,8 +8,9 @@ package lang
  */
 case class ReceiverOutput(s: Set[(String, String, List[String])]) {
   override def equals(c: Any) = c match {
-    case ReceiverOutput(sp) => s forall (e1 => sp exists (e2 => (e1, e2) match {
+    case ReceiverOutput(sp) => s forall (e1 => sp forall (e2 => (e1, e2) match {
       case ((p1, l1, xt1), (p2, l2, xt2)) if (p1 == p2) => l1 != l2 || nonNullSuffix(xt1, xt2)
+      case ((p1, l1, xt1), (p2, l2, xt2)) if (p1 != p2) => true
       case _ => false
     }))
     case _ => false

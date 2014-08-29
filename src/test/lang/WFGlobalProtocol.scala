@@ -40,7 +40,8 @@ class WFGlobalProtocolTest extends PathInfo {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
   }
   
-  @Test def testRecursiveChoice() {
+  @Test(expected = classOf[LocalChoiceConditionException]) 
+  def testRecursiveChoice() {
     val g = getProtocol(new FR(path + "RecursiveChoice.txt"))
   }
   
