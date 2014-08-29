@@ -1,4 +1,4 @@
-	  x_0 = S -> B : Item; x_1
+	  x_0 = S -> B : Item(String); x_1
 	  x_1 = x_2 | x_3
 	  x_2 = B -> S : Sale; x_4
 	  x_3 = B -> C : Purchase; x_5
