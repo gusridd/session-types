@@ -6,6 +6,7 @@ import lang._
 import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
+import lang.ActiveSender.NoActiveSenders
 
 class WFGlobalProtocolTest extends PathInfo {
 
@@ -40,7 +41,7 @@ class WFGlobalProtocolTest extends PathInfo {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
   }
   
-  @Test(expected = classOf[LocalChoiceConditionException]) 
+  @Test(expected = classOf[NoActiveSenders]) 
   def testRecursiveChoice() {
     val g = getProtocol(new FR(path + "RecursiveChoice.txt"))
   }

@@ -8,6 +8,7 @@ import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
 import java.io.Reader
 import scala.collection.immutable.Set
+import lang.ActiveSender.NoActiveSenders
 
 class LocalChoice extends PathInfo {
 
@@ -21,7 +22,8 @@ class LocalChoice extends PathInfo {
     LocalChoice(getProtocol(reader))
   }
 
-  @Test def testSimpleCorrectChoice() {
+  @Test(expected = classOf[NoActiveSenders])
+  def testSimpleCorrectChoice() {
     assertFalse(localChoiceFromReader(new SR("x_1 = x_2 + x_3 \n x_2 + x_3 = x_4 \n x_4 = end")))
   }
 
@@ -58,6 +60,7 @@ class LocalChoice extends PathInfo {
   }
   
   @Test def testNonLocalChoiceMultiple(){
+    //TODO: be sure of what this should return
     assertFalse(localChoiceFromReader(new FR(path + "choiceNonReceive.txt")))
   }
 
@@ -92,11 +95,12 @@ class LocalChoice extends PathInfo {
   @Test def testReceiveChoiceNonReceiveEquality(){
     val g = getProtocol(new FR(path + "choiceNonReceive.txt"))
     val s1 = Receiver(g)("x_1")
-    val s2 = Receiver(g)("x_2") 
-    assertEquals(s1, s2)
+    val s3 = Receiver(g)("x_3") 
+    assertEquals(s1, s3)
   }
   
-  @Test def testReceiveRecursiveChoice(){
+  @Test(expected = classOf[NoActiveSenders]) 
+  def testReceiveRecursiveChoice(){
     val g = getProtocol(new FR(path + "RecursiveChoice.txt"))
     val s3 = Receiver(g)("x_3")
     val s4 = Receiver(g)("x_4") 
