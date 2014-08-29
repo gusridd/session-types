@@ -50,6 +50,11 @@ object Sanity {
     true
   }
 
+  /**
+   * Function that counts how many times does each variable appears at 
+   * which side of the global protocol definitions. It returns that
+   * information into a map for later internal use.
+   */
   def getMapCount(exprs: Iterable[expr])(implicit xs: HashSet[String]): Map[String, (Int, Int)] = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     exprs foreach {
@@ -74,6 +79,9 @@ object Sanity {
         m(x3) = (m(x3)._1, m(x3)._2 + 1)
       case End(x) =>
         m(x) = (m(x)._1 + 1, m(x)._2)
+      case Indirection(x1,x2) => 
+        m(x1) = (m(x1)._1+1,m(x1)._2)
+        m(x2) = (m(x2)._1, m(x2)._2 + 1)
     }
     m
   }
@@ -116,7 +124,7 @@ object Sanity {
     }
     (leftHash, rightHash)
   }
-
+  
   def variableSet(exprs: Iterable[expr]) = {
     val s: Set[String] = Set()
     exprs foreach (e => s ++ e.getVariables)
