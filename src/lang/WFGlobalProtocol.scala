@@ -53,3 +53,9 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
   }
 
 }
+
+object WFGlobalProtocol {
+  def apply(g: GlobalProtocol): WFGlobalProtocol = {
+    new WFGlobalProtocol(g.exprs)
+  }
+}
