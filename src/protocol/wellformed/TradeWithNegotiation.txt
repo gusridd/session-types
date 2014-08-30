@@ -1,0 +1,12 @@
+       x_7 = S -> B : Item (String); x_8
+x_8 + x_13 = x_9
+       x_9 = x_10 + x_12
+      x_10 = B -> C : Offer (Int); x_11
+      x_11 = C -> B : Counter (Int); x_13
+      x_12 = x_1
+       x_0 = x_7
+       x_1 = x_2 | x_3
+       x_2 = B -> S : Sale (Boolean); x_4
+       x_3 = B -> C : Purchase (Boolean); x_5
+ x_4 | x_5 = x_6
+       x_6 = end

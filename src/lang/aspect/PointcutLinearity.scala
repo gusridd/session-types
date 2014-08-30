@@ -16,7 +16,10 @@ import lang.WFConditionException
 object PointcutLinearity {
 	def apply(aspect: Aspect, g: WFGlobalProtocol): Boolean = {
 	  try {
-	    new WFGlobalProtocol(Weaver.naiveGlobalWeaving(List(aspect), g.exprs))
+	    val wovenExprs = Weaver.naiveGlobalWeaving(List(aspect), g.exprs)
+	    wovenExprs foreach (x => println(x.canonical))
+	    println("******************************************")
+	    new WFGlobalProtocol(wovenExprs)
 	    true
 	  } catch {
 	    /**
