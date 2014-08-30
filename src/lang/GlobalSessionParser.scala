@@ -17,7 +17,7 @@ class GlobalSessionParser extends JavaTokenParsers {
 
   def global: Parser[GlobalProtocol] = rep(expr) ^^ (x => new GlobalProtocol(x))
 
-  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end | failure("illegal start of protocol")) ^^ (x => x)
+  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end | indirection | failure("illegal start of protocol")) ^^ (x => x)
 
   def message: Parser[Message] = (messageWithType | messageWithoutType | failure("illegal start of message")) ^^ (x => x)
 
@@ -45,6 +45,10 @@ class GlobalSessionParser extends JavaTokenParsers {
 
   def parallelJoin: Parser[ParallelJoin] = (xid ~ "|" ~ xid ~ "=" ~ xid | failure("illegal start of parallelJoin")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(x1, x2, x3)
+  }
+  
+  def indirection: Parser[Indirection] = xid ~ "=" ~ xid ^^ {
+    case x1 ~ _ ~ x2 => Indirection(x1,x2)
   }
 
   def end: Parser[End] = (xid ~ "=" ~ "end" | failure("illegal start of end")) ^^ { case x ~ _ ~ _ => new End(x) }
