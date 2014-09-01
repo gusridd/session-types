@@ -9,45 +9,63 @@ import test.lang.PathInfo
 import lang.GlobalParser
 import lang.expr
 import lang.Message
-
+import lang.aspect.Aspect
 
 class UniqueMsg extends PathInfo {
   import lang.aspect.uniqueMsg
-  
-  @Test def disjointPartition(){
-    val set = Set(
-        Message("","A","","","",""),
-        Message("","B","","","",""),
-        Message("","C","","","",""),
-        Message("","D","","","",""))
-    val sets = uniqueMsg.disjointPartition(set)
-    
+
+  val testSet = Set(
+    Message("", "A", "", "", "", ""),
+    Message("", "B", "", "", "", ""),
+    Message("", "C", "", "", "", ""),
+    Message("", "D", "", "", "", ""))
+
+  @Test def testDisjointPartition() {
+    val sets = uniqueMsg.disjointPartition(testSet)
+
     sets foreach {
-      case (s1,s2) => {
-        println(s1.toString + " U " + s2.toString)
+      case (s1, s2) => {
         // The sum of the subsets should be the initial set
-        assertEquals(set, s1 ++ s2)
+        assertEquals(testSet, s1 ++ s2)
         // The set intersection should be the empty set
-        assertEquals(Set(),s1.intersect(s1))
+        assertEquals(Set(), s1.intersect(s1))
       }
     }
   }
-  
-  @Test def sumPartition() {
-    val set = Set(
-        Message("","A","","","",""),
-        Message("","B","","","",""),
-        Message("","C","","","",""),
-        Message("","D","","","",""))
-    
-    val sets = uniqueMsg.sumPartition(set)
+
+  @Test def testSumPartition() {
+
+    val sets = uniqueMsg.sumPartition(testSet)
     sets foreach {
-      case (s1,s2) => {
-//        println(s1.toString + " U " + s2.toString)
+      case (s1, s2) => {
         // The sum of the subsets should be the initial set
-        assertEquals(set, s1 ++ s2)
+        assertEquals(testSet, s1 ++ s2)
       }
     }
   }
   
+  @Test def testUniqueMsgLogging(){
+    val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
+    
+    aspects foreach {
+      case a: Aspect => uniqueMsg(a)
+    }
+  }
+  
+  @Test def testUniqueMsgNegotiation(){
+    val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
+    
+    aspects foreach {
+      case a: Aspect => uniqueMsg(a)
+    }
+  }
+  
+  @Test def testUniqueMsgAuthentication(){
+    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    
+    aspects foreach {
+      case a: Aspect => uniqueMsg(a)
+    }
+  }
+ 
 }
