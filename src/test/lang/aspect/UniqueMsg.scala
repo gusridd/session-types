@@ -48,7 +48,7 @@ class UniqueMsg extends PathInfo {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
     
     aspects foreach {
-      case a: Aspect => uniqueMsg(a)
+      case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
   
@@ -56,7 +56,7 @@ class UniqueMsg extends PathInfo {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
     
     aspects foreach {
-      case a: Aspect => uniqueMsg(a)
+      case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
   
@@ -64,7 +64,7 @@ class UniqueMsg extends PathInfo {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
     
     aspects foreach {
-      case a: Aspect => uniqueMsg(a)
+      case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
  
