@@ -82,13 +82,13 @@ case class Pointcut(s: String, r: String, l: String, t: String) extends Aspectua
   def getVariables = scala.collection.mutable.Set()
 }
 
-case class Advice(ls: List[expr]) extends AspectualAST {
+case class Advice(exprs: List[expr]) extends AspectualAST {
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
   def substitute(s1: String, s2: String) = {
-    new Advice(ls map (_.substitute(s1, s2)))
+    new Advice(exprs map (_.substitute(s1, s2)))
   }
-  def getVariables = ls.flatMap(_.getVariables).to
+  def getVariables = exprs.flatMap(_.getVariables).to
   
   private var hashCacheL: Option[HashMap[String, lang.expr]] = None
   private var hashCacheR: Option[HashMap[String, lang.expr]] = None
@@ -97,7 +97,7 @@ case class Advice(ls: List[expr]) extends AspectualAST {
     (hashCacheL, hashCacheR) match {
       case (Some(hl), Some(hr)) => return (hl, hr)
       case _ => {
-        val (leftHash, rightHash) = getHashesFromExpr(ls)
+        val (leftHash, rightHash) = getHashesFromExpr(exprs)
         hashCacheL = Some(leftHash)
         hashCacheR = Some(rightHash)
         (leftHash, rightHash)
