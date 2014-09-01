@@ -9,26 +9,28 @@ import java.io.Reader
 
 class ActiveSender extends PathInfo {
 
-  def activeSenderFromFile(filename: String, x: String, expected: String) = {
-    val reader = new FR(path + filename)
-    val g: GlobalProtocol = GlobalParser.parse(reader)
-    reader.close
-    assertEquals(expected, ActiveSender(g, x))
-  }
-
-  def getASendFromFile(filename: String, x: String) {
+  def getASendFromFile(filename: String, x: String): String = {
     val reader = new FR(filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
-    reader.close
     ActiveSender(g, x)
   }
 
-  @Test def testActiveSender() {
-    activeSenderFromFile("threadCorrectnessGood1.txt", "x_0", "Alice")
-    activeSenderFromFile("greetingDecision.txt", "x_1", "B")
-
-    activeSenderFromFile("negotiationWithNoAgreement.txt", "x_2", "Broker")
-    activeSenderFromFile("negotiationWithNoAgreement.txt", "x_6", "Broker")
+  @Test def testThreadCorrectnessGood1() {
+    val as_x0 = getASendFromFile(path + "threadCorrectnessGood1.txt", "x_0")
+    assertEquals("Alice", as_x0)
+  }
+  
+  @Test def testNegotiationWithNoAgreement() {
+    val as_x2 = getASendFromFile(path + "negotiationWithNoAgreement.txt", "x_2")
+    assertEquals("Broker", as_x2)
+    
+    val as_x6 = getASendFromFile(path + "negotiationWithNoAgreement.txt", "x_6")
+    assertEquals("Broker", as_x6)
+  }
+  
+  @Test def testGreetingDecision() {
+    val as_x1 = getASendFromFile(path + "greetingDecision.txt", "x_1")
+    assertEquals("B", as_x1)
   }
 
   @Test def testPostOffice() {
@@ -45,10 +47,8 @@ class ActiveSender extends PathInfo {
   }
 
   @Test def testChoiceNonReceive() {
-    val reader = new FR(path + "choiceNonReceive.txt")
-    val g: GlobalProtocol = GlobalParser.parse(reader)
-    reader.close
-    assertEquals("A", ActiveSender(g, "x_0"))
+    val as = getASendFromFile(path + "choiceNonReceive.txt", "x_0")
+    assertEquals("A", as)
   }
 
   @Test def testTradeWithNegotiation() {
@@ -58,32 +58,32 @@ class ActiveSender extends PathInfo {
 
   @Test(expected = classOf[ActiveSender.NoActiveSenders])
   def testNonLocalChoice() {
-    activeSenderFromFile("nonLocalChoice.txt", "x_0", "Any")
+    val as = getASendFromFile(path + "nonLocalChoice.txt", "x_0")
   }
 
   @Test(expected = classOf[ActiveSender.NoActiveSenders])
   def testRecursiveChoice() {
-    activeSenderFromFile("RecursiveChoice.txt", "x_2", "")
+    val as = getASendFromFile(path + "RecursiveChoice.txt", "x_2")
   }
 
   @Test(expected = classOf[ActiveSender.NonChoiceException])
   def testNotDefinedForMessage() {
-    activeSenderFromFile("threadCorrectnessGood1.txt", "x_1", "Any")
+    val as = getASendFromFile(path + "threadCorrectnessGood1.txt", "x_1")
   }
 
   @Test(expected = classOf[ActiveSender.NonChoiceException])
   def testNotDefinedForChoiceJoin() {
-    activeSenderFromFile("threadCorrectnessGood1.txt", "x_1", "Any")
+    val as = getASendFromFile(path + "threadCorrectnessGood1.txt", "x_1")
   }
 
   @Test(expected = classOf[ActiveSender.NonChoiceException])
   def testNotDefinedForParallel() {
-    activeSenderFromFile("threadCorrectnessGood2.txt", "x_0", "Any")
+    val as = getASendFromFile(path + "threadCorrectnessGood2.txt", "x_0")
   }
 
   @Test(expected = classOf[ActiveSender.NonChoiceException])
   def testNotDefinedForParallelJoin() {
-    activeSenderFromFile("threadCorrectnessGood2.txt", "x_4", "Any")
+    val as = getASendFromFile(path + "threadCorrectnessGood2.txt", "x_4")
   }
 
 }
