@@ -7,6 +7,8 @@ import lang.GlobalSessionParser
 import lang.expr
 import lang.Identifier
 import lang.stringToIdentifier
+import scala.collection.mutable.HashMap
+import lang._
 
 /**
  * Parser for Aspectual Session Types
@@ -87,6 +89,64 @@ case class Advice(ls: List[expr]) extends AspectualAST {
     new Advice(ls map (_.substitute(s1, s2)))
   }
   def getVariables = ls.flatMap(_.getVariables).to
+  
+  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
+  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+
+  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+    (hashCacheL, hashCacheR) match {
+      case (Some(hl), Some(hr)) => return (hl, hr)
+      case _ => {
+        val (leftHash, rightHash) = getHashesFromExpr(ls)
+        hashCacheL = Some(leftHash)
+        hashCacheR = Some(rightHash)
+        (leftHash, rightHash)
+      }
+    }
+  }
+  
+  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+    val leftHash = HashMap[String, expr]()
+    val rightHash = HashMap[String, expr]()
+    exprs foreach {
+      case m @ Message(x1, _, _, _, _, x2) => {
+        leftHash(x1) = m
+        rightHash(x2) = m
+      }
+      case e @ End(x) => {
+        leftHash(x) = e
+      }
+      case c @ Indirection(x1, x2) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+      }
+      case c @ Choice(x1, x2, x3) => {
+        leftHash(x1) = c
+        rightHash(x2) = c
+        rightHash(x3) = c
+      }
+      case p @ Parallel(x1, x2, x3) => {
+        leftHash(x1) = p
+        rightHash(x2) = p
+        rightHash(x3) = p
+      }
+      case cj @ ChoiceJoin(x1, x2, x3) => {
+        leftHash(x1) = cj
+        leftHash(x2) = cj
+        rightHash(x3) = cj
+      }
+      case pj @ ParallelJoin(x1, x2, x3) => {
+        leftHash(x1) = pj
+        leftHash(x2) = pj
+        rightHash(x3) = pj
+      }
+      case at @ AdviceTransition(x1,x2) => {
+        leftHash(x1) = at
+        rightHash(x2) = at
+      }
+    }
+    (leftHash, rightHash)
+  }
 }
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
