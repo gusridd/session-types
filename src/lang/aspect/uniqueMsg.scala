@@ -5,6 +5,8 @@ import lang.Message
 import lang.Choice
 import lang.Parallel
 import lang.End
+import lang.ChoiceJoin
+import lang.ParallelJoin
 
 object uniqueMsg {
   /**
@@ -32,8 +34,22 @@ object uniqueMsg {
               case (m, mp) => Msg(x2, xb, mp)
             })
           }
-          case Choice(x, x1, x2) if (!xb.contains(x)) => false
-
+          case Choice(x, x1, x2) if (!xb.contains(x)) => {
+            sumPartition(M) exists ({
+              case (m1, m2) => Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+            })
+          }
+          case Parallel(x, x1, x2) if (!xb.contains(x)) => {
+            disjointPartition(M) exists ({
+              case (m1, m2) => Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+            })
+          }
+          // As in the ChoiceJoin and ParallelJoin x1 and x2 appear both at the 
+          // left side of the equation, no other case should be checked.
+          case ChoiceJoin(x1,x2,x) => Msg(x,xb,M)
+          case ParallelJoin(x1,x2,x) => Msg(x,xb,M)
+          
+          // Base cases
           case Choice(x, x1, x2) if (xb.contains(x)) => true
           case Parallel(x, x1, x2) if (xb.contains(x)) => true
           case End(x) => true
@@ -51,20 +67,20 @@ object uniqueMsg {
 
     uniqueMessages.size == 1
   }
-  
+
   type iSet[T] = scala.collection.immutable.Set[T]
 
-  def disjointPartition(s: Set[Message]): Iterator[(iSet[Message],iSet[Message])] =
+  def disjointPartition(s: Set[Message]): Iterator[(iSet[Message], iSet[Message])] =
     for {
       s1 <- s.subsets
     } yield (s1, s -- s1)
-  
-  def sumPartition(s: Set[Message]): Iterator[(iSet[Message],iSet[Message])] = {
+
+  def sumPartition(s: Set[Message]): Iterator[(iSet[Message], iSet[Message])] = {
     for {
       s1 <- s.subsets
       s2 <- s.subsets
       if (s1 ++ s2 == s)
     } yield (s1, s2)
   }
-    
+
 }
