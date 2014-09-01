@@ -46,14 +46,14 @@ object ActiveSender {
     parL: Set[String], actR: String, setR: Set[String],
     parR: Set[String], counter : Int) : Boolean = {
     val (leftHash, rightHash) = g.getHashes
-    println("***************")
-    println("actL: " + actL)
-    println("setL: " + setL)
-    println("parL: " + parL)
-    println("actR: " + actR)
-    println("setR: " + setR)
-    println("parR: " + parR)
-    println("counter: " + counter)
+//    println("***************")
+//    println("actL: " + actL)
+//    println("setL: " + setL)
+//    println("parL: " + parL)
+//    println("actR: " + actR)
+//    println("setR: " + setR)
+//    println("parR: " + parR)
+//    println("counter: " + counter)
     
     
     leftHash(actL) match {
