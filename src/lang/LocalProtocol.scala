@@ -4,12 +4,10 @@ import scala.collection.mutable.Set
 
 object LocalProtocol {
   sealed trait localExpr extends expr {
-    /*
-    override def canonical(): String = left + " = " + right
+//    def canonical(): String = left + " = " + right
     def left: String
     def right: String
-    def substitute(s1: String, s2: String): localExp
-    */
+    def substitute(s1: String, s2: String): localExpr
   }
 
   case class Send(x1: String, p: String, l: String, U: String, x2: String) extends localExpr {
