@@ -16,10 +16,9 @@ class ActiveSender extends PathInfo {
     assertEquals(expected, ActiveSender(g, x))
   }
 
-  def getASendFromFile(filename: String, x: String) {
+  def getASendFromFile(filename: String, x: String): String = {
     val reader = new FR(filename)
     val g: GlobalProtocol = GlobalParser.parse(reader)
-    reader.close
     ActiveSender(g, x)
   }
 
