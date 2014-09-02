@@ -8,6 +8,7 @@ import lang.End
 import lang.ChoiceJoin
 import lang.ParallelJoin
 import lang.GlobalProtocol
+import scala.collection.mutable.HashMap
 
 object uniqueMsg {
   /**
@@ -15,8 +16,8 @@ object uniqueMsg {
    */
   def apply(g: GlobalProtocol, a: Aspect): Boolean = {
 
-    val (leftHash, rightHash) = a.adv.getHashes
-    def Msg(x: String, xb: Set[String], M: Set[Message]): Boolean = {
+    val leftHash = a.adv.getHashes._1
+    def Msg(x: String, xb: Set[String], M: Set[SimpleMessage]): Boolean = {
       leftHash(x) match {
         case m @ Message(x, _, _, _, _, xp) => {
           val Mp = M - m
@@ -130,8 +131,8 @@ object uniqueMsg {
      * If we try to compute the Msg function starting with every message
      * it should give true in every case.
      */
-    val messages: Set[Message] = ((a.adv.exprs ++ g.exprs) flatMap {
-      case m @ Message(_, _, _, _, _, _) => Some(m)
+    val messages: Set[SimpleMessage] = ((a.adv.exprs ++ g.exprs) flatMap {
+      case m @ Message(_, s, r, l, u, _) => Some(SimpleMessage(s,r,l,u))
       case _ => None
     }).to
     //    (a.adv.exprs ++ g.exprs) flatMap {
@@ -148,12 +149,12 @@ object uniqueMsg {
 
   type iSet[T] = scala.collection.immutable.Set[T]
 
-  def disjointPartition(s: Set[Message]): Iterator[(iSet[Message], iSet[Message])] =
+  def disjointPartition[M](s: Set[M]): Iterator[(iSet[M], iSet[M])] =
     for {
       s1 <- s.subsets
     } yield (s1, s -- s1)
 
-  def sumPartition(s: Set[Message]): Iterator[(iSet[Message], iSet[Message])] = {
+  def sumPartition[M](s: Set[M]): Iterator[(iSet[M], iSet[M])] = {
     for {
       s1 <- s.subsets
       s2 <- s.subsets
@@ -162,5 +163,13 @@ object uniqueMsg {
   }
 
   case class SimpleMessage(s: String, r: String, l: String, u: String)
+  
+  implicit def messageToSimpleMessage(m: Message): SimpleMessage = m match {
+    case Message(_, s, r, l, u, _) => SimpleMessage(s,r,l,u)
+  }
+  
+  implicit def simpleMessageToMessage(sm: SimpleMessage): Message = sm match {
+    case SimpleMessage(s,r,l,u) => Message("",s,r,l,u,"")
+  }
 
 }
