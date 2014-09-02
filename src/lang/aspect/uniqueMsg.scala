@@ -160,7 +160,7 @@ object uniqueMsg {
       if (s1 ++ s2 == s)
     } yield (s1, s2)
   }
-    
-    case class SimpleMessage(s:String,r:String,l:String,u:String)
+
+  case class SimpleMessage(s: String, r: String, l: String, u: String)
 
 }
