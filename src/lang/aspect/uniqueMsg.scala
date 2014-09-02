@@ -24,7 +24,7 @@ object uniqueMsg {
           Msg(xp, xb, Mp) || Msg(xp, xb, M)
         }
         case AdviceTransition(x1, x2) => {
-          val pairs = (M.subsets map (s => (s, M -- s)))
+          val pairs = disjointPartition(M)
 
           // This represent all the disjoint sums in whose all the elements
           // of the first set are matched by some pointcut.
