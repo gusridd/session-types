@@ -17,15 +17,17 @@ object uniqueMsg {
 
     val (leftHash, rightHash) = a.adv.getHashes
     def Msg(x: String, xb: Set[String], M: Set[Message]): Boolean = {
-//      println("*************")
-//      println("x: " + x)
-//      println("xb: " + xb)
-//      println("M: " + (M map ({ case Message(_, _, _, l, u, _) => l })))
       leftHash(x) match {
         case m @ Message(x, _, _, _, _, xp) => {
           val Mp = M - m
           // The disjoint sum of sets considers the empty set
-          Msg(xp, xb, Mp) // || Msg(xp, xb, M)
+          val r = Msg(xp, xb, Mp) // || Msg(xp, xb, M)
+          if (r) {
+            println("[Msg-Message]:")
+            println("\t" + m.canonical)
+            println("\tMsg(" + xp + ", " + xb + ", " + Mp + ")")
+          }
+          r
         }
         case AdviceTransition(x1, x2) => {
           val pairs = disjointPartition(M)
@@ -36,28 +38,84 @@ object uniqueMsg {
             case (sM, sMP) => sM forall (m => Weaver.pointcutMatchGlobal(a.pc, m))
           })
           properties exists ({
-            case (m, mp) => Msg(x2, xb, mp)
+            case (m, mp) => {
+              val r = Msg(x2, xb, mp)
+              if (r) {
+                println("[Msg-Proceed]:")
+                println("\t" + leftHash(x2).canonical)
+                println("\tMsg(" + x2 + ", " + xb + ", " + mp + ")")
+              }
+              r
+            }
           })
         }
-        case Choice(x, x1, x2) if (!xb.contains(x)) => {
+        case c @ Choice(x, x1, x2) if (!xb.contains(x)) => {
           sumPartition(M) exists ({
-            case (m1, m2) => Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+            case (m1, m2) => {
+              val r = Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+              if (r) {
+                println("[Msg-Choice]:")
+                println("\t" + c.canonical)
+                println("\tMsg(" + x1 + ", " + (xb + x) + ", " + m1 + ")")
+                println("\tMsg(" + x2 + ", " + (xb + x) + ", " + m2 + ")")
+              }
+              r
+            }
           })
         }
-        case Parallel(x, x1, x2) if (!xb.contains(x)) => {
+        case p @ Parallel(x, x1, x2) if (!xb.contains(x)) => {
           disjointPartition(M) exists ({
-            case (m1, m2) => Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+            case (m1, m2) => {
+              val r = Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
+              if (r) {
+                println("[Msg-Fork]:")
+                println("\t" + p.canonical)
+                println("\tMsg(" + x1 + ", " + (xb + x) + ", " + m1 + ")")
+                println("\tMsg(" + x2 + ", " + (xb + x) + ", " + m2 + ")")
+              }
+              r
+            }
           })
         }
         // As in the ChoiceJoin and ParallelJoin x1 and x2 appear both at the 
         // left side of the equation, no other case should be checked.
-        case ChoiceJoin(x1, x2, x) => Msg(x, xb, M)
-        case ParallelJoin(x1, x2, x) => Msg(x, xb, M)
-
+        case c @ ChoiceJoin(x1, x2, x) => {
+          val r = Msg(x, xb, M)
+          if (r) {
+            println("[Msg-Merge/Join]:")
+            println("\t" + c.canonical)
+            println("\tMsg(" + x + ", " + xb + ", " + M + ")")
+          }
+          r
+        }
+        case p @ ParallelJoin(x1, x2, x) => {
+          val r = Msg(x, xb, M)
+          if (r) {
+            println("[Msg-Merge/Join]:")
+            println("\t" + p.canonical)
+            println("\tMsg(" + x + ", " + xb + ", " + M + ")")
+          }
+          r
+        }
         // Base cases
-        case Choice(x, x1, x2) if (M.isEmpty && xb.contains(x)) => true
-        case Parallel(x, x1, x2) if (M.isEmpty && xb.contains(x)) => true
-        case End(x) if (M.isEmpty) => true
+        case c @ Choice(x, x1, x2) if (M.isEmpty && xb.contains(x)) => {
+          println("[Msg-Choice/Fork-Stop]:")
+          println("\t" + c.canonical)
+          println("\tMsg(" + x + ", " + xb + ", " + M + ")")
+          true
+        }
+        case p @ Parallel(x, x1, x2) if (M.isEmpty && xb.contains(x)) => {
+          println("[Msg-Choice/Fork-Stop]:")
+          println("\t" + p.canonical)
+          println("\tMsg(" + x + ", " + xb + ", " + M + ")")
+          true
+        }
+        case e @ End(x) if (M.isEmpty) => {
+          println("[Msg-End]:")
+          println("\t" + e.canonical)
+          println("\tMsg(" + x + ", " + xb + ", " + M + ")")
+          true
+        }
         case End(x) => false
         case Choice(x, x1, x2) => false
         case Parallel(x, x1, x2) => false
@@ -78,7 +136,7 @@ object uniqueMsg {
     //    } forall (M => Msg("x_0", Set(), messages))
     messages.subsets exists (M => {
       val r = Msg("x_0", Set(), M)
-      if(r) println("The correct set M for UniqueMsg was: " + M)
+      if (r) println("The correct set M for UniqueMsg was: " + M)
       r
     })
     //    Msg("x_0", Set(), messages)
