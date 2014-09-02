@@ -28,7 +28,7 @@ class UniqueMsg extends PathInfo {
         // The sum of the subsets should be the initial set
         assertEquals(testSet, s1 ++ s2)
         // The set intersection should be the empty set
-        assertEquals(Set(), s1.intersect(s1))
+        assertEquals(Set(), s1.intersect(s2))
       }
     }
   }
