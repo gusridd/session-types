@@ -64,6 +64,17 @@ class UniqueMsg extends PathInfo {
       case a: Aspect => assertTrue(uniqueMsg(protocol,a))
     }
   }
+  
+  @Test def testMFUniqueMsgLogging() {
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Logging.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
+
+    assertEquals(1, aspects.size)
+
+    aspects foreach {
+      case a: Aspect => assertFalse(uniqueMsg(protocol,a))
+    }
+  }
 
   @Test def testUniqueMsgNegotiation() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))

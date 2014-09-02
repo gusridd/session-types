@@ -1,8 +1,0 @@
-SessionAspect Logging {
-	pointcut: 
-		B -> S : * + S -> B: *
-	advice: 
-		x_0 = proceed; x_1
-		x_1 = B -> L: LogData(String); x_2
-		x_2 = end
-}
