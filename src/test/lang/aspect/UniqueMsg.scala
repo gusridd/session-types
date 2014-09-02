@@ -22,7 +22,6 @@ class UniqueMsg extends PathInfo {
 
   @Test def testDisjointPartition() {
     val sets = uniqueMsg.disjointPartition(testSet)
-
     sets foreach {
       case (s1, s2) => {
         // The sum of the subsets should be the initial set
@@ -33,9 +32,14 @@ class UniqueMsg extends PathInfo {
     }
   }
 
-  @Test def testSumPartition() {
+  @Test def testDisjointPartitionSize() {
+    val sets = uniqueMsg.disjointPartition(testSet)
+    assertEquals(16, sets.size)
+  }
 
+  @Test def testSumPartition() {
     val sets = uniqueMsg.sumPartition(testSet)
+
     sets foreach {
       case (s1, s2) => {
         // The sum of the subsets should be the initial set
@@ -43,29 +47,40 @@ class UniqueMsg extends PathInfo {
       }
     }
   }
-  
-  @Test def testUniqueMsgLogging(){
+
+  @Test def testSumPartitionSize() {
+    val sets = uniqueMsg.sumPartition(testSet)
+    assertEquals(81, sets.size)
+  }
+
+  @Test def testUniqueMsgLogging() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
-    
+
+    assertEquals(1, aspects.size)
+
     aspects foreach {
       case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
-  
-  @Test def testUniqueMsgNegotiation(){
+
+  @Test def testUniqueMsgNegotiation() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
-    
+
+    assertEquals(1, aspects.size)
+
     aspects foreach {
       case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
-  
-  @Test def testUniqueMsgAuthentication(){
+
+  @Test def testUniqueMsgAuthentication() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
-    
+
+    assertEquals(1, aspects.size)
+
     aspects foreach {
       case a: Aspect => assertTrue(uniqueMsg(a))
     }
   }
- 
+
 }
