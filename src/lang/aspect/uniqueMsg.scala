@@ -51,8 +51,8 @@ object uniqueMsg {
         case ParallelJoin(x1, x2, x) => Msg(x, xb, M)
 
         // Base cases
-        case Choice(x, x1, x2) if (xb.contains(x)) => true
-        case Parallel(x, x1, x2) if (xb.contains(x)) => true
+        case Choice(x, x1, x2) if (M == Set() && xb.contains(x)) => true
+        case Parallel(x, x1, x2) if (M == Set() && xb.contains(x)) => true
         case End(x) => true
       }
     }
