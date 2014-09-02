@@ -20,14 +20,18 @@ object uniqueMsg {
       leftHash(x) match {
         case m @ Message(x, _, _, _, _, xp) => {
           val Mp = M - m
-          // The disjoint sum of sets considers the empty set
-          val r = Msg(xp, xb, Mp) // || Msg(xp, xb, M)
-          if (r) {
-            println("[Msg-Message]:")
-            println("\t" + m.canonical)
-            println("\tMsg(" + xp + ", " + xb + ", " + Mp + ")")
+          if (M.contains(m)) {
+            // The disjoint sum of sets considers the empty set
+            val r = Msg(xp, xb, Mp) // || Msg(xp, xb, M)
+            if (r) {
+              println("[Msg-Message]:")
+              println("\t" + m.canonical)
+              println("\tMsg(" + xp + ", " + xb + ", " + Mp + ")")
+            }
+            r
+          } else {
+            false
           }
-          r
         }
         case AdviceTransition(x1, x2) => {
           val pairs = disjointPartition(M)
@@ -156,5 +160,7 @@ object uniqueMsg {
       if (s1 ++ s2 == s)
     } yield (s1, s2)
   }
+    
+    case class SimpleMessage(s:String,r:String,l:String,u:String)
 
 }
