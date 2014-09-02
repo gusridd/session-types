@@ -10,6 +10,7 @@ import lang.GlobalParser
 import lang.expr
 import lang.Message
 import lang.aspect.Aspect
+import lang.WFGlobalProtocol
 
 class UniqueMsg extends PathInfo {
   import lang.aspect.uniqueMsg
@@ -55,31 +56,34 @@ class UniqueMsg extends PathInfo {
 
   @Test def testUniqueMsgLogging() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(a))
+      case a: Aspect => assertTrue(uniqueMsg(protocol,a))
     }
   }
 
   @Test def testUniqueMsgNegotiation() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(a))
+      case a: Aspect => assertTrue(uniqueMsg(protocol,a))
     }
   }
 
   @Test def testUniqueMsgAuthentication() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(a))
+      case a: Aspect => assertTrue(uniqueMsg(protocol,a))
     }
   }
 

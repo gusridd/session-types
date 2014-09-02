@@ -7,12 +7,13 @@ import lang.Parallel
 import lang.End
 import lang.ChoiceJoin
 import lang.ParallelJoin
+import lang.GlobalProtocol
 
 object uniqueMsg {
   /**
    * Main method that tries to check
    */
-  def apply(a: Aspect): Boolean = {
+  def apply(g: GlobalProtocol, a: Aspect): Boolean = {
 
     val (leftHash, rightHash) = a.adv.getHashes
     def Msg(x: String, xb: Set[String], M: Set[Message]): Boolean = {
@@ -60,7 +61,8 @@ object uniqueMsg {
      * If we try to compute the Msg function starting with every message
      * it should give true in every case.
      */
-    a.adv.exprs flatMap {
+
+    (a.adv.exprs ++ g.exprs) flatMap {
       case m @ Message(_, _, _, _, _, _) => Some(m)
       case _ => None
     } forall (M => Msg("x_0", Set(), Set(M)))
