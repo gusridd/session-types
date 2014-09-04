@@ -98,5 +98,13 @@ class Parser extends PathInfo {
   @Test def testParseNegotiation() {
     val parsed = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
   }
+  
+  @Test def testParseFarm() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Farm.txt"))
+  }
+  
+  @Test def testParseGather() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Gather.txt"))
+  }
 
 }

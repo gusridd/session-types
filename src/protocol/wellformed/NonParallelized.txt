@@ -1,0 +1,3 @@
+x_0 = S -> W: Send; x_1
+x_1 = W -> T: Result; x_2
+x_2 = end
