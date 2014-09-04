@@ -1,0 +1,19 @@
+SessionAspect Farm {
+	pointcut: 
+		S -> W : Send
+	advice: 
+		x_0 = x_1 | x_2
+		x_1 = S -> W: Send; x_3
+		x_3 | x_4 = x_5
+		x_2 = x_6 | x_7
+		x_6 = x_8 | x_9
+		x_7 = x_10 | x_11
+		x_8 = S -> W1: Send; x_12
+		x_9 = S -> W2: Send; x_14
+		x_12 | x_14 = x_16
+		x_10 = S -> W3: Send; x_17
+		x_11 = S -> W4: Send; x_19
+		x_17 | x_19 = x_21
+		x_16 | x_21 = x_4
+		x_5 = end
+}
