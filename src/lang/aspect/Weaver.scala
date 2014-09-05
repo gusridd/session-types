@@ -50,7 +50,7 @@ object Weaver {
              *  variable from the message
              */
 
-            (localize(aspect.adv, x) map ({
+            (tag(localize(aspect.adv, x), m, exprs) map ({
               case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
               case End(xe) => Indirection(xe, xp)
               case e => e
@@ -94,14 +94,15 @@ object Weaver {
     val F = labels(aExprs) diff labels(exprs)
     aExprs map {
       case Message(x, s, r, l, u, xp) if (F.contains(l)) =>
-        Message(x, s, r, l + "^" + m.canonical(), u, xp)
+        Message(x, s, r, l + "^[" + m.canonical()+"]", u, xp)
       case e => e
     }
   }
 
   private[this] def labels(exprs: List[expr]): Set[String] = {
     (exprs flatMap {
-      case Message(x, s, r, l, t, xp) => Set(l)
+      case Message(x, s, r, l, t, xp) => Some(l)
+      case _ => None
     }).to
   }
 

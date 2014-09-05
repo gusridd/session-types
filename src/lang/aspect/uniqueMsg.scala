@@ -132,7 +132,7 @@ object uniqueMsg {
      * it should give true in every case.
      */
     val messages: Set[SimpleMessage] = ((a.adv.exprs ++ g.exprs) flatMap {
-      case m @ Message(_, s, r, l, u, _) => Some(SimpleMessage(s,r,l,u))
+      case m @ Message(_, s, r, l, u, _) => Some(SimpleMessage(s, r, l, u))
       case _ => None
     }).to
     //    (a.adv.exprs ++ g.exprs) flatMap {
@@ -162,14 +162,19 @@ object uniqueMsg {
     } yield (s1, s2)
   }
 
-  case class SimpleMessage(s: String, r: String, l: String, u: String)
-  
-  implicit def messageToSimpleMessage(m: Message): SimpleMessage = m match {
-    case Message(_, s, r, l, u, _) => SimpleMessage(s,r,l,u)
+  case class SimpleMessage(s: String, r: String, l: String, u: String) {
+    def canonical() = u match {
+      case "" => s + " -> " + r + ": " + l
+      case _ => s + " -> " + r + ": " + l + "(" + u + ")"
+    }
   }
-  
+
+  implicit def messageToSimpleMessage(m: Message): SimpleMessage = m match {
+    case Message(_, s, r, l, u, _) => SimpleMessage(s, r, l, u)
+  }
+
   implicit def simpleMessageToMessage(sm: SimpleMessage): Message = sm match {
-    case SimpleMessage(s,r,l,u) => Message("",s,r,l,u,"")
+    case SimpleMessage(s, r, l, u) => Message("", s, r, l, u, "")
   }
 
 }
