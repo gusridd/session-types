@@ -10,9 +10,11 @@ import scala.annotation.tailrec
 
 object Weaver {
 
+  @tailrec
   def naiveGlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
+      naiveGlobalWeaving(aRest,
       (matches flatMap ({
         case m @ Message(x, s, r, l, u, xp) => {
           /**
@@ -21,6 +23,7 @@ object Weaver {
            *  end is replaced by xp, which is the ending
            *  variable from the message
            */
+          
           (localize(aspect.adv, x) map ({
             case AdviceTransition(x1, x2) => Message(x1,s,r,l,u,x2)
             case End(xe) => Indirection(xe, xp)
@@ -28,7 +31,7 @@ object Weaver {
           })) :+ Indirection(x, format(x, "x_0"))
         }
         case _ => throw new Exception("Weaving only matches messages")
-      })) ++ rest
+      })) ++ rest)
     }
     case Nil => exprs
   }
