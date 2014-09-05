@@ -94,7 +94,7 @@ object Weaver {
     val F = labels(aExprs) diff labels(exprs)
     aExprs map {
       case Message(x, s, r, l, u, xp) if (F.contains(l)) =>
-        Message(x, s, r, l + "^[" + m.canonical()+"]", u, xp)
+        Message(x, s, r, l + "^[" + m.canonical() + "]", u, xp)
       case e => e
     }
   }
