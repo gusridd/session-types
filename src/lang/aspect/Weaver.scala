@@ -67,7 +67,8 @@ object Weaver {
    */
   def pointcutMatchGlobal(pcs: List[Pointcut], e: expr) = e match {
     case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
-      case Pointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) => l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
+      case Pointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
+        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
       case _ => false
     }
     case _ => false
