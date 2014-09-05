@@ -36,5 +36,9 @@ class Weaver extends PathInfo {
     println(wovenType)
     wovenType map (x => println(x.canonical))
   }
+  
+  @Test def testLabels(){
+    
+  }
 
 }
