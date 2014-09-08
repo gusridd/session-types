@@ -23,8 +23,8 @@ class LocalProtocol {
   @Test def testHelloWorld() {
     val g = getProtocol(new FR(path_wf + "HelloWorld.txt"))
     
-    val localMe = g.localProjection("Me").toSet
-    val localWorld = g.localProjection("World").toSet
+    val localMe = LocalProjection(g,"Me").toSet
+    val localWorld = LocalProjection(g,"World").toSet
     
     assertTrue(localMe.contains(Send("x_0","World","Say","Hello","x_1")))
     assertTrue(localMe.contains(LocalProtocol.End("x_1")))
@@ -37,9 +37,9 @@ class LocalProtocol {
   @Test def testOnlineBookStore() {
     val g = getProtocol(new FR(path_wf + "OnlineBookstore.txt"))
     
-    val localBuyer1 = g.localProjection("Buyer1").toSet
-    val localBuyer2 = g.localProjection("Buyer2").toSet
-    val localSeller = g.localProjection("Seller").toSet
+    val localBuyer1 = LocalProjection(g,"Buyer1").toSet
+    val localBuyer2 = LocalProjection(g,"Buyer2").toSet
+    val localSeller = LocalProjection(g,"Seller").toSet
     
     assertTrue(localBuyer1.contains(Send("x_0","Seller","Book","","x_1")))
     assertTrue(localSeller.contains(Receive("x_0","Buyer1","Book","","x_1")))

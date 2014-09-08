@@ -8,6 +8,7 @@ import lang.LocalProtocol.Fork
 import lang.LocalProtocol.InternalChoice
 import lang.LocalProtocol.ExternalChoice
 import lang.LocalProtocol.Merge
+import lang.LocalProtocol.NullAction
 
 object LocalProjection {
   def apply(g: GlobalProtocol, p: String) = {
@@ -32,7 +33,7 @@ object LocalProjection {
     g.exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
-      case Message(x, p, pp, l, t, xp) => LocalProtocol.Indirection(x, xp)
+      case Message(x, p, pp, l, t, xp) => NullAction(x, xp)
       case ParallelJoin(x, xp, xpp) => Join(x, xp, xpp)
       case Parallel(x, xp, xpp) => Fork(x, xp, xpp)
       case Choice(x, xp, xpp) => {
