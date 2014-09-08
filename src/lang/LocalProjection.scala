@@ -9,28 +9,21 @@ import lang.LocalProtocol.InternalChoice
 import lang.LocalProtocol.ExternalChoice
 import lang.LocalProtocol.Merge
 import lang.LocalProtocol.NullAction
+import LocalProtocol.localExpr
 
 object LocalProjection {
 
   def apply(g: GlobalProtocol, p: String) = {
     g.getParticipants().find(_ == p) match {
-      //TODO: change this to a fold
       case Some(pp) => {
-        var localProtocol = lp(g, p)
-        localProtocol foreach ({
-          case i @ LocalProtocol.Indirection(x1, x2) => {
-            localProtocol = (localProtocol filterNot (_ == i)).map(_.substitute(x1, x2))
-          }
-          case _ =>
-        })
-        localProtocol
+        Congruence(lp(g, p))
       }
       case None =>
         throw new Exception("Trying to project a non-existant participant " + p)
     }
   }
 
-  private def lp(g: GlobalProtocol, participant: String): Iterable[LocalProtocol.localExpr] = {
+  private[this] def lp(g: GlobalProtocol, participant: String): Iterable[localExpr] = {
     g.exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
