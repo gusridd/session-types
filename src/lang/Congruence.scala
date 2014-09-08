@@ -10,23 +10,20 @@ object Congruence {
   def apply(g: GlobalProtocol): Iterable[lang.expr] = {
     this.apply(g.exprs)
   }
-  
+
   def apply(exprs: Iterable[lang.expr]): Iterable[lang.expr] = {
-    //TODO: change this to a fold
-    var aux = exprs
-    aux foreach ({
+    exprs.foldLeft(exprs)((old: Iterable[expr], curr: expr) => curr match {
       case i @ LocalProtocol.Indirection(x1, x2) => {
-        aux = (aux filterNot (_ == i)).map(_.substitute(x1, x2))
+        (old filterNot (_ == i)).map(_.substitute(x1, x2))
       }
       case i @ Indirection(x1, x2) => {
-        aux = (aux filterNot (_ == i)).map(_.substitute(x1, x2))
+        (old filterNot (_ == i)).map(_.substitute(x1, x2))
       }
       case i @ LocalProtocol.NullAction(x1, x2) => {
-        aux = (aux filterNot (_ == i)).map(_.substitute(x1, x2))
+        (old filterNot (_ == i)).map(_.substitute(x1, x2))
       }
-      case _ =>
+      case _ => old
     })
-    aux
   }
 
 }
