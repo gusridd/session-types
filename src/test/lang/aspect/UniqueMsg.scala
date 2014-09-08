@@ -86,7 +86,10 @@ class UniqueMsg extends PathInfo {
       case a: Aspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
-
+  
+  /**
+   * This one is tricky as in the paper says it should pass, but it shall not
+   */
   @Test def testUniqueMsgAuthentication() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
@@ -94,7 +97,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: Aspect => assertFalse(uniqueMsg(protocol, a))
     }
   }
   

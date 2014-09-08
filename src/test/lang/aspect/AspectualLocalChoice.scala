@@ -11,12 +11,15 @@ import lang.expr
 
 class AspectualLocalChoice extends PathInfo {
   import lang.aspect.AspectualLocalChoice
-
+  
+  /**
+   * This one is tricky as in the paper says it should pass, but it shall not
+   */
   @Test def testSimpleTradeAuthentication() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
 
-    assertTrue(AspectualLocalChoice(aspects, protocol))
+    assertFalse(AspectualLocalChoice(aspects, protocol))
   }
 
   @Test def testSimpleTradeLogging() {
