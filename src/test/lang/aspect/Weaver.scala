@@ -29,11 +29,8 @@ class Weaver extends PathInfo {
   
   @Test def testNaiveWeaveNegotiationWithSimpleTrade() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
-    println(aspects)
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
-    println(protocol)
     val wovenType = Weaver.naiveGlobalWeaving(aspects, protocol.exprs)
-    println(wovenType)
     wovenType map (x => println(x.canonical))
   }
   
@@ -53,16 +50,9 @@ class Weaver extends PathInfo {
   
   @Test def testWeaveNegotiationWithSimpleTrade() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Negotiation.txt"))
-    println(aspects)
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
-    println(protocol)
     val wovenType = Weaver.GlobalWeaving(aspects, protocol.exprs)
-    println(wovenType)
     wovenType map (x => println(x.canonical))
-  }
-  
-  @Test def testLabels(){
-    
   }
 
 }

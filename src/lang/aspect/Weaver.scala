@@ -107,6 +107,6 @@ object Weaver {
     }).to
   }
 
-  private[this] def format(x: String, xp: String): String = xp + "^" + x
+  private[this] def format(x: String, xp: String): String = xp + "^[" + x + "]"
 
 }
