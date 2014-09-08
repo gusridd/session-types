@@ -13,6 +13,7 @@ class WFGlobalProtocol(exprs: List[expr]) extends GlobalProtocol(exprs) {
 
   def localProjection(p: String): Iterable[localExpr] = {
     getParticipants().find(_ == p) match {
+      //TODO: change this to a fold
       case Some(pp) => {
         var localProtocol = lp(p)
         localProtocol foreach ( {
