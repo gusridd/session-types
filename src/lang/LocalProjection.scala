@@ -11,6 +11,7 @@ import lang.LocalProtocol.Merge
 import lang.LocalProtocol.NullAction
 
 object LocalProjection {
+
   def apply(g: GlobalProtocol, p: String) = {
     g.getParticipants().find(_ == p) match {
       //TODO: change this to a fold
@@ -52,4 +53,5 @@ object LocalProjection {
       case End(x) => LocalProtocol.End(x)
     })
   }
+
 }
