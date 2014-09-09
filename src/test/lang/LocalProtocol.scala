@@ -26,6 +26,10 @@ class LocalProtocol {
     val localMe = LocalProjection(g,"Me").toSet
     val localWorld = LocalProjection(g,"World").toSet
     
+    localMe foreach(f=>println(f.canonical))
+    println()
+    localWorld foreach(f=>println(f.canonical))
+    
     assertTrue(localMe.contains(Send("x_0","World","Say","Hello","x_1")))
     assertTrue(localMe.contains(LocalProtocol.End("x_1")))
     
