@@ -75,6 +75,8 @@ class Linearity extends PathInfo {
     val s2 = lin(g)("x_3")
     println(s1)
     println(s2)
+    assertFalse(s1.isEmpty)
+    assertFalse(s2.isEmpty)
     assertEquals(s1, s2)
   }
   
@@ -82,5 +84,16 @@ class Linearity extends PathInfo {
     val g = getProtocol(new FR(path_mf + "TradeWithLoggingBefore.txt"))
         
     assertFalse(Linearity(g))
+  }
+  
+  @Test def testLinTradeWithLoggingBefore(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingBefore.txt"))
+    val s1 = lin(g)("x_2")
+    val s2 = lin(g)("x_3")
+    println(s1)
+    println(s2)
+    assertFalse(s1.isEmpty)
+    assertFalse(s2.isEmpty)
+    assertEquals(s1, s2)
   }
 }

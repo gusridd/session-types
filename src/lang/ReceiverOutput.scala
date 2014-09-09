@@ -15,6 +15,8 @@ case class ReceiverOutput(s: Set[(String, String, List[String])]) {
     }))
     case _ => false
   }
+  
+  def isEmpty = s.isEmpty
 
   final private def nonNullSuffix(xt1: List[String], xt2: List[String]): Boolean =
     (xt1, xt2) match {
