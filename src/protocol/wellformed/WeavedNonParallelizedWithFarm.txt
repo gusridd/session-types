@@ -1,0 +1,17 @@
+x_3 = x_4 | x_5
+x_4 = S -> W : Send; x_6
+x_6 | x_7 = x_8
+x_5 = x_9 | x_10
+x_9 = x_11 | x_12
+x_10 = x_13 | x_14
+x_11 = S -> W1 : Send; x_15
+x_12 = S -> W2 : Send; x_16
+x_15 | x_16 = x_17
+x_13 = S -> W3 : Send; x_18
+x_14 = S -> W4 : Send; x_19
+x_18 | x_19 = x_20
+x_17 | x_20 = x_7
+x_8 = x_1
+x_0 = x_3
+x_1 = W -> T : Result; x_2
+x_2 = end
