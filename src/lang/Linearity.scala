@@ -15,7 +15,9 @@ object Linearity {
   }
 
   def lin(g: GlobalProtocol)(x: String) = {
-    new ReceiverOutput(l(g, List(), List(), List(), x))
+    val c = Congruence(g)
+    val ng = new GlobalProtocol(c.to)
+    new ReceiverOutput(l(ng, List(), List(), List(), x))
   }
 
   private def l(g: GlobalProtocol, xm: List[String], xj: List[String], pt: List[String], xi: String): Set[(String, String, List[String])] = {
