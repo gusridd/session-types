@@ -96,7 +96,13 @@ class Linearity extends PathInfo {
   }
 
   @Test def testLinNonParallelizedWithFarm() {
-    val g = getProtocol(new FR(path_wf + "WeavedNonParallelizedWithFarm.txt"))
+    val og = getProtocol(new FR(path_wf + "WeavedNonParallelizedWithFarm.txt"))
+    /**
+     * The actual apply method of Linearity applies the congruence reduction
+     * but for testing purposes here is needed by hand
+     */
+    val g = new GlobalProtocol(Congruence(og.exprs).to)
+    
     val s1 = lin(g)("x_4")
     val s2 = lin(g)("x_5")
 

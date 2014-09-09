@@ -110,5 +110,7 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
     }
     s
   }
+  
+  def print(): Unit = exprs foreach (e => println(e.canonical)) 
 
 }

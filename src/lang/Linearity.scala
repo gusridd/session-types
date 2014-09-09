@@ -3,7 +3,14 @@ package lang
 object Linearity {
 
   def apply(g: GlobalProtocol): Boolean = {
-    g.exprs forall (e => e match {
+    val c = Congruence(g)
+    val ng = new GlobalProtocol(c.to)
+    g.print
+    g.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
+    println("<---------------->")
+    ng.print
+    ng.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
+    ng.exprs forall (e => e match {
       case Parallel(x, xp, xpp) => lin(g)(xp) == lin(g)(xpp)
       case _ => true
     })
@@ -15,15 +22,13 @@ object Linearity {
   }
 
   def lin(g: GlobalProtocol)(x: String) = {
-    val c = Congruence(g)
-    val ng = new GlobalProtocol(c.to)
-    new ReceiverOutput(l(ng, List(), List(), List(), x))
+    new ReceiverOutput(l(g, List(), List(), List(), x))
   }
 
   private def l(g: GlobalProtocol, xm: List[String], xj: List[String], pt: List[String], xi: String): Set[(String, String, List[String])] = {
     val (lHash, rHash) = g.getHashes
-    val e = lHash(xi)
     println("Lin(G," + xm + ", " + pt + ")(" + xi + ")")
+    val e = lHash(xi)
     println(e)
     e match {
       case ChoiceJoin(x, xp, xpp) if (xm.contains(xpp)) => Set()
