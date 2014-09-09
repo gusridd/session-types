@@ -5,6 +5,7 @@ import lang.SanityConditionException
 import lang.LocalChoiceConditionException
 import lang.LinearityConditionException
 import lang.WFConditionException
+import lang.Congruence
 
 /**
  * This object checks the next property: Let A be an aspect ang G be a 
@@ -19,7 +20,7 @@ object PointcutLinearity {
 	    val wovenExprs = Weaver.naiveGlobalWeaving(List(aspect), g.exprs)
 	    wovenExprs foreach (x => println(x.canonical))
 	    println("******************************************")
-	    new WFGlobalProtocol(wovenExprs)
+	    new WFGlobalProtocol(Congruence(wovenExprs).to)
 	    true
 	  } catch {
 	    /**
