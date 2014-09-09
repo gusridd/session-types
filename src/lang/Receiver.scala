@@ -25,7 +25,6 @@ object Receiver {
   }
 
   private def r(g: GlobalProtocol, xt: List[String], pt: Set[String], xi: String): Set[(String, String, List[String])] = {
-    val it = g.exprs.iterator
     println("Rcv(G," + xt + "," + pt + ")(" + xi + ")")
     val (lHash, rHash) = g.getHashes
     val e = lHash(xi)
