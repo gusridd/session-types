@@ -6,9 +6,17 @@ import org.junit.Test;
 import lang._
 import java.io.{FileReader => FR}
 import java.io.{StringReader => SR}
+import java.io.Reader
+
 
 class Sanity extends PathInfo {
-
+	
+  def getProtocol(reader: Reader) = {
+    val g: GlobalProtocol = GlobalParser.parse(reader)
+    reader.close
+    g
+  }
+  
   def sanityCheckFile(name: String) = {
     val reader = new FR(name)
     val g: GlobalProtocol = GlobalParser.parse(reader)
@@ -162,6 +170,16 @@ class Sanity extends PathInfo {
             Indirection("x_4^x_0","x_6"), 
             Indirection("x_0","x_1^x_0"), 
             End("x_6") ))
+    assertTrue(Sanity(g))
+  }
+  
+  @Test def testTradeWithLoggingAfter(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingAfter.txt"))
+    assertTrue(Sanity(g))
+  }
+  
+  @Test def testTradeWithLoggingBefore(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingBefore.txt"))
     assertTrue(Sanity(g))
   }
 

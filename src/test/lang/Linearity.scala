@@ -62,4 +62,25 @@ class Linearity extends PathInfo {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
     assertTrue(Linearity(g))
   }
+  
+  @Test def testLinearityTradeWithLoggingAfter(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingAfter.txt"))
+        
+    assertFalse(Linearity(g))
+  }
+  
+  @Test def testLinTradeWithLoggingAfter(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingAfter.txt"))
+    val s1 = lin(g)("x_2")
+    val s2 = lin(g)("x_3")
+    println(s1)
+    println(s2)
+    assertEquals(s1, s2)
+  }
+  
+  @Test def testLinearityTradeWithLoggingBefore(){
+    val g = getProtocol(new FR(path_mf + "TradeWithLoggingBefore.txt"))
+        
+    assertFalse(Linearity(g))
+  }
 }
