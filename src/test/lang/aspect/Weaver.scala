@@ -54,5 +54,19 @@ class Weaver extends PathInfo {
     val wovenType = Weaver.GlobalWeaving(aspects, protocol.exprs)
     wovenType map (x => println(x.canonical))
   }
+  
+  @Test def testWeaveNonParallelizedWithFarm() {
+    val aspects = AspectParser.parse(new FR(path_wf_a + "Farm.txt"))
+    val protocol = GlobalParser.parse(new FR(path_wf + "NonParallelized.txt"))
+    val wovenType = Weaver.GlobalWeaving(aspects, protocol.exprs)
+    wovenType map (x => println(x.canonical))
+  }
+  
+  @Test def testWeaveNonParallelizedWithGather() {
+    val aspects = AspectParser.parse(new FR(path_wf_a + "Gather.txt"))
+    val protocol = GlobalParser.parse(new FR(path_wf + "NonParallelized.txt"))
+    val wovenType = Weaver.GlobalWeaving(aspects, protocol.exprs)
+    wovenType map (x => println(x.canonical))
+  }
 
 }

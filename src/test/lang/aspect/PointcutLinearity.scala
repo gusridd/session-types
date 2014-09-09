@@ -34,14 +34,14 @@ class PointcutLinearity extends PathInfo {
     assertTrue(PointcutLinearity(aspects,protocol))
   }
   
-  @Test def testWeaveFarmWithSimpleTrade() {
+  @Test def testWeaveFarmWithNonParallelized() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Farm.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "NonParallelized.txt")))
     
     assertTrue(PointcutLinearity(aspects,protocol))
   }
   
-  @Test def testWeaveGatherWithSimpleTrade() {
+  @Test def testWeaveGatherWithNonParallelized() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Gather.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "NonParallelized.txt")))
     
