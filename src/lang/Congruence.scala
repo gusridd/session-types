@@ -21,32 +21,6 @@ object Congruence {
   }
 
   def apply(exprs: List[lang.expr]): List[lang.expr] = {
-    //    exprs.foldLeft(exprs)((old: Iterable[expr], curr: expr) => curr match {
-    ////      case i @ LocalProtocol.Indirection("x_0", x2) => {
-    ////        (old filterNot (_ == i)).map(_.substitute(x2, "x_0"))
-    ////      }
-    ////      case i @ Indirection("x_0", x2) => {
-    ////        (old filterNot (_ == i)).map(_.substitute(x2, "x_0"))
-    ////      }
-    //      case i @ LocalProtocol.Indirection(x1, x2) => {
-    ////        println(curr)
-    //        (old filterNot (_ == i)).map(_.substitute(x2, x1))
-    //      }
-    //      case i @ Indirection(x1, x2) => {
-    //        println(curr)
-    //        println(old filterNot (_ == i))
-    //        println((old filterNot (_ == i)).map(_.substitute(x2, x1)))
-    //        (old filterNot (_ == i)).map(_.substitute(x2, x1))
-    //      }
-    //      case i @ LocalProtocol.NullAction(x1, x2) => {
-    ////        println(curr)
-    //        (old filterNot (_ == i)).map(_.substitute(x2, x1))
-    //      }
-    //      case _ => {
-    //        println(curr)
-    //        old
-    //      }
-    //    })
     @tailrec
     def reduce(exprs: List[lang.expr], rec: List[lang.expr]): List[lang.expr] = {
       rec match {
@@ -69,6 +43,7 @@ object Congruence {
   }
 
   def apply(exprs: Iterable[localExpr]): Iterable[localExpr] = {
+    //TODO: Congruence rules for localExpr
     exprs
   }
 
