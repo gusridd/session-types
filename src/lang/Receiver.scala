@@ -29,18 +29,17 @@ object Receiver {
     val (lHash, rHash) = g.getHashes
     val e = lHash(xi)
     e match {
-      case Message(x, p, pp, _, _, xp) if (x == xi && (pt contains pp)) => return r(g, xt, pt, xp)
-      case ParallelJoin(x, xpp, xp) if (x == xi || xpp == xi) => return r(g, xt, pt, xp)
-      case Message(x, p, pp, l, _, xp) if (x == xi && !(pt contains pp)) => return Set((pp, l, xt)) ++ r(g, xt, pt + pp, xp)
-      case Choice(x, xp, xpp) if (x == xi) => return r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
-      case Parallel(x, xp, xpp) if (x == xi) => return r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
-      case ChoiceJoin(x, xp, xpp) if ((x == xi || xp == xi) && (xt contains xpp)) => return Set.empty
-      case End(x) if (x == xi) => return Set.empty
-      case ChoiceJoin(xp, x, xpp) if (x == xi || xp == xi) && !(xt contains xpp) => return r(g, xt :+ xpp, pt, xpp)
-      case _ => return Set.empty
+      case Message(x, p, pp, _, _, xp) if (pt contains pp) => r(g, xt, pt, xp)
+      case ParallelJoin(x, xpp, xp) => r(g, xt, pt, xp)
+      case Message(x, p, pp, l, _, xp) if !(pt contains pp) => Set((pp, l, xt)) ++ r(g, xt, pt + pp, xp)
+      case Choice(x, xp, xpp) if (x == xi) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
+      case Parallel(x, xp, xpp) if (x == xi) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
+      case ChoiceJoin(x, xp, xpp) if (xt contains xpp) => Set.empty
+      case End(x) => Set.empty
+      case ChoiceJoin(xp, x, xpp) if !(xt contains xpp) => r(g, xt :+ xpp, pt, xpp)
+      // This will happen if the rules are incomplete
+      case _ => throw new UndefinedReceiverException(xt, pt, xi)
     }
-    // This will happen if the protocol is incomplete
-    throw new UndefinedReceiverException(xt, pt, xi)
   }
 }
 
