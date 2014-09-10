@@ -56,7 +56,7 @@ class LocalProtocol {
     assertTrue(localSeller.contains(Receive("x_0","Buyer1","Book","","x_1")))
     
     assertTrue(localBuyer1.contains(Receive("x_1","Seller","Price","","x_2")))
-    assertTrue(localSeller.contains(Send("x_1","Buyer1","Price","","x_3")))
+    assertTrue(localSeller.contains(Send("x_1","Buyer1","Price","","x_2")))
     
     assertTrue(localBuyer1.contains(Send("x_2","Buyer2","Quote","","x_3")))
     assertTrue(localBuyer2.contains(Receive("x_2","Buyer1","Quote","","x_3")))
@@ -65,7 +65,7 @@ class LocalProtocol {
     assertTrue(localBuyer2.contains(Send("x_5","Buyer1","Quit","","x_6")))
     
     assertTrue(localBuyer1.contains(Receive("x_11","Buyer2","Agree","","x_12")))
-    assertTrue(localBuyer2.contains(Send("x_11","Buyer1","Agree","","x_13")))
+    assertTrue(localBuyer2.contains(Send("x_11","Buyer1","Agree","","x_12")))
     
     assertTrue(localBuyer1.contains(Send("x_12","Seller","Transfer","","x_13")))
     
