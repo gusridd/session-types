@@ -35,7 +35,8 @@ object Sanity {
     }
 
     if (!unambiguous.isEmpty) {
-      print("Unanbiguity at: " + unambiguous.head._1)
+      g.print
+      print("Ambiguity at: " + unambiguous.head._1)
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
     }
 
