@@ -4,17 +4,19 @@ import scala.collection.immutable.Set
 
 object Receiver {
 
-  class UndefinedReceiverException(xt: List[String], pt: Set[String], xi: String) extends Exception {
+  class UndefinedReceiverException(g: GlobalProtocol, xt: List[String], pt: Set[String], xi: String) extends Exception {
     override def toString: String =
-      "UndefinedReceiverException: Undefined Rcv(G," + xt + "," + pt + ")(" + xi + ")"
+      "UndefinedReceiverException: Undefined Rcv(G," + xt + "," + pt + ")(" + xi + ")\n" + g.canonical(1)
   }
 
   def apply(g: GlobalProtocol)(x: String) = {
-    val (hLeft, hRight) = g.getHashes
+    val cg = new GlobalProtocol(Congruence(g).to)
+    
+    val (hLeft, hRight) = cg.getHashes
     hRight(x) match {
       case Choice(xc, _, _) => {
-        val activeSender = ActiveSender(g, xc)
-        val setWithoutActiveSender = r(g, List(), Set(), x) filter {
+        val activeSender = ActiveSender(cg, xc)
+        val setWithoutActiveSender = r(cg, List(), Set(), x) filter {
           case (p, _, _) => p != activeSender
         }
         new ReceiverOutput(setWithoutActiveSender)
@@ -28,17 +30,18 @@ object Receiver {
     println("Rcv(G," + xt + "," + pt + ")(" + xi + ")")
     val (lHash, rHash) = g.getHashes
     val e = lHash(xi)
+    println(e)
     e match {
       case Message(x, p, pp, _, _, xp) if (pt contains pp) => r(g, xt, pt, xp)
       case ParallelJoin(x, xpp, xp) => r(g, xt, pt, xp)
       case Message(x, p, pp, l, _, xp) if !(pt contains pp) => Set((pp, l, xt)) ++ r(g, xt, pt + pp, xp)
-      case Choice(x, xp, xpp) if (x == xi) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
-      case Parallel(x, xp, xpp) if (x == xi) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
+      case Choice(x, xp, xpp) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
+      case Parallel(x, xp, xpp) => r(g, xt, pt, xp) ++ r(g, xt, pt, xpp)
       case ChoiceJoin(x, xp, xpp) if (xt contains xpp) => Set.empty
       case End(x) => Set.empty
       case ChoiceJoin(xp, x, xpp) if !(xt contains xpp) => r(g, xt :+ xpp, pt, xpp)
       // This will happen if the rules are incomplete
-      case _ => throw new UndefinedReceiverException(xt, pt, xi)
+      case _ => throw new UndefinedReceiverException(g, xt, pt, xi)
     }
   }
 }

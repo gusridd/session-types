@@ -110,7 +110,12 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
     }
     s
   }
-  
-  def print(): Unit = exprs foreach (e => println(e.canonical)) 
 
+  def print(): Unit = exprs foreach (e => println(e.canonical))
+
+  def canonical(tabs:Int = 0): String = {
+    val sb = new StringBuilder
+    exprs foreach (e => sb ++= (("\t" * tabs) + e.canonical + "\n"))
+    sb.toString
+  }
 }
