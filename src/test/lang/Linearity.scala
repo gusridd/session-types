@@ -132,4 +132,10 @@ class Linearity extends PathInfo {
     assertTrue(s13 == s14)
 
   }
+  
+  @Test def testLinearityTradeWithNegotiation() {
+    val g = getProtocol(new FR(path_wf + "TradeWithNegotiation.txt"))
+    
+    assertTrue(Linearity(g))
+  }
 }

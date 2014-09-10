@@ -5,11 +5,11 @@ object Linearity {
   def apply(g: GlobalProtocol): Boolean = {
     val c = Congruence(g)
     val ng = new GlobalProtocol(c.to)
-    g.print
-    g.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
-    println("<---------------->")
-    ng.print
-    ng.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
+//    g.print
+//    g.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
+//    println("<---------------->")
+//    ng.print
+//    ng.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
     ng.exprs forall (e => e match {
       case Parallel(x, xp, xpp) => lin(g)(xp) == lin(g)(xpp)
       case _ => true

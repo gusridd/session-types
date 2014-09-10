@@ -156,6 +156,21 @@ class LocalChoice extends PathInfo {
     assertEquals(s6, s8)
   }
   
+  @Test def testReceiverTradeWithNegotiation() {
+    val g = getProtocol(new FR(path_wf + "TradeWithNegotiation.txt"))
+    
+    val s10 = Receiver(g)("x_10")
+    val s12 = Receiver(g)("x_12")
+    
+    println(s10)
+    println(s12)
+    
+    assertFalse(s10.isEmpty)
+    assertFalse(s12.isEmpty)
+    
+    assertTrue(s10 == s12)
+  }
+  
   
 
 }
