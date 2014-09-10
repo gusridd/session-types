@@ -18,7 +18,7 @@ class Congruence {
     	  """))
     val reduced = Congruence(g)
     val ng = new GlobalProtocol(reduced.to)
-    ng.print
+    
     assertEquals(2,ng.exprs.size)
   }
 
@@ -34,7 +34,7 @@ class Congruence {
     	  """))
     val reduced = Congruence(g)
     val ng = new GlobalProtocol(reduced.to)
-    ng.print
+    
     assertEquals(4,ng.exprs.size)
   }
 
@@ -50,7 +50,7 @@ class Congruence {
     	  """))
     val reduced = Congruence(g)
     val ng = new GlobalProtocol(reduced.to)
-    ng.print
+    
     assertEquals(4,ng.exprs.size)
   }
 }
