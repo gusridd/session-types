@@ -24,8 +24,13 @@ class PointcutLinearity extends PathInfo {
   @Test def testWeaveLoggingWithSimpleTrade() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
+    println("*************THE PROTOCOL*************")
     protocol.print
-    assertTrue(PointcutLinearity(aspects,protocol))
+    println("**************************************")
+    println("**************THE ASPECT**************")
+    print(aspects(0).toString)
+    println("**************************************")
+    assertFalse(PointcutLinearity(aspects,protocol))
   }
   
   @Test def testWeaveNegotiationWithSimpleTrade() {
