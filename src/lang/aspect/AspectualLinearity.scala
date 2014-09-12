@@ -11,7 +11,7 @@ object AspectualLinearity {
 
   def apply(g: GlobalProtocol, a: Aspect) = {
     val wf = WFGlobalProtocol(g)
-    PointcutLinearity(a, wf) && AdviceLinearity(wf, a)
+    PointcutLinearity(a, wf) || AdviceLinearity(wf, a)
   }
 
 }
