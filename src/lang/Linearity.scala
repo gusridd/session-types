@@ -31,14 +31,14 @@ object Linearity {
     val e = lHash(xi)
     println(e)
     e match {
-      case ChoiceJoin(x, xp, xpp) if (xm.contains(xpp)) => Set()
-      case End(x) => Set()
       case Message(x, p, pp, m, u, xp) if (!pt.contains(pp)) => Set((p + pp, m, xj)) ++ l(g, xm, xj, pt :+ pp, xp)
       case Message(x, p, pp, m, u, xp) => l(g, xm, xj, pt, xp)
       case Choice(x, xp, xpp) => l(g, xm, xj, pt, xp) ++ l(g, xm, xj, pt, xpp)
       case Parallel(x, xp, xpp) => l(g, xm, xj, pt, xp) ++ l(g, xm, xj, pt, xpp)
       case ChoiceJoin(x, xp, xpp) if (!xm.contains(xpp)) => l(g, xm :+ xpp, xj, pt, xpp)
+      case ChoiceJoin(x, xp, xpp) if (xm.contains(xpp)) => Set()	
       case ParallelJoin(x,xp,xpp) => l(g,xm,xj :+ xpp,pt,xpp)
+      case End(x) => Set()
       case _ => throw new UndefinedLinearityException(xm, xj, pt, xi)
     }
 
