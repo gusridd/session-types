@@ -33,7 +33,7 @@ class AspectParser extends GlobalSessionParser {
     { case p ~ _ ~ pp ~ _ ~ l => new Pointcut(p, pp, l, "") }
 
   def advice: Parser[Advice] = "advice:" ~ rep(expr | advTransition) ^^
-    { case _ ~ ls => new Advice(ls) }
+    { case _ ~ ls => new Advice(ls, "x_0") }
 
   def advTransition: Parser[AdviceTransition] = xid ~ "=" ~ "proceed" ~ ";" ~ xid ^^
     { case x1 ~ _ ~ _ ~ _ ~ x2 => new AdviceTransition(x1, x2) }
@@ -87,14 +87,21 @@ case class Pointcut(s: String, r: String, l: String, t: String) extends Aspectua
   }
 }
 
-case class Advice(exprs: List[expr]) extends AspectualAST {
+case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
   def substitute(s1: String, s2: String) = {
-    new Advice(exprs map (_.substitute(s1, s2)))
+    new Advice(exprs map (_.substitute(s1, s2)), xa.substitute(s1,s2))
   }
   def getVariables = exprs.flatMap(_.getVariables).to
 
+  implicit class sustitutableString(s: String) {
+    def substitute(s1: String, s2:String) = {
+      if (s == s1) s2
+      else s
+    }
+  }
+  
   private var hashCacheL: Option[HashMap[String, lang.expr]] = None
   private var hashCacheR: Option[HashMap[String, lang.expr]] = None
 
@@ -170,6 +177,7 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
 class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect])
 
 case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
+  
   override def toString(): String = {
     val sb = new StringBuilder()
     sb ++= "Name: " + name + "\n"

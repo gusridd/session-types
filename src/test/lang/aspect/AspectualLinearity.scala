@@ -24,7 +24,7 @@ class AspectualLinearity extends PathInfo{
   @Test def testSimpleTradeLogging() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Logging.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
-
+    
     assertTrue(AspectualLinearity(protocol,aspects(0)))
   }
 
