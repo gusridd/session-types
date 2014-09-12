@@ -40,7 +40,7 @@ object Weaver {
   def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-      naiveGlobalWeaving(aRest,
+      GlobalWeaving(aRest,
         (matches flatMap ({
           case m @ Message(x, s, r, l, u, xp) => {
             /**
