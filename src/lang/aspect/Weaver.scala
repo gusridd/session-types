@@ -46,33 +46,53 @@ object Weaver {
   def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-      val r = matches.foldRight(exprs)((e: expr, exprs: List[expr]) => e match {
-        case m @ Message(x, s, r, l, u, xp) => {
-          
-          val Gap = tag(localize(aspect.adv, x), m, exprs)
-          val upper = findUpper(((Gap.exprs ++ exprs)) flatMap (_.getVariables))
-          
-          val fx1 = "x_" + (upper + 1)
-          val fx2 = "x_" + (upper + 2)
-          val fx3 = "x_" + (upper + 3)
-          
-          val lp = freshLabel(aspect.adv.exprs ++ exprs, l)
-          val newMessage = Message(fx1, s, r, lp, u, fx2)
-          val newChoice = Choice(x, fx1, Gap.xa)
-          val newMerge = ChoiceJoin(fx2, fx3, xp)
-          
-          val res = ((Gap.exprs map ({
-            case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
-            case End(xe) => Indirection(xe, fx3)
-            case e => e
-          })) ++ List(newMessage, newChoice, newMerge))
+//      println("exprs")
+//      exprs foreach { x => println(x.canonical) }
+//      println("aspect")
+//      aspect.adv.exprs foreach { x => println(x.canonical) }
+//      println("matches")
+//      matches foreach { x => println(x.canonical) }
+//      println("rest")
+//      rest foreach { x => println(x.canonical) }
+//      println()
 
-          res ++ exprs
+
+
+      def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
+        ms match {
+          case m :: restm => m match {
+            case m @ Message(x, s, r, l, u, xp) => {
+              val Gap = tag(localize(aspect.adv, x), m, all.to)
+              val upper = findUpper(((Gap.exprs ++ all)) flatMap (_.getVariables))
+
+              val fx1 = "x_" + (upper + 1)
+              val fx2 = "x_" + (upper + 2)
+              val fx3 = "x_" + (upper + 3)
+
+              val lp = freshLabel(aspect.adv.exprs ++ all, l)
+//              println("lp " + lp)
+              val newMessage = Message(fx1, s, r, lp, u, fx2)
+              val newChoice = Choice(x, fx1, Gap.xa)
+              val newMerge = ChoiceJoin(fx2, fx3, xp)
+
+              val res = ((Gap.exprs map ({
+                case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
+                case End(xe) => Indirection(xe, fx3)
+                case e => e
+              })) ++ List(newMessage, newChoice, newMerge))
+
+              val set: Set[expr] = (res ++ all).to
+
+              replaceMatch(restm, set.to)
+            }
+            case _ => throw new Exception("Weaving should only match messages")
+          }
+          case Nil => all
         }
-        case _ => throw new Exception("Weaving should only match messages")
-      })
 
-      GlobalWeaving(aRest, r)
+      }
+
+      (replaceMatch(matches, exprs.to) -- matches).to
     }
     case Nil => exprs
   }
