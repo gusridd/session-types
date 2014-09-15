@@ -11,7 +11,17 @@ object AspectualLinearity {
 
   def apply(g: GlobalProtocol, a: Aspect) = {
     val wf = WFGlobalProtocol(g)
-    PointcutLinearity(a, wf) || AdviceLinearity(wf, a)
+    val pcLinearity = PointcutLinearity(a, wf)
+    val advLinearity = AdviceLinearity(wf, a)
+    val r = pcLinearity || advLinearity
+    if (r) {
+      println("[SUCCESS] AspectualLinearity")
+    } else {
+      println("[FAIL] AspectualLinearity")
+      println("     ] pcLinearity: " + pcLinearity)
+      println("     ] advLinearity: " + advLinearity)
+    }
+    r
   }
 
 }

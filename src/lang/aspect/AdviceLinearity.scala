@@ -1,6 +1,7 @@
 package lang.aspect
 
 import lang.GlobalProtocol
+import lang.WFGlobalProtocol
 
 /**
  * An advice A is advice-linear wft a global type G iff G,A comply with the 

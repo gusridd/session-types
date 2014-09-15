@@ -1,9 +1,11 @@
 package lang.aspect
 
-object SgTh {
-  
-  def apply() = {
+import lang.GlobalProtocol
 
+object SgTh {
+
+  def apply(g: GlobalProtocol, a: Aspect) = {
+	  
   }
-  
+
 }

@@ -17,14 +17,7 @@ import lang.Congruence
 object PointcutLinearity {
 	def apply(aspect: Aspect, g: WFGlobalProtocol): Boolean = {
 	  try {
-	    // TODO: check if this should be naive or normal weaving
 	    val wovenExprs = Weaver.naiveGlobalWeaving(List(aspect), g.exprs)
-//	    println("************ORIGINAL WOVEN****************")
-//	    wovenExprs foreach (x => println(x.canonical))
-//	    println("**************CONGRUENCE******************")
-//	    val cg = Congruence(wovenExprs).to
-//	    cg foreach (x => println(x.canonical))
-//	    println("******************************************")
 	    new WFGlobalProtocol(Congruence(wovenExprs).to)
 	    true
 	  } catch {
