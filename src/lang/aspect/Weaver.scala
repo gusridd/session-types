@@ -56,8 +56,6 @@ object Weaver {
 //      rest foreach { x => println(x.canonical) }
 //      println()
 
-
-
       def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
         ms match {
           case m :: restm => m match {
