@@ -144,14 +144,17 @@ object Sanity {
       leftHash
     }
 
-    val hash = getHash(exprs)
-
     /**
      * reduce:
      * exprs: list of expressions to reduce
      * return the list of the reduced expressions and a boolean representing if a reduction has been applied
      */
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
+      /**
+       * As variables are substituted on each iteration the hash can be 
+       * corrupted, so it must be recomputed every time
+       */
+      val hash = getHash(exprs)
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) =>
           return { /*println("[Trans]"); */ ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
