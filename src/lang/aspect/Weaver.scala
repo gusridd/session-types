@@ -46,16 +46,8 @@ object Weaver {
   def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-//      println("exprs")
-//      exprs foreach { x => println(x.canonical) }
-//      println("aspect")
-//      aspect.adv.exprs foreach { x => println(x.canonical) }
-//      println("matches")
-//      matches foreach { x => println(x.canonical) }
-//      println("rest")
-//      rest foreach { x => println(x.canonical) }
-//      println()
-
+      
+      @tailrec
       def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
         ms match {
           case m :: restm => m match {
@@ -68,7 +60,6 @@ object Weaver {
               val fx3 = "x_" + (upper + 3)
 
               val lp = freshLabel(aspect.adv.exprs ++ all, l)
-//              println("lp " + lp)
               val newMessage = Message(fx1, s, r, lp, u, fx2)
               val newChoice = Choice(x, fx1, Gap.xa)
               val newMerge = ChoiceJoin(fx2, fx3, xp)
@@ -87,7 +78,6 @@ object Weaver {
           }
           case Nil => all
         }
-
       }
 
       (replaceMatch(matches, exprs.to) -- matches).to
