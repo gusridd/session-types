@@ -46,7 +46,8 @@ object Weaver {
   def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-      
+
+      /*
       val r = ((matches flatMap ({
         case m @ Message(x, s, r, l, u, xp) => {
           /**
@@ -90,12 +91,41 @@ object Weaver {
           throw new Exception("Weaving should only match messages")
 
       })) ++ rest)
-      
-      matches.foldRight(exprs)((e: expr, es: List[expr]) => e match {
-        case m @ Message(x, s, r, l, u, xp) => es
-        case _ => throw new Exception("Weaving should only match messages") 
+      */
+
+      val r = matches.foldRight(exprs)((e: expr, exprs: List[expr]) => e match {
+        case m @ Message(x, s, r, l, u, xp) => {
+//          println("MESSAGE: " + m)
+          val Gap = tag(localize(aspect.adv, x), m, exprs)
+          val upper = findUpper(((Gap.exprs ++ exprs)) flatMap (_.getVariables))
+//          println("upper " + upper)
+          val fx1 = "x_" + (upper + 1)
+          val fx2 = "x_" + (upper + 2)
+          val fx3 = "x_" + (upper + 3)
+          val lp = freshLabel(aspect.adv.exprs ++ exprs, l)
+//          println("fLabel: " + lp)
+
+          val newMessage = Message(fx1, s, r, lp, u, fx2)
+          val newChoice = Choice(x, fx1, Gap.xa)
+          val newMerge = ChoiceJoin(fx2, fx3, xp)
+
+//          println("newMessage: " + newMessage)
+//          println("newChoice: " + newChoice)
+//          println("newMerge: " + newMerge)
+
+          val res = ((Gap.exprs map ({
+            case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
+            case End(xe) => Indirection(xe, fx3)
+            case e => e
+          })) ++ List(newMessage, newChoice, newMerge))
+//          println("--------------------------")
+//          res foreach (e => println(e.canonical))
+//          println("--------------------------")
+          res ++ exprs
+        }
+        case _ => throw new Exception("Weaving should only match messages")
       })
-      
+
       GlobalWeaving(aRest, r)
     }
     case Nil => exprs
