@@ -13,7 +13,6 @@ object ActiveSender {
     override def toString: String =
       "NoActiveSenders: No active senders found for " + x
   }
-  
 
   def apply(g: GlobalProtocol, x: String) = {
     val (leftHash, rightHash) = g.getHashes
@@ -25,15 +24,21 @@ object ActiveSender {
          * and Boolean, if it reduces then (p,true) is given.
          */
         implicit val justConmuted = false
-        println(g.getParticipants)
-        println(g.getHashes()._1.foreach(x => println(x)))
+//        println(g.getParticipants)
+//        println(g.getHashes()._1.foreach(x => println(x)))
         val activeSenders = g.getParticipants map
           (p => {
-            println("ASend Participant: " + p)
+            //            println("ASend Participant: " + p)
             (p, reduce(g, x1, Set(), Set(p), x2, Set(), Set(p), 0))
-          }) filter (e => e._2)
+          }) filter (e => {
+            if (e._2) {
+              println("[INFO] ASend("+x+"): " + e._1)
+            }
+            e._2
+          })
 
         if (activeSenders.size != 1) {
+          println("[FAIL] ASend("+x+"): " + activeSenders)
           throw new NoActiveSenders(x)
         } else {
           activeSenders.last._1

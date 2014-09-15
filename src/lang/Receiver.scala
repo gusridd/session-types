@@ -27,10 +27,10 @@ object Receiver {
   }
 
   private def r(g: GlobalProtocol, xch: String, xt: List[String], pt: Set[String], xi: String): Set[(String, String, List[String])] = {
-    println("Rcv(G," + xt + "," + pt + ")(" + xi + ")")
+//    println("Rcv(G," + xt + "," + pt + ")(" + xi + ")")
     val (lHash, rHash) = g.getHashes
     val e = lHash(xi)
-    println(e)
+//    println(e)
     e match {
       case Message(x, p, pp, _, _, xp) if (pt contains pp) => r(g, xch, xt, pt, xp)
       case ParallelJoin(x, xpp, xp) => r(g, xch, xt, pt, xp)

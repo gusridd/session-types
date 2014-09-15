@@ -23,9 +23,9 @@ object AspectualLocalChoice {
       Weaver.GlobalWeaving(List(a), exprs)
     }
     val wovenExprs: List[lang.expr] = aspects.foldLeft(g.exprs)(op)
-    println("------before")
+    println("------woven protocol")
     wovenExprs map {x => println(x.canonical)}
-    println("------after")
+    println("------end woven protocol")
     try {
       new WFGlobalProtocol(Congruence(wovenExprs).to)
       true
