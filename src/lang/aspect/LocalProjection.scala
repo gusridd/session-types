@@ -18,20 +18,22 @@ import lang.LocalProtocol.localExpr
 import lang.Message
 import lang.Parallel
 import lang.ParallelJoin
+import lang.expr
 
 object LocalProjection {
-  def apply(g: GlobalProtocol, p: String) = {
+
+  def apply(a: Aspect, g: GlobalProtocol, p: String) = {
     g.getParticipants().find(_ == p) match {
       case Some(pp) => {
-        Congruence(lp(g, p))
+        Congruence(lp(a, g, p))
       }
       case None =>
         throw new Exception("Trying to project a non-existant participant " + p)
     }
   }
 
-  private[this] def lp(g: GlobalProtocol, participant: String): Iterable[localExpr] = {
-    g.exprs map (e => e match {
+  private[this] def lp(exprs: List[expr], participant: String): Iterable[localExpr] = {
+    exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
       case Message(x, p, pp, l, t, xp) => LocalProtocol.NullAction(x, xp)
@@ -39,6 +41,7 @@ object LocalProjection {
       case Parallel(x, xp, xpp) => Fork(x, xp, xpp)
       case Choice(x, xp, xpp) => {
         try {
+          val g = new GlobalProtocol(exprs)
           val as = ActiveSender(g, x)
           if (participant == as) {
             InternalChoice(x, xp, xpp)
