@@ -10,6 +10,7 @@ import lang.stringToIdentifier
 import scala.collection.mutable.HashMap
 import lang._
 import scala.collection.mutable.StringBuilder
+import lang.LocalProtocol.localExpr
 
 /**
  * Parser for Aspectual Session Types
@@ -87,6 +88,12 @@ case class Pointcut(s: String, r: String, l: String, t: String) extends Aspectua
   }
 }
 
+
+abstract class LocalPointcut
+
+case class SendPC(p: String,l: String, u: String) extends LocalPointcut
+case class ReceivePC(pp: String, l: String, u: String) extends LocalPointcut
+
 case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
@@ -161,6 +168,8 @@ case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   }
 }
 
+class LocalAdvice(exprs: List[localExpr], xa: String) extends Advice(exprs,xa)
+
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
   override def left = x1
   override def right = "proceed;" + x2
@@ -188,3 +197,7 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
     sb.toString
   }
 }
+
+
+
+class localAspect(name: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name,pc,adv)
