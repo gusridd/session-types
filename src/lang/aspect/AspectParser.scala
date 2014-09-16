@@ -88,27 +88,44 @@ case class Pointcut(s: String, r: String, l: String, t: String) extends Aspectua
   }
 }
 
+abstract class LocalPointcut(s: String, r: String, l: String, t: String) extends Pointcut(s, r, l, t)
 
-abstract class LocalPointcut
+class SendPC(p: String, l: String, u: String) extends LocalPointcut(p, "", l, u) {
+  def unapply(): Option[(String, String, String)] = Some((p, l, u))
+}
+object SendPC {
+  def apply(p: String, l: String, u: String) = new SendPC(p, l, u)
+}
 
-case class SendPC(p: String,l: String, u: String) extends LocalPointcut
-case class ReceivePC(pp: String, l: String, u: String) extends LocalPointcut
+class ReceivePC(pp: String, l: String, u: String) extends LocalPointcut("", pp, l, u) {
+  def unapply(): Option[(String, String, String)] = Some((pp, l, u))
+}
+
+object ReceivePC {
+  def apply(pp: String, l: String, u: String) = new ReceivePC(pp, l, u)
+}
+
+class NullPC extends LocalPointcut("", "", "", "")
+
+object NullPC {
+  def apply() = new NullPC
+}
 
 case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
   def substitute(s1: String, s2: String) = {
-    new Advice(exprs map (_.substitute(s1, s2)), xa.substitute(s1,s2))
+    new Advice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
   def getVariables = exprs.flatMap(_.getVariables).to
 
   implicit class sustitutableString(s: String) {
-    def substitute(s1: String, s2:String) = {
+    def substitute(s1: String, s2: String) = {
       if (s == s1) s2
       else s
     }
   }
-  
+
   private var hashCacheL: Option[HashMap[String, lang.expr]] = None
   private var hashCacheR: Option[HashMap[String, lang.expr]] = None
 
@@ -168,7 +185,7 @@ case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   }
 }
 
-class LocalAdvice(exprs: List[localExpr], xa: String) extends Advice(exprs,xa)
+class LocalAdvice(exprs: List[localExpr], xa: String) extends Advice(exprs, xa)
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
   override def left = x1
@@ -186,7 +203,7 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
 class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect])
 
 case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
-  
+
   override def toString(): String = {
     val sb = new StringBuilder()
     sb ++= "Name: " + name + "\n"
@@ -198,6 +215,4 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
   }
 }
 
-
-
-class localAspect(name: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name,pc,adv)
+class LocalAspect(name: String, p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv)

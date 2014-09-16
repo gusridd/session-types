@@ -22,11 +22,15 @@ import lang.expr
 
 object LocalProjection {
 
-  def apply(a: Aspect, p: String) = {
-    Congruence(lp(a.adv.exprs, p))
+  def apply(a: Aspect, p: String): LocalAspect = {
+    //    Congruence(lp(a.adv.exprs, p))
+    new LocalAspect(
+      a.name,
+      p, pcLocalProjection(a.pc, p),
+      advLocalProjection(a.adv, p))
   }
 
-  private[this] def lp(exprs: List[expr], participant: String): Iterable[localExpr] = {
+  private[this] def lp(exprs: List[expr], participant: String): List[localExpr] = {
     exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
@@ -49,5 +53,17 @@ object LocalProjection {
       case ChoiceJoin(x, xp, xpp) => Merge(x, xp, xpp)
       case End(x) => LocalProtocol.End(x)
     })
+  }
+
+  private[this] def pcLocalProjection(pc: List[Pointcut], p: String): List[LocalPointcut] = {
+    pc map ({
+      case Pointcut(s, r, l, u) if (p == s) => SendPC(r, l, u)
+      case Pointcut(s, r, l, u) if (p == r) => ReceivePC(s, l, u)
+      case Pointcut(s, r, l, u) => NullPC()
+    })
+  }
+
+  private[this] def advLocalProjection(adv: Advice, p: String): LocalAdvice = {
+    new LocalAdvice(lp(adv.exprs, p), adv.xa)
   }
 }
