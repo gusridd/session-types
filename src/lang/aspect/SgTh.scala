@@ -33,34 +33,26 @@ object SgTh {
           case e => e
         }, a.adv.xa))
 
-        // Projections
+        // Projections to p and pp
         val Ta_p = LocalProjection(replacedAspect, p)
         val Ta_pp = LocalProjection(replacedAspect, pp)
 
-        val end_p = Ta_p.adv.exprs.flatMap({
-          case e @ End(_) => List(e)
-          case _ => List()
-        })
-        val end_pp = Ta_pp.adv.exprs.flatMap({
-          case e @ End(_) => List(e)
-          case _ => List()
-        })
-        if (end_p.size != 1) {
-          println("[EXCEPTION] The aspect have an end amount != 1")
-          throw new Exception("The aspect have an end amount != 1")
-        }
-        if (end_pp.size != 1) {
-          println("[EXCEPTION] The aspect have an end amount != 1")
-          throw new Exception("The aspect have an end amount != 1")
-        }
         val STh_p = bs exists ({ b => STh(Ta_p, m, "end", List(), b) })
         val STh_pp = bs exists ({ b => STh(Ta_pp, m, "end", List(), b) })
-
-        false
+        
+        disjunction exists {
+          case (b1,b2) => 
+            STh(Ta_p, m, "end", List(), b1) && STh(Ta_pp, m, "end", List(), b2)
+        }
       }
     }
   }
-
+  
+  /**
+   * Notice that this functions returns true if the initial Boolean b was 
+   * correct. It returns false if the considered Boolean does not comply with
+   * some rule.
+   */
   private[this] def STh(la: LocalAspect, m: SimpleMessage, x: String, xb: List[String], b: Boolean): Boolean = {
     val (lHash, rHash) = la.adv.getHashes
 
@@ -98,8 +90,6 @@ object SgTh {
         case SimpleMessage(p, l, u, pp) if (q != p && q != pp) => true
       }
     }
-
-    false
   }
   /**
    * THe disjunction operator # is undefined when the two arguments are both
