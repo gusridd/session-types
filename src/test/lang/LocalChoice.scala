@@ -49,12 +49,10 @@ class LocalChoice extends PathInfo {
     assertTrue(localChoiceFromReader(new SR("x_1 = x_2 | x_3 \n x_2 | x_3 = x_4 \n x_4 = end")))
   }
 
-  //@Test(expected = classOf[lang.LocalChoiceException])
   def testNonLocalChoice() {
     assertFalse(localChoiceFromReader(new FR(path + "nonLocalChoice.txt")))
   }
-
-  //@Test(expected = classOf[lang.LocalChoiceException])
+  
   def testNonLocalChoiceConfusion() {
     assertFalse(localChoiceFromReader(new FR(path + "nonLocalChoiceConfusion.txt")))
   }
@@ -146,13 +144,13 @@ class LocalChoice extends PathInfo {
     val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
     
     val s1 = Receiver(g)("x_1")
-    println("s1: " + s1)
     val s5 = Receiver(g)("x_5")
-    println("s5: " + s5)
+    
     assertEquals(s1, s5)
     
     val s6 = Receiver(g)("x_6")
     val s8 = Receiver(g)("x_8") 
+    
     assertEquals(s6, s8)
   }
   
@@ -161,9 +159,6 @@ class LocalChoice extends PathInfo {
     
     val s10 = Receiver(g)("x_10")
     val s12 = Receiver(g)("x_12")
-    
-    println(s10)
-    println(s12)
     
     assertFalse(s10.isEmpty)
     assertFalse(s12.isEmpty)

@@ -64,7 +64,7 @@ class UniqueMsg extends PathInfo {
       case a: Aspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
-
+  
   @Test def testMFUniqueMsgLogging() {
     val aspects = AspectParser.parse(new FR(path_mf_a + "Logging.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
@@ -88,6 +88,7 @@ class UniqueMsg extends PathInfo {
   }
   
   /**
+   * TODO: Enhance the uniqueMsg funcion so this passes.
    * This one is tricky as in the paper says it should pass, but it shall not
    */
   @Test def testUniqueMsgAuthentication() {
@@ -120,6 +121,17 @@ class UniqueMsg extends PathInfo {
 
     aspects foreach {
       case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+    }
+  }
+  
+  @Test def testMFUniqueMsgLoggingTwice() {
+    val aspects = AspectParser.parse(new FR(path_mf_a + "LoggingTwice.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
+
+    assertEquals(1, aspects.size)
+
+    aspects foreach {
+      case a: Aspect => assertFalse(uniqueMsg(protocol, a))
     }
   }
 
