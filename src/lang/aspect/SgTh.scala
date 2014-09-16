@@ -15,8 +15,8 @@ object SgTh {
 
     matches forall {
       case m @ Message(x1, p, pp, l, u, x2) => {
-        val Ta_p = LocalProjection(a,g,p)
-        val Ta_pp = LocalProjection(a,g,pp)
+        val Ta_p = LocalProjection(a,p)
+        val Ta_pp = LocalProjection(a,pp)
         false
       }
     }

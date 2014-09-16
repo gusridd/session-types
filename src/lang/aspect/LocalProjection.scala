@@ -22,14 +22,8 @@ import lang.expr
 
 object LocalProjection {
 
-  def apply(a: Aspect, g: GlobalProtocol, p: String) = {
-    g.getParticipants().find(_ == p) match {
-      case Some(pp) => {
-        Congruence(lp(a, g, p))
-      }
-      case None =>
-        throw new Exception("Trying to project a non-existant participant " + p)
-    }
+  def apply(a: Aspect, p: String) = {
+    Congruence(lp(a.adv.exprs, p))
   }
 
   private[this] def lp(exprs: List[expr], participant: String): Iterable[localExpr] = {
