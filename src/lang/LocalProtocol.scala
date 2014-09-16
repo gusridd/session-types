@@ -97,5 +97,14 @@ object LocalProtocol {
     }
     def getVariables = Set(x1, x2)
   }
+  
+  case class AdviceTransition(x1: String, x2: String) extends localExpr {
+    def left = x1
+    def right = "proceed; " + x2
+    def substitute(s1: String, s2: String): AdviceTransition = {
+      AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
+    }
+    def getVariables = Set(x1, x2)
+  }
 }
 

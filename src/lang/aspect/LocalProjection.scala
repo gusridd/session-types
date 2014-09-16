@@ -39,6 +39,7 @@ object LocalProjection {
       case Parallel(x, xp, xpp) => Fork(x, xp, xpp)
       case Choice(x, xp, xpp) => {
         try {
+          // This is a trick in order to get the active sender efficiently
           val g = new GlobalProtocol(exprs)
           val as = ActiveSender(g, x)
           if (participant == as) {
@@ -47,9 +48,13 @@ object LocalProjection {
             ExternalChoice(x, xp, xpp)
           }
         } catch {
-          case e: Exception => ExternalChoice(x, xp, xpp)
+          case e: Exception => {
+            println("[EXCEPTION] " + e.toString())
+            ExternalChoice(x, xp, xpp)
+          }
         }
       }
+      case AdviceTransition(x1, x2) => LocalProtocol.AdviceTransition(x1, x2)
       case ChoiceJoin(x, xp, xpp) => Merge(x, xp, xpp)
       case End(x) => LocalProtocol.End(x)
     })

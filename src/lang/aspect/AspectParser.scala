@@ -92,6 +92,7 @@ abstract class LocalPointcut(s: String, r: String, l: String, t: String) extends
 
 class SendPC(p: String, l: String, u: String) extends LocalPointcut(p, "", l, u) {
   def unapply(): Option[(String, String, String)] = Some((p, l, u))
+  override def canonical(): String = "!(" + p + ", " + l + ", " + u + ")"
 }
 object SendPC {
   def apply(p: String, l: String, u: String) = new SendPC(p, l, u)
@@ -99,13 +100,16 @@ object SendPC {
 
 class ReceivePC(pp: String, l: String, u: String) extends LocalPointcut("", pp, l, u) {
   def unapply(): Option[(String, String, String)] = Some((pp, l, u))
+  override def canonical(): String = "?(" + pp + ", " + l + ", " + u + ")"
 }
 
 object ReceivePC {
   def apply(pp: String, l: String, u: String) = new ReceivePC(pp, l, u)
 }
 
-class NullPC extends LocalPointcut("", "", "", "")
+class NullPC extends LocalPointcut("", "", "", "") {
+  override def canonical(): String = "0"
+}
 
 object NullPC {
   def apply() = new NullPC
@@ -215,4 +219,4 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
   }
 }
 
-class LocalAspect(name: String, p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv)
+class LocalAspect(name: String, val p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv)

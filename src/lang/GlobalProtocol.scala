@@ -7,6 +7,7 @@ import scala.collection.mutable.LinkedHashSet
 import scala.collection.mutable.Set
 import scala.annotation.tailrec
 import scala.util.parsing.input.Positional
+import lang.aspect.AdviceTransition
 
 class GlobalProtocol(val exprs: List[expr]) extends Positional {
 
@@ -95,6 +96,10 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
         leftHash(x1) = pj
         leftHash(x2) = pj
         rightHash(x3) = pj
+      }
+      case at @ AdviceTransition(x1,x2) => {
+        leftHash(x1) = at
+        leftHash(x2) = at
       }
     }
     (leftHash, rightHash)
