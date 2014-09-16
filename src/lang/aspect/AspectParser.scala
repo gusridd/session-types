@@ -155,6 +155,7 @@ case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
       }
       case e @ End(x) => {
         leftHash(x) = e
+        rightHash("end") = e
       }
       case c @ Indirection(x1, x2) => {
         leftHash(x1) = c
@@ -219,4 +220,6 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
   }
 }
 
-class LocalAspect(name: String, val p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv)
+class LocalAspect(name: String, val p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv) {
+  def xa = adv.xa
+}

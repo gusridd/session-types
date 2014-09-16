@@ -72,6 +72,7 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
       }
       case e @ End(x) => {
         leftHash(x) = e
+        rightHash("end") = e
       }
       case c @ Indirection(x1, x2) => {
         leftHash(x1) = c
