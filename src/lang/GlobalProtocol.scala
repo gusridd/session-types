@@ -65,44 +65,7 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
   def getHashesFromExpr(exprs: List[expr] = exprs): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
     val leftHash = HashMap[String, expr]()
     val rightHash = HashMap[String, expr]()
-    exprs foreach {
-      case m @ Message(x1, _, _, _, _, x2) => {
-        leftHash(x1) = m
-        rightHash(x2) = m
-      }
-      case e @ End(x) => {
-        leftHash(x) = e
-        rightHash("end") = e
-      }
-      case c @ Indirection(x1, x2) => {
-        leftHash(x1) = c
-        rightHash(x2) = c
-      }
-      case c @ Choice(x1, x2, x3) => {
-        leftHash(x1) = c
-        rightHash(x2) = c
-        rightHash(x3) = c
-      }
-      case p @ Parallel(x1, x2, x3) => {
-        leftHash(x1) = p
-        rightHash(x2) = p
-        rightHash(x3) = p
-      }
-      case cj @ ChoiceJoin(x1, x2, x3) => {
-        leftHash(x1) = cj
-        leftHash(x2) = cj
-        rightHash(x3) = cj
-      }
-      case pj @ ParallelJoin(x1, x2, x3) => {
-        leftHash(x1) = pj
-        leftHash(x2) = pj
-        rightHash(x3) = pj
-      }
-      case at @ AdviceTransition(x1,x2) => {
-        leftHash(x1) = at
-        leftHash(x2) = at
-      }
-    }
+    exprs foreach { x => x.addToHash(leftHash, rightHash) }
     (leftHash, rightHash)
   }
 
@@ -119,7 +82,7 @@ class GlobalProtocol(val exprs: List[expr]) extends Positional {
 
   def print(): Unit = exprs foreach (e => println(e.canonical))
 
-  def canonical(tabs:Int = 0): String = {
+  def canonical(tabs: Int = 0): String = {
     val sb = new StringBuilder
     exprs foreach (e => sb ++= (("\t" * tabs) + e.canonical + "\n"))
     sb.toString

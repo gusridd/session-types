@@ -46,9 +46,9 @@ class GlobalSessionParser extends JavaTokenParsers {
   def parallelJoin: Parser[ParallelJoin] = (xid ~ "|" ~ xid ~ "=" ~ xid | failure("illegal start of parallelJoin")) ^^ {
     case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(x1, x2, x3)
   }
-  
+
   def indirection: Parser[Indirection] = xid ~ "=" ~ xid ^^ {
-    case x1 ~ _ ~ x2 => Indirection(x1,x2)
+    case x1 ~ _ ~ x2 => Indirection(x1, x2)
   }
 
   def end: Parser[End] = (xid ~ "=" ~ "end" | failure("illegal start of end")) ^^ { case x ~ _ ~ _ => new End(x) }
@@ -84,6 +84,8 @@ trait expr extends Positional {
   def right: String
   def isEnd = false
   def getVariables: Set[String]
+
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]): Unit
 }
 
 sealed trait Ternary {
@@ -114,6 +116,11 @@ case class Message(val x_1: String, val s: String, val r: String, val msg: Strin
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
   def getVariables = Set(x_1, x_2)
+
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+  }
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = Choice
@@ -121,6 +128,12 @@ class Choice private (val x_1: String, val x_2: String, val x_3: String) extends
   override def toString(): String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def left = x_1
   def right = x_2 + " + " + x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 /**
  * Companion object and Extractor Choices with lexicographical order
@@ -137,6 +150,12 @@ class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) ext
   protected def construct(x_1: String, x_2: String, x_3: String) = ChoiceJoin(x_1, x_2, x_3)
   def left = x_1 + " + " + x_2
   def right = x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    lHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 /**
  * Companion object and Extractor ChoiceJoin with lexicographical order
@@ -154,6 +173,12 @@ class Parallel private (val x_1: String, val x_2: String, val x_3: String) exten
   protected def construct(x_1: String, x_2: String, x_3: String) = Parallel(x_1, x_2, x_3)
   def left = x_1
   def right = x_2 + " | " + x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 object Parallel {
   def apply(x_1: String, x_2: String, x_3: String): Parallel =
@@ -167,6 +192,12 @@ class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) e
   protected def construct(x_1: String, x_2: String, x_3: String) = ParallelJoin(x_1, x_2, x_3)
   def left = x_1 + " | " + x_2
   def right = x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    lHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 object ParallelJoin {
   def apply(x_1: String, x_2: String, x_3: String): ParallelJoin = {
@@ -185,6 +216,11 @@ case class End(x: String) extends expr {
   def right = "end"
   override def isEnd = true
   def getVariables = Set(x)
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x) = this
+    rHash("end") = this
+  }
 }
 case class Indirection(x_1: String, x_2: String) extends expr {
   def substitute(s1: String, s2: String): Indirection = {
@@ -193,6 +229,11 @@ case class Indirection(x_1: String, x_2: String) extends expr {
   def left = x_1
   def right = x_2
   def getVariables = Set(x_1, x_2)
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+  }
 }
 
 abstract class WFConditionException extends Exception

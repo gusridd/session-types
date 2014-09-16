@@ -75,7 +75,11 @@ object AspectParser extends AspectParser {
  * AST definitions for the AspectParser
  */
 
-trait AspectualAST extends expr with Positional
+trait AspectualAST extends expr with Positional {
+  def addToHash(lHash: HashMap[String,expr], rHash: HashMap[String,expr]) = {
+    //throw new Exception("Add to hash is not defined for AspectualAST " + this)
+  }
+}
 
 case class Pointcut(s: String, r: String, l: String, t: String) extends AspectualAST {
   def left = throw new Exception("left called on Pointcut")
@@ -148,44 +152,7 @@ case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
   def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
     val leftHash = HashMap[String, expr]()
     val rightHash = HashMap[String, expr]()
-    exprs foreach {
-      case m @ Message(x1, _, _, _, _, x2) => {
-        leftHash(x1) = m
-        rightHash(x2) = m
-      }
-      case e @ End(x) => {
-        leftHash(x) = e
-        rightHash("end") = e
-      }
-      case c @ Indirection(x1, x2) => {
-        leftHash(x1) = c
-        rightHash(x2) = c
-      }
-      case c @ Choice(x1, x2, x3) => {
-        leftHash(x1) = c
-        rightHash(x2) = c
-        rightHash(x3) = c
-      }
-      case p @ Parallel(x1, x2, x3) => {
-        leftHash(x1) = p
-        rightHash(x2) = p
-        rightHash(x3) = p
-      }
-      case cj @ ChoiceJoin(x1, x2, x3) => {
-        leftHash(x1) = cj
-        leftHash(x2) = cj
-        rightHash(x3) = cj
-      }
-      case pj @ ParallelJoin(x1, x2, x3) => {
-        leftHash(x1) = pj
-        leftHash(x2) = pj
-        rightHash(x3) = pj
-      }
-      case at @ AdviceTransition(x1, x2) => {
-        leftHash(x1) = at
-        rightHash(x2) = at
-      }
-    }
+    exprs foreach { x => x.addToHash(leftHash, rightHash) }
     (leftHash, rightHash)
   }
 }
@@ -199,6 +166,12 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
     new AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
   }
   override def getVariables = scala.collection.mutable.Set(x1, x2)
+  
+  override def addToHash(lHash: HashMap[String,expr], rHash: HashMap[String,expr]) = {
+    lHash(x1) = this
+    rHash(x2) = this
+  }
+  
 }
 
 /**

@@ -3,7 +3,7 @@ package lang.aspect
 import lang.GlobalProtocol
 import lang.Message
 import lang.expr
-import lang.End
+import lang.LocalProtocol.End
 import lang.LocalProtocol.Merge
 import lang.LocalProtocol.Join
 import lang.LocalProtocol.Fork
@@ -12,6 +12,7 @@ import lang.LocalProtocol.ExternalChoice
 import lang.LocalProtocol.Receive
 import lang.LocalProtocol.Send
 import lang.aspect.uniqueMsg.SimpleMessage
+import lang.LocalProtocol.NullAction
 
 /**
  * This condition is true, if for all M such that match(pc,M), adv is
@@ -26,7 +27,7 @@ object SgTh {
 
     matches forall {
       case m @ Message(x1, p, pp, l, u, x2) => {
-    	  
+
         // adv[proceed -> M]
         val replacedAspect = Aspect(a.name, a.pc, Advice(a.adv.exprs map {
           case AdviceTransition(x1, x2) => Message(x1, p, pp, l, u, x2)
@@ -39,17 +40,17 @@ object SgTh {
 
         val STh_p = bs exists ({ b => STh(Ta_p, m, "end", List(), b) })
         val STh_pp = bs exists ({ b => STh(Ta_pp, m, "end", List(), b) })
-        
+
         disjunction exists {
-          case (b1,b2) => 
+          case (b1, b2) =>
             STh(Ta_p, m, "end", List(), b1) && STh(Ta_pp, m, "end", List(), b2)
         }
       }
     }
   }
-  
+
   /**
-   * Notice that this functions returns true if the initial Boolean b was 
+   * Notice that this functions returns true if the initial Boolean b was
    * correct. It returns false if the considered Boolean does not comply with
    * some rule.
    */
@@ -63,8 +64,8 @@ object SgTh {
       // STh-End
       case End(x) => STh(la, m, x, xb, b)
       // STh-Merge/Join-Stop
-      case Merge(x1, x2, x3) if (b == false && xb.contains(x)) => true
-      case Join(x1, x2, x3) if (b == false && xb.contains(x)) => true
+      case Merge(x1, x2, x3) if (xb.contains(x)) => !b
+      case Join(x1, x2, x3) if (xb.contains(x)) => !b
       // STh-Fork/Choice
       case InternalChoice(x1, x2, x3) => STh(la, m, x1, xb, b)
       case ExternalChoice(x1, x2, x3) => STh(la, m, x1, xb, b)
@@ -89,6 +90,10 @@ object SgTh {
         // STh-Message
         case SimpleMessage(p, l, u, pp) if (q != p && q != pp) => true
       }
+      /**
+       * new cases
+       */
+      case NullAction(x1, x2) => STh(la, m, x1, xb, b)
     }
   }
   /**
