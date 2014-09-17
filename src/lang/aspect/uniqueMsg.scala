@@ -18,7 +18,7 @@ object uniqueMsg {
   
       val leftHash = a.adv.getHashes._1
       def Msg(x: String, xb: Set[String], M: Set[SimpleMessage]): Boolean = {
-        if(x == "x_0" && !leftHash.isDefinedAt(x)){
+        if(x == a.adv.xa && !leftHash.isDefinedAt(x)){
           a.adv.exprs foreach {e => println(e.canonical)}
           println("FAILFAILFAILFAIL")
           println(leftHash)
@@ -140,16 +140,11 @@ object uniqueMsg {
         case m @ Message(_, s, r, l, u, _) => Some(SimpleMessage(s, r, l, u))
         case _ => None
       }).to
-      //    (a.adv.exprs ++ g.exprs) flatMap {
-      //      case m @ Message(_, _, _, _, _, _) => Some(m)
-      //      case _ => None
-      //    } forall (M => Msg("x_0", Set(), messages))
       messages.subsets exists (M => {
         val r = Msg("x_0", Set(), M)
         if (r) println("The correct set M for UniqueMsg was: " + M)
         r
       })
-      //    Msg("x_0", Set(), messages)
     }
 
   type iSet[T] = scala.collection.immutable.Set[T]
