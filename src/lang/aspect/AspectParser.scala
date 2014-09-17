@@ -162,12 +162,16 @@ object NullPC {
   def unapply(n: NullPC) = Some()
 }
 
-sealed abstract class Advice(val exprs: List[expr], val xa: String) extends AspectualAST {
+trait Advice[A <: Advice[A]] extends AspectualAST {
 //  type T <: Advice
+  A =>
+  val exprs: List[expr]
+  val xa: String
+  
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
   
-  def substitute(s1: String, s2: String): Advice
+  override def substitute(s1: String, s2: String): A
 
 //  def construct[E <: expr,A <: Advice](exprs: List[E], xa: String): A
   
@@ -202,7 +206,7 @@ sealed abstract class Advice(val exprs: List[expr], val xa: String) extends Aspe
     (leftHash, rightHash)
   }
 }
-class GlobalAdvice(override val exprs: List[expr], xa: String) extends Advice(exprs, xa){
+class GlobalAdvice(override val exprs: List[expr],val xa: String) extends Advice[GlobalAdvice]{
 //  type T = GlobalAdvice
 //  def construct[expr,GlobalAdvice](exprs: List[lang.expr], xa: String): GlobalAdvice = GlobalAdvice(exprs,xa)
   
@@ -214,7 +218,7 @@ object GlobalAdvice{
   def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs,xa)
 }
 
-class LocalAdvice(override val exprs: List[localExpr], xa: String) extends Advice(exprs, xa){
+class LocalAdvice(override val exprs: List[localExpr],val xa: String) extends Advice[LocalAdvice]{
 //  type T = LocalAdvice
 //  def construct(exprs: List[localExpr], xa: String) = LocalAdvice(exprs,xa)
   override def substitute(s1: String, s2: String): LocalAdvice = {
@@ -245,9 +249,9 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
  * Base class for the algorithms
  */
 
-class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect[expr, GlobalPC]])
+class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect[expr, GlobalPC, GlobalAdvice]])
 
-class Aspect[+E, S](val name: String, pc: Pointcut[E, S], adv: Advice) {
+class Aspect[+E, S, A <: Advice[A]](val name: String, pc: Pointcut[E, S], adv: Advice[A]) {
   override def toString(): String = {
     val sb = new StringBuilder()
     sb ++= "Name: " + name + "\n"

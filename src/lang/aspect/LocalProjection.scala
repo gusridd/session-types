@@ -30,7 +30,7 @@ object LocalProjection {
       advLocalProjection(a.adv, p))
   }
 
-  private[this] def lp(a: Advice, participant: String): List[localExpr] = {
+  private[this] def lp(a: GlobalAdvice, participant: String): List[localExpr] = {
     val exprs = a.exprs
     exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
@@ -69,7 +69,7 @@ object LocalProjection {
     }))
   }
 
-  private[this] def advLocalProjection(adv: Advice, p: String): LocalAdvice = {
+  private[this] def advLocalProjection(adv: GlobalAdvice, p: String): LocalAdvice = {
     new LocalAdvice(lp(adv, p), adv.xa)
   }
 }
