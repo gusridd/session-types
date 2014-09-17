@@ -29,7 +29,7 @@ object SgTh {
       case m @ Message(x1, p, pp, l, u, x2) => {
 
         // adv[proceed -> M]
-        val replacedAspect = GlobalAspect(a.name, a.pc, Advice(a.adv.exprs map {
+        val replacedAspect = GlobalAspect(a.name, a.pc, GlobalAdvice(a.adv.exprs map {
           case AdviceTransition(x1, x2) => Message(x1, p, pp, l, u, x2)
           case e => e
         }, a.adv.xa))

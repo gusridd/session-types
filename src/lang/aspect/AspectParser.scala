@@ -163,14 +163,14 @@ object NullPC {
 }
 
 sealed abstract class Advice(val exprs: List[expr], val xa: String) extends AspectualAST {
-  type T <: Advice
+//  type T <: Advice
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
-  def substitute(s1: String, s2: String): this.type = {
-    construct(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
-  }
+  
+  def substitute(s1: String, s2: String): Advice
 
-  def construct[E <: expr](exprs: List[E], xa: String): this.type
+//  def construct[E <: expr,A <: Advice](exprs: List[E], xa: String): A
+  
   def getVariables = exprs.flatMap(_.getVariables).to
 
   implicit class sustitutableString(s: String) {
@@ -203,20 +203,27 @@ sealed abstract class Advice(val exprs: List[expr], val xa: String) extends Aspe
   }
 }
 class GlobalAdvice(override val exprs: List[expr], xa: String) extends Advice(exprs, xa){
-  type T = GlobalAdvice
-  def construct(exprs: List[expr], xa: String) = GlobalAdvice(exprs,xa)
+//  type T = GlobalAdvice
+//  def construct[expr,GlobalAdvice](exprs: List[lang.expr], xa: String): GlobalAdvice = GlobalAdvice(exprs,xa)
+  
+  override def substitute(s1: String, s2: String) = {
+    GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
+  }
 }
 object GlobalAdvice{
-  def apply(exprs: List[expr], xa: String): GlobalAdvice = new GlobalAdvice(exprs,xa)
+  def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs,xa)
 }
 
 class LocalAdvice(override val exprs: List[localExpr], xa: String) extends Advice(exprs, xa){
-  type T = LocalAdvice
-  def construct(exprs: List[localExpr], xa: String) = LocalAdvice(exprs,xa)
+//  type T = LocalAdvice
+//  def construct(exprs: List[localExpr], xa: String) = LocalAdvice(exprs,xa)
+  override def substitute(s1: String, s2: String): LocalAdvice = {
+    LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
+  }
 }
 
 object LocalAdvice{
-  def apply(exprs: List[localExpr], xa: String): LocalAdvice = new LocalAdvice(exprs,xa)
+  def apply(exprs: List[localExpr], xa: String) = new LocalAdvice(exprs,xa)
 }
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {

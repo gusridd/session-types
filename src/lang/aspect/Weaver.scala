@@ -187,16 +187,34 @@ object Weaver {
    * when the advice is inserted several times within the same
    * global session.
    */
-  private[this] def localize[A <: Advice](adv: A, x: String): A = {
+  private[this] def localize(adv: GlobalAdvice, x: String): GlobalAdvice = {
     val xs: Set[String] = (adv.exprs flatMap (_.getVariables)).to
 
-    @tailrec def loc[A <: Advice](adv: A, replacements: List[String]): A =
+    @tailrec def loc(adv: GlobalAdvice, replacements: List[String]): GlobalAdvice =
       replacements match {
-        case xp :: xps => loc(adv.substitute(xp, format(x, xp)), xps)
+        case xp :: xps => {
+          val er = adv.substitute(xp, format(x, xp))
+          loc(adv.substitute(xp, format(x, xp)), xps)
+        }
         case Nil => adv
       }
 
-    loc[A](adv, xs.to)
+    loc(adv, xs.to)
+  }
+  
+  private[this] def localize(adv: LocalAdvice, x: String): LocalAdvice = {
+    val xs: Set[String] = (adv.exprs flatMap (_.getVariables)).to
+
+    @tailrec def loc(adv: LocalAdvice, replacements: List[String]): LocalAdvice =
+      replacements match {
+        case xp :: xps => {
+          val er = adv.substitute(xp, format(x, xp))
+          loc(adv.substitute(xp, format(x, xp)), xps)
+        }
+        case Nil => adv
+      }
+
+    loc(adv, xs.to)
   }
 
   private[this] def tag(adv: GlobalAdvice, m: SimpleMessage, exprs: List[expr]) = {
