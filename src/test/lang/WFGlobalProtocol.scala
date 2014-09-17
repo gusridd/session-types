@@ -13,7 +13,7 @@ class WFGlobalProtocolTest extends PathInfo {
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
     reader.close
-    val wf = new WFGlobalProtocol(g.exprs)
+    val wf = new WFGlobalProtocol(g.exprs,g.x_0)
     wf
   }
 

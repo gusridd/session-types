@@ -11,7 +11,7 @@ object AspectualLocalChoice {
     try {
       val wovenExprs = Weaver.GlobalWeaving(List(aspect), g.exprs)
       wovenExprs map {x => println(x.canonical)}
-      new WFGlobalProtocol(Congruence(wovenExprs).to)
+      new WFGlobalProtocol(Congruence(wovenExprs).to, g.x_0)
       true
     } catch {
       case e: WFConditionException => false
@@ -27,7 +27,7 @@ object AspectualLocalChoice {
     wovenExprs map {x => println(x.canonical)}
     println("------end woven protocol")
     try {
-      new WFGlobalProtocol(Congruence(wovenExprs).to)
+      new WFGlobalProtocol(Congruence(wovenExprs).to, g.x_0)
       true
     } catch {
       case e: WFConditionException => false

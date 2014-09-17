@@ -4,7 +4,7 @@ object Linearity {
 
   def apply(g: GlobalProtocol): Boolean = {
     val c = Congruence(g)
-    val ng = new GlobalProtocol(c.to)
+    val ng = new GlobalProtocol(c.to,g.x_0)
     //    g.print
     //    g.getHashes._1 foreach (e => println(e._1 + " => " + e._2.canonical))
     //    println("<---------------->")

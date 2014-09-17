@@ -9,9 +9,9 @@ import scala.annotation.tailrec
 import scala.util.parsing.input.Positional
 import lang.aspect.AdviceTransition
 
-class GlobalProtocol(val exprs: List[expr]) extends Positional {
+class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional {
 
-  val x0: String = "x_0"
+//  val x0: String = "x_0"
   private val end: String = "end"
   val xs: HashSet[String] = HashSet() ++ exprs.flatMap(e => e.getVariables)
 

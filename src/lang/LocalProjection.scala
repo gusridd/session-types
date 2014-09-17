@@ -16,7 +16,7 @@ object LocalProjection {
   def apply(g: GlobalProtocol, p: String): LocalProtocol = {
     g.getParticipants().find(_ == p) match {
       case Some(pp) => {
-        new LocalProtocol(Congruence(lp(g, p)).to, p)
+        new LocalProtocol(Congruence(lp(g, p)).to, p,g.x_0)
       }
       case None =>
         throw new Exception("Trying to project a non-existant participant " + p)

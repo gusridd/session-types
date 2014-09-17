@@ -123,7 +123,7 @@ object Weaver {
             case Nil => all
           }
         }
-        LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p)
+        new LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p, lp.x_0)
       }
       case Nil => lp
     }

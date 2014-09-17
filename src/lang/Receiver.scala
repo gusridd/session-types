@@ -10,7 +10,7 @@ object Receiver {
   }
 
   def apply(g: GlobalProtocol)(x: String) = {
-    val cg = new GlobalProtocol(Congruence(g).to)
+    val cg = new GlobalProtocol(Congruence(g).to,g.x_0)
 
     val (hLeft, hRight) = cg.getHashes
     hRight(x) match {

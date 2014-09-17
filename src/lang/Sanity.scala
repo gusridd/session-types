@@ -8,7 +8,7 @@ object Sanity {
 
   def apply(g: GlobalProtocol): Boolean = {
     val exprs = g.exprs
-    val x0 = g.x0
+    val x0 = g.x_0
     implicit val xs = g.xs
 
     /**

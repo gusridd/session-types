@@ -17,7 +17,7 @@ class Congruence {
 	      x_3 = end
     	  """))
     val reduced = Congruence(g)
-    val ng = new GlobalProtocol(reduced.to)
+    val ng = new GlobalProtocol(reduced.to, "x_0")
 
     assertEquals(2, ng.exprs.size)
   }
@@ -33,7 +33,7 @@ class Congruence {
 	      x_6 = end
     	  """))
     val reduced = Congruence(g)
-    val ng = new GlobalProtocol(reduced.to)
+    val ng = new GlobalProtocol(reduced.to, g.x_0)
 
     assertEquals(4, ng.exprs.size)
   }
@@ -49,7 +49,7 @@ class Congruence {
 	      x_6 = end
     	  """))
     val reduced = Congruence(g)
-    val ng = new GlobalProtocol(reduced.to)
+    val ng = new GlobalProtocol(reduced.to, g.x_0)
     ng.print
     assertEquals(4, ng.exprs.size)
   }
@@ -72,7 +72,7 @@ class Congruence {
     val nExprs: Set[expr] = Congruence(exprs).to
 
     assertEquals(10, nExprs.size)
-    
-    assertTrue(nExprs.contains(Message("x_0","S","B","Item","String","x_1^[x_0)]")))
+
+    assertTrue(nExprs.contains(Message("x_0", "S", "B", "Item", "String", "x_1^[x_0)]")))
   }
 }

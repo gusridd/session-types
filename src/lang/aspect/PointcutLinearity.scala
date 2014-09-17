@@ -18,7 +18,7 @@ object PointcutLinearity {
 	def apply(aspect: GlobalAspect, g: WFGlobalProtocol): Boolean = {
 	  try {
 	    val wovenExprs = Weaver.naiveGlobalWeaving(List(aspect), g.exprs)
-	    new WFGlobalProtocol(Congruence(wovenExprs).to)
+	    new WFGlobalProtocol(Congruence(wovenExprs).to, g.x_0)
 	    true
 	  } catch {
 	    /**

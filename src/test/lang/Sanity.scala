@@ -169,7 +169,7 @@ class Sanity extends PathInfo {
             Choice("x_2^x_0","x_4^x_0","x_6^x_0"), 
             Indirection("x_4^x_0","x_6"), 
             Indirection("x_0","x_1^x_0"), 
-            End("x_6") ))
+            End("x_6") ), "x_0")
     assertTrue(Sanity(g))
   }
   

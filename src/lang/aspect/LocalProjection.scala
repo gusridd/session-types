@@ -30,7 +30,8 @@ object LocalProjection {
       advLocalProjection(a.adv, p))
   }
 
-  private[this] def lp(exprs: List[expr], participant: String): List[localExpr] = {
+  private[this] def lp(a: Advice, participant: String): List[localExpr] = {
+    val exprs = a.exprs
     exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
@@ -40,7 +41,7 @@ object LocalProjection {
       case Choice(x, xp, xpp) => {
         try {
           // This is a trick in order to get the active sender efficiently
-          val g = new GlobalProtocol(exprs)
+          val g = new GlobalProtocol(exprs,a.xa)
           val as = ActiveSender(g, x)
           if (participant == as) {
             InternalChoice(x, xp, xpp)
@@ -69,6 +70,6 @@ object LocalProjection {
   }
 
   private[this] def advLocalProjection(adv: Advice, p: String): LocalAdvice = {
-    new LocalAdvice(lp(adv.exprs, p), adv.xa)
+    new LocalAdvice(lp(adv, p), adv.xa)
   }
 }
