@@ -139,32 +139,9 @@ object Weaver {
   /**
    * Pointcut Matching
    */
-  def pointcutMatchGlobal(pc: GlobalPointcut, e: expr) =
-    //    e match {
-    //    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
-    //      case GlobalPointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
-    //        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
-    //      case _ => false
-    //    }
-    //    case _ => false
-    //  }
-    pc.doesMatch(e)
+  def pointcutMatchGlobal(pc: GlobalPointcut, e: expr) = pc.doesMatch(e)
 
-  def pointcutMatchLocal(pc: LocalPointcut, e: localExpr): Boolean =
-    //    e match {
-    //      case Send(x1, p, l, u, x2) => pcs exists {
-    //        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-    //          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-    //        case _ => false
-    //      }
-    //      case Receive(x1, p, l, u, x2) => pcs exists {
-    //        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-    //          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-    //        case _ => false
-    //      }
-    //      case _ => false
-    //    }
-    pc.doesMatch(e)
+  def pointcutMatchLocal(pc: LocalPointcut, e: localExpr): Boolean = pc.doesMatch(e)
 
   /**
    * Function responsible for maintaining the uniqueness of states
