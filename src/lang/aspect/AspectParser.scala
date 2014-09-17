@@ -119,6 +119,7 @@ class NullPC extends LocalPointcut("", "", "", "") {
 
 object NullPC {
   def apply() = new NullPC
+  def unapply(n: NullPC) = Some()
 }
 
 case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
@@ -195,6 +196,6 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
   }
 }
 
-class LocalAspect(name: String, val p: String, override val pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv) {
+class LocalAspect(name: String, val p: String, override val pc: List[LocalPointcut],override val adv: LocalAdvice) extends Aspect(name, pc, adv) {
   def xa = adv.xa
 }

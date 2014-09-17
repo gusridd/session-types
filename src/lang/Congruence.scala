@@ -2,6 +2,9 @@ package lang
 
 import lang.LocalProtocol.localExpr
 import scala.annotation.tailrec
+import lang.aspect.Pointcut
+import lang.aspect.NullPC
+import lang.aspect.LocalPointcut
 
 /**
  * The methods listed here do not correspond to a congruence relation, but
@@ -45,6 +48,18 @@ object Congruence {
   def apply(exprs: Iterable[localExpr]): Iterable[localExpr] = {
     //TODO: Congruence rules for localExpr
     exprs
+  }
+
+  def apply(pc: List[LocalPointcut]): List[LocalPointcut] = {
+    val filtered = pc filter ({
+      case NullPC() => false
+      case _ => true
+    })
+    if (filtered.size == 0) {
+      List(NullPC())
+    } else {
+      filtered
+    }
   }
 
 }

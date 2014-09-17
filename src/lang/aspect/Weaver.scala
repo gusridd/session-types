@@ -1,7 +1,6 @@
 package lang.aspect
 
 import scala.annotation.tailrec
-
 import lang.Choice
 import lang.ChoiceJoin
 import lang.End
@@ -14,6 +13,8 @@ import lang.LocalProtocol.localExpr
 import lang.Message
 import lang.aspect.uniqueMsg.SimpleMessage
 import lang.expr
+import lang.Congruence
+import lang.Parallel
 
 object Weaver {
 
@@ -92,10 +93,37 @@ object Weaver {
   def localWeaving(aspects: List[LocalAspect], lp: LocalProtocol): LocalProtocol = {
     aspects match {
       case aspect :: aRest => {
-        
-        val (matches, rest) = lp.exprs partition { e => pointcutMatchLocal(aspect.pc, e) }
+        val pc = Congruence(aspect.pc)
 
-        lp
+        // T-Daemon
+        if (pc.size == 1 && pc(0) == NullPC()) {
+          val upper = findUpper((aspect.adv.exprs ++ lp.exprs) flatMap (_.getVariables))
+          val fx0 = "x_" + (upper + 1)
+          val fx1 = "x_" + (upper + 2)
+          val fxe = "x_" + (upper + 3)
+
+          val newParallel = Parallel("x_0", fx0, fx1)
+          val newChoiceJoin = ChoiceJoin(fx1, fxe, aspect.xa)
+          val replacedTa = aspect.adv
+        }
+
+        val (matches, rest) = lp.exprs partition { e => pointcutMatchLocal(pc, e) }
+        def replaceMatch(ms: List[localExpr], all: Set[localExpr]): Set[localExpr] = {
+          ms match {
+            case m :: restm => m match {
+//              case s @ Send(x, p, l, u, xp) => {
+//
+//              }
+//              case r @ Receive(x, p, l, u, xp) => {
+//
+//              }
+              case _ => all
+              case _ => throw new Exception("Weaving should only match messages")
+            }
+            case Nil => all
+          }
+        }
+        LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p)
       }
       case Nil => lp
     }
