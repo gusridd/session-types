@@ -92,7 +92,8 @@ object Weaver {
   def localWeaving(aspects: List[LocalAspect], lp: LocalProtocol): LocalProtocol = {
     aspects match {
       case aspect :: aRest => {
-        val (matches, rest) = lp.exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
+        
+        val (matches, rest) = lp.exprs partition { e => pointcutMatchLocal(aspect.pc, e) }
 
         lp
       }

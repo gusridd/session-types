@@ -3,7 +3,7 @@ package lang
 import scala.collection.mutable.Set
 import scala.collection.mutable.HashMap
 
-class LocalProtocol(exprs: List[LocalProtocol.localExpr], p: String) extends GlobalProtocol(exprs)
+class LocalProtocol(override val exprs: List[LocalProtocol.localExpr], p: String) extends GlobalProtocol(exprs)
 
 object LocalProtocol {
   sealed trait localExpr extends expr {

@@ -104,7 +104,7 @@ object SendPC {
 }
 
 class ReceivePC(val p: String, l: String, val u: String) extends LocalPointcut("", p, l, u) {
-//  def unapply(): Option[(String, String, String)] = Some((p, l, u))
+  //  def unapply(): Option[(String, String, String)] = Some((p, l, u))
   override def canonical(): String = "?(" + p + ", " + l + ", " + u + ")"
 }
 
@@ -195,6 +195,6 @@ case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
   }
 }
 
-class LocalAspect(name: String, val p: String, pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv) {
+class LocalAspect(name: String, val p: String, override val pc: List[LocalPointcut], adv: LocalAdvice) extends Aspect(name, pc, adv) {
   def xa = adv.xa
 }
