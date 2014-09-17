@@ -76,7 +76,7 @@ object AspectParser extends AspectParser {
  */
 
 trait AspectualAST extends expr with Positional {
-  def addToHash(lHash: HashMap[String,expr], rHash: HashMap[String,expr]) = {
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
     //throw new Exception("Add to hash is not defined for AspectualAST " + this)
   }
 }
@@ -94,21 +94,23 @@ case class Pointcut(s: String, r: String, l: String, t: String) extends Aspectua
 
 abstract class LocalPointcut(s: String, r: String, l: String, t: String) extends Pointcut(s, r, l, t)
 
-class SendPC(p: String, l: String, u: String) extends LocalPointcut(p, "", l, u) {
-  def unapply(): Option[(String, String, String)] = Some((p, l, u))
+class SendPC(val p: String, l: String, val u: String) extends LocalPointcut(p, "", l, u) {
+  //  def unapply(): Option[(String, String, String)] = Some((p, l, u))
   override def canonical(): String = "!(" + p + ", " + l + ", " + u + ")"
 }
 object SendPC {
   def apply(p: String, l: String, u: String) = new SendPC(p, l, u)
+  def unapply(s: SendPC): Option[(String, String, String)] = Some((s.p, s.l, s.u))
 }
 
-class ReceivePC(pp: String, l: String, u: String) extends LocalPointcut("", pp, l, u) {
-  def unapply(): Option[(String, String, String)] = Some((pp, l, u))
-  override def canonical(): String = "?(" + pp + ", " + l + ", " + u + ")"
+class ReceivePC(val p: String, l: String, val u: String) extends LocalPointcut("", p, l, u) {
+//  def unapply(): Option[(String, String, String)] = Some((p, l, u))
+  override def canonical(): String = "?(" + p + ", " + l + ", " + u + ")"
 }
 
 object ReceivePC {
   def apply(pp: String, l: String, u: String) = new ReceivePC(pp, l, u)
+  def unapply(r: ReceivePC): Option[(String, String, String)] = Some((r.p, r.l, r.u))
 }
 
 class NullPC extends LocalPointcut("", "", "", "") {
@@ -166,12 +168,12 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
     new AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
   }
   override def getVariables = scala.collection.mutable.Set(x1, x2)
-  
-  override def addToHash(lHash: HashMap[String,expr], rHash: HashMap[String,expr]) = {
+
+  override def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
     lHash(x1) = this
     rHash(x2) = this
   }
-  
+
 }
 
 /**

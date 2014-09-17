@@ -1,15 +1,19 @@
 package lang.aspect
 
-import lang.GlobalProtocol
-import lang.expr
-import lang.Message
-import lang.End
-import lang.Indirection
-import lang.LocalProtocol.Send
 import scala.annotation.tailrec
-import lang.aspect.uniqueMsg.SimpleMessage
+
 import lang.Choice
 import lang.ChoiceJoin
+import lang.End
+import lang.GlobalProtocol
+import lang.Indirection
+import lang.LocalProtocol
+import lang.LocalProtocol.Receive
+import lang.LocalProtocol.Send
+import lang.LocalProtocol.localExpr
+import lang.Message
+import lang.aspect.uniqueMsg.SimpleMessage
+import lang.expr
 
 object Weaver {
 
@@ -85,6 +89,17 @@ object Weaver {
     case Nil => exprs
   }
 
+  def localWeaving(aspects: List[LocalAspect], lp: LocalProtocol): LocalProtocol = {
+    aspects match {
+      case aspect :: aRest => {
+        val (matches, rest) = lp.exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
+
+        lp
+      }
+      case Nil => lp
+    }
+  }
+
   /**
    * Pointcut Matching
    */
@@ -96,6 +111,21 @@ object Weaver {
     }
     case _ => false
   }
+
+  def pointcutMatchLocal(pcs: List[LocalPointcut], e: localExpr): Boolean =
+    e match {
+      case Send(x1, p, l, u, x2) => pcs exists {
+        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+        case _ => false
+      }
+      case Receive(x1, p, l, u, x2) => pcs exists {
+        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+        case _ => false
+      }
+      case _ => false
+    }
 
   /**
    * Function responsible for maintaining the uniqueness of states
@@ -186,10 +216,5 @@ object Weaver {
       l
     }
   }
-  
-  
-  def localWeaving(aspects: List[LocalAspect], g: GlobalProtocol) = {
-    
-  }
-  
+
 }
