@@ -15,7 +15,7 @@ class GlobalSessionParser extends JavaTokenParsers {
 
   import scala.math.Ordering.String
 
-  def global: Parser[GlobalProtocol] = (implicitStart | explicitStart) ^^ ({
+  def global: Parser[GlobalProtocol] = (explicitStart | implicitStart) ^^ ({
     case (exprs,x0) => new GlobalProtocol(exprs,x0)
   })
 
