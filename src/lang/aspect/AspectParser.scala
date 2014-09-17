@@ -11,27 +11,29 @@ import scala.collection.mutable.HashMap
 import lang._
 import scala.collection.mutable.StringBuilder
 import lang.LocalProtocol.localExpr
+import lang.LocalProtocol.Send
+import lang.LocalProtocol.Receive
 
 /**
  * Parser for Aspectual Session Types
  */
 class AspectParser extends GlobalSessionParser {
 
-  def aspects: Parser[List[Aspect]] = rep(aspect)
+  def aspects: Parser[List[GlobalAspect]] = rep(aspect)
 
-  def aspect: Parser[Aspect] = "SessionAspect" ~ qualifiedName ~ "{" ~ pointcuts ~ advice ~ "}" ^^
-    { case _ ~ name ~ _ ~ pc ~ adv ~ _ => new Aspect(name, pc, adv) }
+  def aspect: Parser[GlobalAspect] = "SessionAspect" ~ qualifiedName ~ "{" ~ pointcuts ~ advice ~ "}" ^^
+    { case _ ~ name ~ _ ~ pc ~ adv ~ _ => new GlobalAspect(name, pc, adv) }
 
-  def pointcuts: Parser[List[Pointcut]] = "pointcut:" ~ repsep(pointcut, "+") ^^
-    { case _ ~ pcs => pcs }
+  def pointcuts: Parser[GlobalPointcut] = "pointcut:" ~ repsep(pointcut, "+") ^^
+    { case _ ~ pcs => new GlobalPointcut(pcs) }
 
-  def pointcut: Parser[Pointcut] = (poincutWithPayloadType | poincutWithoutPayloadType) ^^ { p => p }
+  def pointcut: Parser[GlobalPC] = (poincutWithPayloadType | poincutWithoutPayloadType) ^^ { p => p }
 
   def poincutWithPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ~ "(" ~ qNameWildcard ~ ")" ^^
-    { case p ~ _ ~ pp ~ _ ~ l ~ _ ~ t ~ _ => new Pointcut(p, pp, l, t) }
+    { case p ~ _ ~ pp ~ _ ~ l ~ _ ~ t ~ _ => new GlobalPC(p, pp, l, t) }
 
   def poincutWithoutPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ^^
-    { case p ~ _ ~ pp ~ _ ~ l => new Pointcut(p, pp, l, "") }
+    { case p ~ _ ~ pp ~ _ ~ l => new GlobalPC(p, pp, l, "") }
 
   def advice: Parser[Advice] = "advice:" ~ rep(expr | advTransition) ^^
     { case _ ~ ls => new Advice(ls, "x_0") }
@@ -45,7 +47,7 @@ class AspectParser extends GlobalSessionParser {
 }
 
 object AspectParser extends AspectParser {
-  def parse(reader: java.io.Reader): List[Aspect] = {
+  def parse(reader: java.io.Reader): List[GlobalAspect] = {
     parseAll(aspects, reader) match {
       case Success(asps, _) => {
         asps
@@ -81,39 +83,77 @@ trait AspectualAST extends expr with Positional {
   }
 }
 
-case class Pointcut(s: String, r: String, l: String, t: String) extends AspectualAST {
+abstract class Pointcut[E, S] extends AspectualAST {
   def left = throw new Exception("left called on Pointcut")
   def right = throw new Exception("right called on Pointcut")
   def substitute(s1: String, s2: String) = this
   def getVariables = scala.collection.mutable.Set()
-  override def canonical(): String = l match {
+
+  def doesMatch(e: E): Boolean
+  def contains(e: S): Boolean
+}
+
+case class GlobalPointcut(pcs: List[GlobalPC]) extends Pointcut[expr, GlobalPC] {
+  override def canonical(): String = (pcs map { _.canonical }).mkString(" + ")
+
+  override def doesMatch(e: expr): Boolean = e match {
+    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
+      case GlobalPC(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
+        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
+      case _ => false
+    }
+    case _ => false
+  }
+
+  override def contains(e: GlobalPC): Boolean = pcs.contains(e)
+}
+
+case class GlobalPC(s: String, r: String, l: String, t: String) {
+  def canonical(): String = l match {
     case "*" => s + "->" + r + ":" + l
     case _ => s + "->" + r + ":" + l + "(" + t + ")"
   }
 }
 
-abstract class LocalPointcut(s: String, r: String, l: String, t: String) extends Pointcut(s, r, l, t)
+class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, LocalPC] {
+  override def canonical(): String = (pcs map { _.canonical }).mkString(" + ")
 
-class SendPC(val p: String, l: String, val u: String) extends LocalPointcut(p, "", l, u) {
-  //  def unapply(): Option[(String, String, String)] = Some((p, l, u))
-  override def canonical(): String = "!(" + p + ", " + l + ", " + u + ")"
-}
-object SendPC {
-  def apply(p: String, l: String, u: String) = new SendPC(p, l, u)
-  def unapply(s: SendPC): Option[(String, String, String)] = Some((s.p, s.l, s.u))
+  override def doesMatch(e: localExpr): Boolean = e match {
+    case Send(x1, p, l, u, x2) => pcs exists {
+      case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+        pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+      case _ => false
+    }
+    case Receive(x1, p, l, u, x2) => pcs exists {
+      case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+        pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+      case _ => false
+    }
+    case _ => false
+  }
+
+  override def contains(e: LocalPC): Boolean = pcs.contains(e)
 }
 
-class ReceivePC(val p: String, l: String, val u: String) extends LocalPointcut("", p, l, u) {
-  //  def unapply(): Option[(String, String, String)] = Some((p, l, u))
-  override def canonical(): String = "?(" + p + ", " + l + ", " + u + ")"
+object LocalPointcut {
+  def apply(pcs: List[LocalPC]) = new LocalPointcut(pcs)
 }
 
-object ReceivePC {
-  def apply(pp: String, l: String, u: String) = new ReceivePC(pp, l, u)
-  def unapply(r: ReceivePC): Option[(String, String, String)] = Some((r.p, r.l, r.u))
+abstract class LocalPC(val p: String, val l: String, val u: String) {
+  val symbol: String
+  def canonical(): String = symbol + "(" + p + ", " + l + ", " + u + ")"
 }
 
-class NullPC extends LocalPointcut("", "", "", "") {
+case class SendPC(override val p: String, override val l: String, override val u: String) extends LocalPC(p, l, u) {
+  val symbol = "!"
+}
+
+case class ReceivePC(override val p: String, override val l: String, override val u: String) extends LocalPC(p, l, u) {
+  val symbol = "?"
+}
+
+class NullPC extends LocalPC("", "", "") {
+  val symbol: String = "0"
   override def canonical(): String = "0"
 }
 
@@ -181,21 +221,23 @@ case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
  * Base class for the algorithms
  */
 
-class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect])
+class GlobalAspectualSessionType(g: GlobalProtocol, aspects: List[Aspect[expr, GlobalPC]])
 
-case class Aspect(name: String, pc: List[Pointcut], adv: Advice) {
-
+class Aspect[+E, S](val name: String, pc: Pointcut[E, S], adv: Advice) {
   override def toString(): String = {
     val sb = new StringBuilder()
     sb ++= "Name: " + name + "\n"
     sb ++= "pc: "
-    pc foreach (p => sb ++= (p.canonical) + " ")
+    sb ++= pc.canonical
+    //    pc foreach (p => sb ++= (p.canonical) + " ")
     sb ++= "\nadvice:"
     adv.exprs foreach (e => sb ++= ("\t" + e.canonical + "\n"))
     sb.toString
   }
 }
 
-class LocalAspect(name: String, val p: String, override val pc: List[LocalPointcut],override val adv: LocalAdvice) extends Aspect(name, pc, adv) {
+case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: Advice) extends Aspect(name, pc, adv)
+
+class LocalAspect(name: String, val p: String, val pc: LocalPointcut, val adv: LocalAdvice) extends Aspect(name, pc, adv) {
   def xa = adv.xa
 }

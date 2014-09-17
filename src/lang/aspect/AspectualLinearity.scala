@@ -9,7 +9,7 @@ import lang.WFGlobalProtocol
  */
 object AspectualLinearity {
 
-  def apply(g: GlobalProtocol, a: Aspect) = {
+  def apply(g: GlobalProtocol, a: GlobalAspect) = {
     val wf = WFGlobalProtocol(g)
     val pcLinearity = PointcutLinearity(a, wf)
     val advLinearity = AdviceLinearity(wf, a)

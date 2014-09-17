@@ -15,7 +15,7 @@ import lang.Congruence
  * thus this function only tries to instantiate a WFGlobalProtocol object.
  */
 object PointcutLinearity {
-	def apply(aspect: Aspect, g: WFGlobalProtocol): Boolean = {
+	def apply(aspect: GlobalAspect, g: WFGlobalProtocol): Boolean = {
 	  try {
 	    val wovenExprs = Weaver.naiveGlobalWeaving(List(aspect), g.exprs)
 	    new WFGlobalProtocol(Congruence(wovenExprs).to)
@@ -29,7 +29,7 @@ object PointcutLinearity {
 	  }
 	}
 	
-	def apply(aspects: List[Aspect], g: WFGlobalProtocol): Boolean = {
+	def apply(aspects: List[GlobalAspect], g: WFGlobalProtocol): Boolean = {
 	  aspects forall (this.apply(_,g))
 	}
 }

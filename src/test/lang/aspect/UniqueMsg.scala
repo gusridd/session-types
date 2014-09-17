@@ -11,6 +11,7 @@ import lang.expr
 import lang.Message
 import lang.aspect.Aspect
 import lang.WFGlobalProtocol
+import lang.aspect.GlobalAspect
 
 class UniqueMsg extends PathInfo {
   import lang.aspect.uniqueMsg
@@ -61,7 +62,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
   
@@ -72,7 +73,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertFalse(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertFalse(uniqueMsg(protocol, a))
     }
   }
 
@@ -83,7 +84,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
   
@@ -98,7 +99,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertFalse(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertFalse(uniqueMsg(protocol, a))
     }
   }
   
@@ -109,7 +110,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
   
@@ -120,7 +121,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
   
@@ -131,7 +132,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertTrue(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
     }
   }
   
@@ -145,7 +146,7 @@ class UniqueMsg extends PathInfo {
     assertEquals(1, aspects.size)
 
     aspects foreach {
-      case a: Aspect => assertFalse(uniqueMsg(protocol, a))
+      case a: GlobalAspect => assertFalse(uniqueMsg(protocol, a))
     }
   }
   

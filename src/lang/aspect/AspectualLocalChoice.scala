@@ -7,7 +7,7 @@ import lang.expr
 import lang.Congruence
 
 object AspectualLocalChoice {
-  def apply(aspect: Aspect, g: GlobalProtocol): Boolean = {
+  def apply(aspect: GlobalAspect, g: GlobalProtocol): Boolean = {
     try {
       val wovenExprs = Weaver.GlobalWeaving(List(aspect), g.exprs)
       wovenExprs map {x => println(x.canonical)}
@@ -18,8 +18,8 @@ object AspectualLocalChoice {
     } 
   }
 
-  def apply(aspects: List[Aspect], g: GlobalProtocol): Boolean = {
-    val op = (exprs:List[expr], a: Aspect) => {
+  def apply(aspects: List[GlobalAspect], g: GlobalProtocol): Boolean = {
+    val op = (exprs:List[expr], a: GlobalAspect) => {
       Weaver.GlobalWeaving(List(a), exprs)
     }
     val wovenExprs: List[lang.expr] = aspects.foldLeft(g.exprs)(op)

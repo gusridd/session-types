@@ -14,7 +14,7 @@ object uniqueMsg {
   /**
    * Main method that tries to check
    */
-    def apply(g: GlobalProtocol, a: Aspect): Boolean = {
+    def apply(g: GlobalProtocol, a: GlobalAspect): Boolean = {
   
       val leftHash = a.adv.getHashes._1
       def Msg(x: String, xb: Set[String], M: Set[SimpleMessage]): Boolean = {

@@ -22,7 +22,7 @@ object Weaver {
   val regEx = """^x_[0-9]+$""".r
 
   @tailrec
-  def naiveGlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] =
+  def naiveGlobalWeaving(aspects: List[GlobalAspect], exprs: List[expr]): List[expr] =
     aspects match {
       case aspect :: aRest => {
         val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
@@ -48,7 +48,7 @@ object Weaver {
       case Nil => exprs
     }
 
-  def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
+  def GlobalWeaving(aspects: List[GlobalAspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
 
@@ -96,7 +96,7 @@ object Weaver {
         val pc = Congruence(aspect.pc)
 
         // T-Daemon
-        if (pc.size == 1 && pc(0) == NullPC()) {
+        if (pc == NullPC()) {
           val upper = findUpper((aspect.adv.exprs ++ lp.exprs) flatMap (_.getVariables))
           val fx0 = "x_" + (upper + 1)
           val fx1 = "x_" + (upper + 2)
@@ -132,29 +132,32 @@ object Weaver {
   /**
    * Pointcut Matching
    */
-  def pointcutMatchGlobal(pcs: List[Pointcut], e: expr) = e match {
-    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
-      case Pointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
-        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
-      case _ => false
-    }
-    case _ => false
-  }
+  def pointcutMatchGlobal(pc: GlobalPointcut, e: expr) = 
+//    e match {
+//    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
+//      case GlobalPointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
+//        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
+//      case _ => false
+//    }
+//    case _ => false
+//  }
+  pc.doesMatch(e)
 
-  def pointcutMatchLocal(pcs: List[LocalPointcut], e: localExpr): Boolean =
-    e match {
-      case Send(x1, p, l, u, x2) => pcs exists {
-        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-        case _ => false
-      }
-      case Receive(x1, p, l, u, x2) => pcs exists {
-        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-        case _ => false
-      }
-      case _ => false
-    }
+  def pointcutMatchLocal(pc: LocalPointcut, e: localExpr): Boolean =
+//    e match {
+//      case Send(x1, p, l, u, x2) => pcs exists {
+//        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+//          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+//        case _ => false
+//      }
+//      case Receive(x1, p, l, u, x2) => pcs exists {
+//        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+//          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+//        case _ => false
+//      }
+//      case _ => false
+//    }
+    pc.doesMatch(e)
 
   /**
    * Function responsible for maintaining the uniqueness of states

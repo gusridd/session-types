@@ -22,7 +22,7 @@ import lang.expr
 
 object LocalProjection {
 
-  def apply(a: Aspect, p: String): LocalAspect = {
+  def apply(a: GlobalAspect, p: String): LocalAspect = {
     //    Congruence(lp(a.adv.exprs, p))
     new LocalAspect(
       a.name,
@@ -60,12 +60,12 @@ object LocalProjection {
     })
   }
 
-  private[this] def pcLocalProjection(pc: List[Pointcut], p: String): List[LocalPointcut] = {
-    pc map ({
-      case Pointcut(s, r, l, u) if (p == s) => SendPC(r, l, u)
-      case Pointcut(s, r, l, u) if (p == r) => ReceivePC(s, l, u)
-      case Pointcut(s, r, l, u) => NullPC()
-    })
+  private[this] def pcLocalProjection(pc: GlobalPointcut, p: String): LocalPointcut = {
+    LocalPointcut(pc.pcs map ({
+      case GlobalPC(s, r, l, u) if (p == s) => SendPC(r, l, u)
+      case GlobalPC(s, r, l, u) if (p == r) => ReceivePC(s, l, u)
+      case GlobalPC(s, r, l, u) => NullPC()
+    }))
   }
 
   private[this] def advLocalProjection(adv: Advice, p: String): LocalAdvice = {

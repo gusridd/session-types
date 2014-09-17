@@ -50,15 +50,15 @@ object Congruence {
     exprs
   }
 
-  def apply(pc: List[LocalPointcut]): List[LocalPointcut] = {
-    val filtered = pc filter ({
+  def apply(pc: LocalPointcut): LocalPointcut = {
+    val filtered = pc.pcs filter ({
       case NullPC() => false
       case _ => true
     })
     if (filtered.size == 0) {
-      List(NullPC())
+      LocalPointcut(List(NullPC()))
     } else {
-      filtered
+      LocalPointcut(filtered)
     }
   }
 

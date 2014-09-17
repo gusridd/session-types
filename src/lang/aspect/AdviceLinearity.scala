@@ -9,7 +9,7 @@ import lang.WFGlobalProtocol
  */
 object AdviceLinearity {
 
-  def apply(g: GlobalProtocol, a: Aspect): Boolean = {
+  def apply(g: GlobalProtocol, a: GlobalAspect): Boolean = {
     val uniMsg = uniqueMsg(g, a)
     val sgTh = SgTh(g, a)
     val r = uniMsg && sgTh

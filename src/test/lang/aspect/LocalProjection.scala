@@ -45,7 +45,8 @@ class LocalProjection extends PathInfo {
 
     val Ts: LocalAspect = LocalProjection(aspect, "S")
     val pc = Ts.pc
-
+    println(pc.canonical)
+    println(SendPC("B", "Item", "String").canonical)
     assertTrue(pc.contains(SendPC("B", "Item", "String")))
   }
 
