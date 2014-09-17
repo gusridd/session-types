@@ -125,7 +125,7 @@ class UniqueMsg extends PathInfo {
   }
   
   @Test def testMFUniqueMsgLoggingTwice() {
-    val aspects = AspectParser.parse(new FR(path_mf_a + "LoggingTwice.txt"))
+    val aspects = AspectParser.parse(new FR(path_mb_a + "LoggingTwice.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)
