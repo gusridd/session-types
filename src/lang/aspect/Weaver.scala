@@ -46,7 +46,7 @@ object Weaver {
   def GlobalWeaving(aspects: List[Aspect], exprs: List[expr]): List[expr] = aspects match {
     case aspect :: aRest => {
       val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-      
+
       @tailrec
       def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
         ms match {
@@ -186,4 +186,10 @@ object Weaver {
       l
     }
   }
+  
+  
+  def localWeaving(aspects: List[LocalAspect], g: GlobalProtocol) = {
+    
+  }
+  
 }

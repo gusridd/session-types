@@ -23,8 +23,8 @@ class LocalProtocol {
   @Test def testHelloWorld() {
     val g = getProtocol(new FR(path_wf + "HelloWorld.txt"))
     
-    val localMe = LocalProjection(g,"Me").toSet
-    val localWorld = LocalProjection(g,"World").toSet
+    val localMe = LocalProjection(g,"Me").exprs.toSet
+    val localWorld = LocalProjection(g,"World").exprs.toSet
     
     localMe foreach(f=>println(f.canonical))
     println()
@@ -41,9 +41,9 @@ class LocalProtocol {
   @Test def testOnlineBookStore() {
     val g = getProtocol(new FR(path_wf + "OnlineBookstore.txt"))
     
-    val localBuyer1 = LocalProjection(g,"Buyer1").toSet
-    val localBuyer2 = LocalProjection(g,"Buyer2").toSet
-    val localSeller = LocalProjection(g,"Seller").toSet
+    val localBuyer1 = LocalProjection(g,"Buyer1").exprs.toSet
+    val localBuyer2 = LocalProjection(g,"Buyer2").exprs.toSet
+    val localSeller = LocalProjection(g,"Seller").exprs.toSet
     
     println("##Buyer1##")
     localBuyer1 foreach (e => println(e.canonical))
