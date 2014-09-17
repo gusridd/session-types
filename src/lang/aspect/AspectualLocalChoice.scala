@@ -9,9 +9,9 @@ import lang.Congruence
 object AspectualLocalChoice {
   def apply(aspect: GlobalAspect, g: GlobalProtocol): Boolean = {
     try {
-      val wovenExprs = Weaver.GlobalWeaving(List(aspect), g.exprs)
-      wovenExprs map {x => println(x.canonical)}
-      new WFGlobalProtocol(Congruence(wovenExprs).to, g.x_0)
+      val wovenProtocol = Weaver.GlobalWeaving(List(aspect), g)
+//      wovenExprs map {x => println(x.canonical)}
+      WFGlobalProtocol(Congruence(wovenProtocol))
       true
     } catch {
       case e: WFConditionException => false
@@ -19,15 +19,15 @@ object AspectualLocalChoice {
   }
 
   def apply(aspects: List[GlobalAspect], g: GlobalProtocol): Boolean = {
-    val op = (exprs:List[expr], a: GlobalAspect) => {
-      Weaver.GlobalWeaving(List(a), exprs)
+    val op = (g:GlobalProtocol, a: GlobalAspect) => {
+      Weaver.GlobalWeaving(List(a), g)
     }
-    val wovenExprs: List[lang.expr] = aspects.foldLeft(g.exprs)(op)
+    val wovenProtocol = aspects.foldLeft(g)(op)
     println("------woven protocol")
-    wovenExprs map {x => println(x.canonical)}
+//    wovenExprs map {x => println(x.canonical)}
     println("------end woven protocol")
     try {
-      new WFGlobalProtocol(Congruence(wovenExprs).to, g.x_0)
+      WFGlobalProtocol(Congruence(wovenProtocol))
       true
     } catch {
       case e: WFConditionException => false

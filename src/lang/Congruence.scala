@@ -19,11 +19,11 @@ import lang.aspect.LocalPointcut
  */
 object Congruence {
 
-  def apply(g: GlobalProtocol): Iterable[lang.expr] = {
-    this.apply(g.exprs)
+  def apply(g: GlobalProtocol): GlobalProtocol = {
+    new GlobalProtocol(replace(g.exprs),g.x_0)
   }
 
-  def apply(exprs: List[lang.expr]): List[lang.expr] = {
+  private[this] def replace(exprs: List[lang.expr]): List[lang.expr] = {
     @tailrec
     def reduce(exprs: List[lang.expr], rec: List[lang.expr]): List[lang.expr] = {
       rec match {
@@ -45,9 +45,9 @@ object Congruence {
     reduce(exprs, exprs)
   }
 
-  def apply(exprs: Iterable[localExpr]): Iterable[localExpr] = {
+  def apply(lp: LocalProtocol): LocalProtocol = {
     //TODO: Congruence rules for localExpr
-    exprs
+    lp
   }
 
   def apply(pc: LocalPointcut): LocalPointcut = {

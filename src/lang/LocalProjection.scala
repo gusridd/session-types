@@ -16,15 +16,17 @@ object LocalProjection {
   def apply(g: GlobalProtocol, p: String): LocalProtocol = {
     g.getParticipants().find(_ == p) match {
       case Some(pp) => {
-        new LocalProtocol(Congruence(lp(g, p)).to, p,g.x_0)
+//        val cg = Congruence(lp(g, p))
+//        new LocalProtocol(Congruence(lp(g, p)).to, p, g.x_0)
+        Congruence(lp(g, p))
       }
       case None =>
         throw new Exception("Trying to project a non-existant participant " + p)
     }
   }
 
-  private[this] def lp(g: GlobalProtocol, participant: String): Iterable[localExpr] = {
-    g.exprs map (e => e match {
+  private[this] def lp(g: GlobalProtocol, participant: String): LocalProtocol = {
+    new LocalProtocol((g.exprs map (e => e match {
       case Message(x, p, pp, l, t, xp) if (participant == p) => Send(x, pp, l, t, xp)
       case Message(x, p, pp, l, t, xp) if (participant == pp) => Receive(x, p, l, t, xp)
       case Message(x, p, pp, l, t, xp) => LocalProtocol.Indirection(x, xp)
@@ -44,7 +46,7 @@ object LocalProjection {
       }
       case ChoiceJoin(x, xp, xpp) => Merge(x, xp, xpp)
       case End(x) => LocalProtocol.End(x)
-    })
+    })), participant, g.x_0)
   }
 
 }

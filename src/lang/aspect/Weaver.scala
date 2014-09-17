@@ -15,6 +15,7 @@ import lang.aspect.uniqueMsg.SimpleMessage
 import lang.expr
 import lang.Congruence
 import lang.Parallel
+import lang.GlobalProtocol
 
 object Weaver {
 
@@ -22,12 +23,13 @@ object Weaver {
   val regEx = """^x_[0-9]+$""".r
 
   @tailrec
-  def naiveGlobalWeaving(aspects: List[GlobalAspect], exprs: List[expr]): List[expr] =
+  def naiveGlobalWeaving(aspects: List[GlobalAspect], g: GlobalProtocol): GlobalProtocol = {
+    val exprs = g.exprs
     aspects match {
       case aspect :: aRest => {
         val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
         naiveGlobalWeaving(aRest,
-          (matches flatMap ({
+          new GlobalProtocol((matches flatMap ({
             case m @ Message(x, s, r, l, u, xp) => {
               /**
                *  The localize function is applied and the 'proceed' keyword
@@ -43,51 +45,56 @@ object Weaver {
               })) :+ Indirection(x, format(x, "x_0"))
             }
             case _ => throw new Exception("Weaving only matches messages")
-          })) ++ rest)
+          })) ++ rest, g.x_0))
+      }
+      case Nil => g
+    }
+  }
+
+  def GlobalWeaving(aspects: List[GlobalAspect], g: GlobalProtocol): GlobalProtocol = {
+    val exprs = g.exprs
+    val r = aspects match {
+      case aspect :: aRest => {
+        val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
+
+        @tailrec
+        def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
+          ms match {
+            case m :: restm => m match {
+              case m @ Message(x, s, r, l, u, xp) => {
+                val Gap = tag(localize(aspect.adv, x), m, all.to)
+                val upper = findUpper(((Gap.exprs ++ all)) flatMap (_.getVariables))
+
+                val fx1 = "x_" + (upper + 1)
+                val fx2 = "x_" + (upper + 2)
+                val fx3 = "x_" + (upper + 3)
+
+                val lp = freshLabel(aspect.adv.exprs ++ all, l)
+                val newMessage = Message(fx1, s, r, lp, u, fx2)
+                val newChoice = Choice(x, fx1, Gap.xa)
+                val newMerge = ChoiceJoin(fx2, fx3, xp)
+
+                val res = ((Gap.exprs map ({
+                  case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
+                  case End(xe) => Indirection(xe, fx3)
+                  case e => e
+                })) ++ List(newMessage, newChoice, newMerge))
+
+                val set: Set[expr] = (res ++ all).to
+
+                replaceMatch(restm, set.to)
+              }
+              case _ => throw new Exception("Weaving should only match messages")
+            }
+            case Nil => all
+          }
+        }
+
+        (replaceMatch(matches, exprs.to) -- matches).to
       }
       case Nil => exprs
     }
-
-  def GlobalWeaving(aspects: List[GlobalAspect], exprs: List[expr]): List[expr] = aspects match {
-    case aspect :: aRest => {
-      val (matches, rest) = exprs partition { e => pointcutMatchGlobal(aspect.pc, e) }
-
-      @tailrec
-      def replaceMatch(ms: List[expr], all: Set[expr]): Set[expr] = {
-        ms match {
-          case m :: restm => m match {
-            case m @ Message(x, s, r, l, u, xp) => {
-              val Gap = tag(localize(aspect.adv, x), m, all.to)
-              val upper = findUpper(((Gap.exprs ++ all)) flatMap (_.getVariables))
-
-              val fx1 = "x_" + (upper + 1)
-              val fx2 = "x_" + (upper + 2)
-              val fx3 = "x_" + (upper + 3)
-
-              val lp = freshLabel(aspect.adv.exprs ++ all, l)
-              val newMessage = Message(fx1, s, r, lp, u, fx2)
-              val newChoice = Choice(x, fx1, Gap.xa)
-              val newMerge = ChoiceJoin(fx2, fx3, xp)
-
-              val res = ((Gap.exprs map ({
-                case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
-                case End(xe) => Indirection(xe, fx3)
-                case e => e
-              })) ++ List(newMessage, newChoice, newMerge))
-
-              val set: Set[expr] = (res ++ all).to
-
-              replaceMatch(restm, set.to)
-            }
-            case _ => throw new Exception("Weaving should only match messages")
-          }
-          case Nil => all
-        }
-      }
-
-      (replaceMatch(matches, exprs.to) -- matches).to
-    }
-    case Nil => exprs
+    new GlobalProtocol(r.to, g.x_0)
   }
 
   def localWeaving(aspects: List[LocalAspect], lp: LocalProtocol): LocalProtocol = {
@@ -111,12 +118,12 @@ object Weaver {
         def replaceMatch(ms: List[localExpr], all: Set[localExpr]): Set[localExpr] = {
           ms match {
             case m :: restm => m match {
-//              case s @ Send(x, p, l, u, xp) => {
-//
-//              }
-//              case r @ Receive(x, p, l, u, xp) => {
-//
-//              }
+              //              case s @ Send(x, p, l, u, xp) => {
+              //
+              //              }
+              //              case r @ Receive(x, p, l, u, xp) => {
+              //
+              //              }
               case _ => all
               case _ => throw new Exception("Weaving should only match messages")
             }
@@ -132,31 +139,31 @@ object Weaver {
   /**
    * Pointcut Matching
    */
-  def pointcutMatchGlobal(pc: GlobalPointcut, e: expr) = 
-//    e match {
-//    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
-//      case GlobalPointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
-//        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
-//      case _ => false
-//    }
-//    case _ => false
-//  }
-  pc.doesMatch(e)
+  def pointcutMatchGlobal(pc: GlobalPointcut, e: expr) =
+    //    e match {
+    //    case Message(x1, s1, r1, l1, t1, x2) => pcs exists {
+    //      case GlobalPointcut(s2, r2, l2, t2) if (s1 == s2 && r1 == r2) =>
+    //        l2 == "*" || (l2 == l1 && (t2 == "*" || t2 == t1))
+    //      case _ => false
+    //    }
+    //    case _ => false
+    //  }
+    pc.doesMatch(e)
 
   def pointcutMatchLocal(pc: LocalPointcut, e: localExpr): Boolean =
-//    e match {
-//      case Send(x1, p, l, u, x2) => pcs exists {
-//        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-//          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-//        case _ => false
-//      }
-//      case Receive(x1, p, l, u, x2) => pcs exists {
-//        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
-//          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
-//        case _ => false
-//      }
-//      case _ => false
-//    }
+    //    e match {
+    //      case Send(x1, p, l, u, x2) => pcs exists {
+    //        case SendPC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+    //          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+    //        case _ => false
+    //      }
+    //      case Receive(x1, p, l, u, x2) => pcs exists {
+    //        case ReceivePC(pc_p, pc_l, pc_u) if (p == pc_p) =>
+    //          pc_l == "*" || (l == pc_l && (pc_u == "*" || u == pc_u))
+    //        case _ => false
+    //      }
+    //      case _ => false
+    //    }
     pc.doesMatch(e)
 
   /**

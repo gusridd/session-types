@@ -101,7 +101,7 @@ class Linearity extends PathInfo {
      * The actual apply method of Linearity applies the congruence reduction
      * but for testing purposes here is needed by hand
      */
-    val g = new GlobalProtocol(Congruence(og.exprs).to, og.x_0)
+    val g = Congruence(og)
 
     val s1 = lin(g)("x_4")
     val s2 = lin(g)("x_5")
