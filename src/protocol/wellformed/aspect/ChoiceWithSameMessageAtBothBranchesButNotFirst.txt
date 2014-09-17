@@ -1,0 +1,17 @@
+SessionAspect ChoiceWithSameMessageAtBothBranchesButNotFirst {
+	pointcut: 
+		B -> S : * + B -> C: *
+	advice: 
+		x_0 = x_1 + x_5
+		
+		x_1 = A -> D: Msg1(String); x_2
+		x_2 = D -> A: Ack(String); x_3
+		x_3 = A -> D: Msg(String); x_4
+		
+		x_5 = A -> D: Msg2(String); x_6
+		x_6 = A -> D: Ack(String); x_7
+		x_7 = A -> D: Msg(String); x_8
+		
+		x_4 + x_8 = x_9
+		x_9 = end
+}
