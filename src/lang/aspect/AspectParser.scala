@@ -35,8 +35,8 @@ class AspectParser extends GlobalSessionParser {
   def poincutWithoutPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ^^
     { case p ~ _ ~ pp ~ _ ~ l => new GlobalPC(p, pp, l, "") }
 
-  def advice: Parser[Advice] = "advice:" ~ rep(expr | advTransition) ^^
-    { case _ ~ ls => new Advice(ls, "x_0") }
+  def advice: Parser[GlobalAdvice] = "advice:" ~ rep(expr | advTransition) ^^
+    { case _ ~ ls => new GlobalAdvice(ls, "x_0") }
 
   def advTransition: Parser[AdviceTransition] = xid ~ "=" ~ "proceed" ~ ";" ~ xid ^^
     { case x1 ~ _ ~ _ ~ _ ~ x2 => new AdviceTransition(x1, x2) }
@@ -83,7 +83,7 @@ trait AspectualAST extends expr with Positional {
   }
 }
 
-abstract class Pointcut[E, S] extends AspectualAST {
+sealed abstract class Pointcut[E, S] extends AspectualAST {
   def left = throw new Exception("left called on Pointcut")
   def right = throw new Exception("right called on Pointcut")
   def substitute(s1: String, s2: String) = this
@@ -162,12 +162,15 @@ object NullPC {
   def unapply(n: NullPC) = Some()
 }
 
-case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
+sealed abstract class Advice(val exprs: List[expr], val xa: String) extends AspectualAST {
+  type T <: Advice
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
-  def substitute(s1: String, s2: String) = {
-    new Advice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
+  def substitute(s1: String, s2: String): this.type = {
+    construct(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
+
+  def construct[E <: expr](exprs: List[E], xa: String): this.type
   def getVariables = exprs.flatMap(_.getVariables).to
 
   implicit class sustitutableString(s: String) {
@@ -199,8 +202,22 @@ case class Advice(exprs: List[expr], xa: String) extends AspectualAST {
     (leftHash, rightHash)
   }
 }
+class GlobalAdvice(override val exprs: List[expr], xa: String) extends Advice(exprs, xa){
+  type T = GlobalAdvice
+  def construct(exprs: List[expr], xa: String) = GlobalAdvice(exprs,xa)
+}
+object GlobalAdvice{
+  def apply(exprs: List[expr], xa: String): GlobalAdvice = new GlobalAdvice(exprs,xa)
+}
 
-class LocalAdvice(exprs: List[localExpr], xa: String) extends Advice(exprs, xa)
+class LocalAdvice(override val exprs: List[localExpr], xa: String) extends Advice(exprs, xa){
+  type T = LocalAdvice
+  def construct(exprs: List[localExpr], xa: String) = LocalAdvice(exprs,xa)
+}
+
+object LocalAdvice{
+  def apply(exprs: List[localExpr], xa: String): LocalAdvice = new LocalAdvice(exprs,xa)
+}
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
   override def left = x1
@@ -236,7 +253,7 @@ class Aspect[+E, S](val name: String, pc: Pointcut[E, S], adv: Advice) {
   }
 }
 
-case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: Advice) extends Aspect(name, pc, adv)
+case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: GlobalAdvice) extends Aspect(name, pc, adv)
 
 class LocalAspect(name: String, val p: String, val pc: LocalPointcut, val adv: LocalAdvice) extends Aspect(name, pc, adv) {
   def xa = adv.xa
