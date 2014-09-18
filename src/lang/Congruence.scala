@@ -46,7 +46,6 @@ object Congruence {
   }
 
   def apply(lp: LocalProtocol): LocalProtocol = {
-    //TODO: Congruence rules for localExpr
     @tailrec
     def reduce(lp: LocalProtocol, rec: List[localExpr]): LocalProtocol = {
       rec match {

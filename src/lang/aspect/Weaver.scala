@@ -133,10 +133,10 @@ object Weaver {
 
         localWeaving(aRest,
           new LocalProtocol((matches flatMap ({
-            case Send(x, p, l, u, xp) => {
+            case e@Send(x, p, l, u, xp) => {
               /**
                *  The localize function is applied and the 'proceed' keyword
-               *  is replaced by the actual message and
+               *  is replaced by the actual send and
                *  end is replaced by xp, which is the ending
                *  variable from the message
                */
@@ -146,12 +146,13 @@ object Weaver {
                 case e => e
               })) :+ LocalProtocol.Indirection(x, format(x, aspect.xa))
             }
-            case Receive(x, p, l, u, xp) => {
+            case e@Receive(x, p, l, u, xp) => {
               /**
-               * The same as above
+               * The same as above, but changing proceed -> receive
                */
+              println("[INFO] matched: " + e.canonical)
               (localize(aspect.adv, x).exprs map ({
-                case LocalProtocol.AdviceTransition(x1, x2) => Send(x1, p, l, u, x2)
+                case LocalProtocol.AdviceTransition(x1, x2) => Receive(x1, p, l, u, x2)
                 case LocalProtocol.End(xe) => LocalProtocol.Indirection(xe, xp)
                 case e => e
               })) :+ LocalProtocol.Indirection(x, format(x, aspect.xa))
