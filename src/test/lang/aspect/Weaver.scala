@@ -9,6 +9,9 @@ import test.lang.PathInfo
 import lang.GlobalParser
 import lang.expr
 import lang.Congruence
+import lang.LocalProtocol.Send
+import lang.LocalProtocol.SimpSend
+import lang.LocalProtocol.SimpReceive
 
 class Weaver extends PathInfo {
   import lang.aspect.Weaver
@@ -90,6 +93,10 @@ class Weaver extends PathInfo {
     println("LOCAL WOVEN TYPE")
     //    localWovenType.exprs map (x => println(x.canonical))
     println(localWovenType.canonical(1))
+    
+    assertTrue(localWovenType.contains(SimpSend("B","Counter","Int")))
+    assertTrue(localWovenType.contains(SimpReceive("B","Offer","Int")))
+    assertTrue(localWovenType.contains(SimpReceive("B","Purchase","Boolean")))
   }
 
 }

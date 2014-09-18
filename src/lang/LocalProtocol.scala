@@ -2,12 +2,32 @@ package lang
 
 import scala.collection.mutable.Set
 import scala.collection.mutable.HashMap
+import lang.LocalProtocol.SimpleLocalExpr
+import lang.LocalProtocol.Send
+import lang.LocalProtocol.SimpSend
+import lang.LocalProtocol.Receive
+import lang.LocalProtocol.SimpReceive
 
-class LocalProtocol(override val exprs: List[LocalProtocol.localExpr], val p: String, x_0: String) extends GlobalProtocol(exprs,x_0)
+class LocalProtocol(override val exprs: List[LocalProtocol.localExpr], val p: String, x_0: String) extends GlobalProtocol(exprs, x_0) {
+  
+  def contains(smpl: SimpleLocalExpr): Boolean = {
+    exprs exists {
+      case Send(_,p,l,u,_) => smpl match {
+        case SimpSend(pp,lp,up) => p == pp && l ==lp && u == up
+        case _ => false
+      }
+      case Receive(_,p,l,u,_) => smpl match {
+        case SimpReceive(pp,lp,up) => p == pp && l ==lp && u == up
+        case _ => false
+      }
+      case _ => false
+    }
+  }
+}
 
 object LocalProtocol {
 
-//  def apply(exprs: List[LocalProtocol.localExpr], p: String) = new LocalProtocol(exprs, p)
+  //  def apply(exprs: List[LocalProtocol.localExpr], p: String) = new LocalProtocol(exprs, p)
 
   sealed trait localExpr extends expr {
     //    def canonical(): String = left + " = " + right
@@ -15,6 +35,8 @@ object LocalProtocol {
     def right: String
     def substitute(s1: String, s2: String): localExpr
   }
+  
+  trait SimpleLocalExpr
 
   case class Send(x1: String, p: String, l: String, U: String, x2: String) extends localExpr {
     def left = x1
@@ -27,6 +49,8 @@ object LocalProtocol {
       rHash(x2) = this
     }
   }
+
+  case class SimpSend(p: String, l: String, u: String) extends SimpleLocalExpr
 
   case class Receive(x1: String, p: String, l: String, U: String, x2: String) extends localExpr {
     def left = x1
@@ -41,6 +65,8 @@ object LocalProtocol {
       rHash(x2) = this
     }
   }
+
+  case class SimpReceive(p: String, l: String, u: String) extends SimpleLocalExpr
 
   case class Indirection(x1: String, x2: String) extends localExpr {
     def left = x1
