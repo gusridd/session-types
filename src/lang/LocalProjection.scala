@@ -16,12 +16,18 @@ object LocalProjection {
   def apply(g: GlobalProtocol, p: String): LocalProtocol = {
     g.getParticipants().find(_ == p) match {
       case Some(pp) => {
-//        val cg = Congruence(lp(g, p))
-//        new LocalProtocol(Congruence(lp(g, p)).to, p, g.x_0)
         Congruence(lp(g, p))
       }
-      case None =>
-        throw new Exception("Trying to project a non-existant participant " + p)
+      case None => {
+        /**
+         * In multiparty session types, projection to a non-existant participant
+         * is not defined, but in aspectual session types we define it as an
+         * empty protocol
+         */
+        new LocalProtocol(List(NullAction("x_0", "x_1"), LocalProtocol.End("x_1")), p, "x_0")
+//        throw new Exception("Trying to project a non-existant participant " + p)
+      }
+
     }
   }
 

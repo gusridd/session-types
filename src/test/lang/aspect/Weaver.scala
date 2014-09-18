@@ -182,7 +182,7 @@ class Weaver extends PathInfo {
     val localProtocol = lang.LocalProjection(protocol, p)
 
     val localWovenType = Congruence(Weaver.localWeaving(localAspects, localProtocol))
-
+    println(localWovenType.canonical(0))
     assertTrue(localWovenType.contains(SimpSend("B", "Retry", "")))
     assertTrue(localWovenType.contains(SimpReceive("B", "Auth", "String")))
     assertTrue(localWovenType.contains(SimpSend("B", "OK", "")))
@@ -243,14 +243,6 @@ class Weaver extends PathInfo {
     val localProtocol = lang.LocalProjection(protocol, p)
 
     val localWovenType = Congruence(Weaver.localWeaving(localAspects, localProtocol))
-    //    println("GLOBAL ASPECT")
-    //    println(aspects(0).toString)
-    //    println("LOCAL PROTOCOL")
-    //    println(localProtocol.canonical(1))
-    //    println("LOCAL ASPECT")
-    //    println(localAspects(0).toString)
-    //    println("LOCAL WOVEN TYPE")
-    //    println(localWovenType.canonical(1))
 
     assertTrue(localWovenType.contains(SimpSend("T", "Result", "")))
     assertTrue(localWovenType.contains(SimpSend("W1", "Ready", "")))
