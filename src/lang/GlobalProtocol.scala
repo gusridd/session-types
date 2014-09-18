@@ -83,7 +83,8 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
 
   def canonical(tabs: Int = 0): String = {
     val sb = new StringBuilder
-    exprs foreach (e => sb ++= (("\t" * tabs) + e.canonical + "\n"))
+    exprs foreach (e => sb ++= "\n" + (("\t" * tabs) + e.canonical))
+    sb ++= " in " + x_0
     sb.toString
   }
 }

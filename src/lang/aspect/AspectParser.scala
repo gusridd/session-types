@@ -120,7 +120,7 @@ case class GlobalPC(s: String, r: String, l: String, t: String) {
   }
 }
 
-class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, LocalPC] {
+case class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, LocalPC] {
   override def canonical(): String = (pcs map { _.canonical }).mkString(" + ")
 
   override def doesMatch(e: localExpr): Boolean = e match {
@@ -136,12 +136,13 @@ class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, LocalPC]
     }
     case _ => false
   }
+  
+  def isNullPc: Boolean = pcs match {
+    case List(NullPC()) => true
+    case _ => false
+  }
 
   override def contains(e: LocalPC): Boolean = pcs.contains(e)
-}
-
-object LocalPointcut {
-  def apply(pcs: List[LocalPC]) = new LocalPointcut(pcs)
 }
 
 abstract class LocalPC(val p: String, val l: String, val u: String) {
@@ -259,7 +260,8 @@ class Aspect[+E, S, A <: Advice[A]](val name: String, pc: Pointcut[E, S], adv: A
     sb ++= pc.canonical
     //    pc foreach (p => sb ++= (p.canonical) + " ")
     sb ++= "\nadvice:"
-    adv.exprs foreach (e => sb ++= ("\t" + e.canonical + "\n"))
+    adv.exprs foreach (e => sb ++= ("\n\t" + e.canonical))
+    sb ++= " in " + xa
     sb.toString
   }
 
