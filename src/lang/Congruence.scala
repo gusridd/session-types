@@ -20,7 +20,7 @@ import lang.aspect.LocalPointcut
 object Congruence {
 
   def apply(g: GlobalProtocol): GlobalProtocol = {
-    new GlobalProtocol(replace(g.exprs),g.x_0)
+    new GlobalProtocol(replace(g.exprs), g.x_0)
   }
 
   private[this] def replace(exprs: List[lang.expr]): List[lang.expr] = {
@@ -47,7 +47,26 @@ object Congruence {
 
   def apply(lp: LocalProtocol): LocalProtocol = {
     //TODO: Congruence rules for localExpr
-    lp
+    @tailrec
+    def reduce(lp: LocalProtocol, rec: List[localExpr]): LocalProtocol = {
+      rec match {
+        case e :: rest => e match {
+          case i @ LocalProtocol.Indirection(x1, x2) => {
+            val nExprs = (lp.exprs filterNot (_ == i)).map(_.substitute(x2, x1))
+            reduce(new LocalProtocol(nExprs, lp.p, lp.x_0.sub(x2, x1)), rest.map(_.substitute(x2, x1)))
+          }
+          case i @ LocalProtocol.NullAction(x1, x2) => {
+            val nExprs = (lp.exprs filterNot (_ == i)).map(_.substitute(x2, x1))
+            reduce(new LocalProtocol(nExprs, lp.p, lp.x_0.sub(x2, x1)), rest.map(_.substitute(x2, x1)))
+          }
+          case _ => {
+            reduce(lp, rest)
+          }
+        }
+        case Nil => lp
+      }
+    }
+    reduce(lp, lp.exprs)
   }
 
   def apply(pc: LocalPointcut): LocalPointcut = {
