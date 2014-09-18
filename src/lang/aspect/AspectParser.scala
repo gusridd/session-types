@@ -35,8 +35,13 @@ class AspectParser extends GlobalSessionParser {
   def poincutWithoutPayloadType = qualifiedName ~ "->" ~ qualifiedName ~ ":" ~ qNameWildcard ^^
     { case p ~ _ ~ pp ~ _ ~ l => new GlobalPC(p, pp, l, "") }
 
-  def advice: Parser[GlobalAdvice] = "advice:" ~ rep(expr | advTransition) ^^
+  def advice: Parser[GlobalAdvice] = (explicitAdvice | implicitAdvice) ^^ { x => x }
+
+  def implicitAdvice: Parser[GlobalAdvice] = "advice:" ~ rep(expr | advTransition) ^^
     { case _ ~ ls => new GlobalAdvice(ls, "x_0") }
+
+  def explicitAdvice: Parser[GlobalAdvice] = "advice:" ~ rep(expr | advTransition) ~ "in" ~ xid ^^
+    { case _ ~ ls ~ _ ~ x0 => new GlobalAdvice(ls, x0) }
 
   def advTransition: Parser[AdviceTransition] = xid ~ "=" ~ "proceed" ~ ";" ~ xid ^^
     { case x1 ~ _ ~ _ ~ _ ~ x2 => new AdviceTransition(x1, x2) }
@@ -257,10 +262,10 @@ class Aspect[+E, S, A <: Advice[A]](val name: String, pc: Pointcut[E, S], adv: A
     adv.exprs foreach (e => sb ++= ("\t" + e.canonical + "\n"))
     sb.toString
   }
+
+  def xa = adv.xa
 }
 
 case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: GlobalAdvice) extends Aspect(name, pc, adv)
 
-class LocalAspect(name: String, val p: String, val pc: LocalPointcut, val adv: LocalAdvice) extends Aspect(name, pc, adv) {
-  def xa = adv.xa
-}
+class LocalAspect(name: String, val p: String, val pc: LocalPointcut, val adv: LocalAdvice) extends Aspect(name, pc, adv)
