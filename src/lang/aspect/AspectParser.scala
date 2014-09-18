@@ -163,18 +163,15 @@ object NullPC {
 }
 
 trait Advice[A <: Advice[A]] extends AspectualAST {
-//  type T <: Advice
   A =>
   val exprs: List[expr]
   val xa: String
-  
+
   def left = throw new Exception("left called on Advice")
   def right = throw new Exception("right called on Advice")
-  
+
   override def substitute(s1: String, s2: String): A
 
-//  def construct[E <: expr,A <: Advice](exprs: List[E], xa: String): A
-  
   def getVariables = exprs.flatMap(_.getVariables).to
 
   implicit class sustitutableString(s: String) {
@@ -206,28 +203,26 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
     (leftHash, rightHash)
   }
 }
-class GlobalAdvice(override val exprs: List[expr],val xa: String) extends Advice[GlobalAdvice]{
-//  type T = GlobalAdvice
-//  def construct[expr,GlobalAdvice](exprs: List[lang.expr], xa: String): GlobalAdvice = GlobalAdvice(exprs,xa)
-  
+class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice] {
+
   override def substitute(s1: String, s2: String) = {
     GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
+
 }
-object GlobalAdvice{
-  def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs,xa)
+object GlobalAdvice {
+  def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs, xa)
 }
 
-class LocalAdvice(override val exprs: List[localExpr],val xa: String) extends Advice[LocalAdvice]{
-//  type T = LocalAdvice
-//  def construct(exprs: List[localExpr], xa: String) = LocalAdvice(exprs,xa)
+class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] {
+
   override def substitute(s1: String, s2: String): LocalAdvice = {
     LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
-}
 
-object LocalAdvice{
-  def apply(exprs: List[localExpr], xa: String) = new LocalAdvice(exprs,xa)
+}
+object LocalAdvice {
+  def apply(exprs: List[localExpr], xa: String) = new LocalAdvice(exprs, xa)
 }
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
