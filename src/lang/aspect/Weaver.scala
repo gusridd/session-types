@@ -46,7 +46,7 @@ object Weaver {
                 case AdviceTransition(x1, x2) => Message(x1, s, r, l, u, x2)
                 case End(xe) => Indirection(xe, xp)
                 case e => e
-              })) :+ Indirection(x, format(x, "x_0"))
+              })) :+ Indirection(x, format(x, aspect.xa))
             }
             case _ => throw new Exception("Weaving only matches messages")
           })) ++ rest, g.x_0))
