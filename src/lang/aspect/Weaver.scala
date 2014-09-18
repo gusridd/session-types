@@ -105,22 +105,27 @@ object Weaver {
     aspects match {
       case aspect :: aRest => {
         val pc = Congruence(aspect.pc)
-
         // T-Daemon
-        if (pc == NullPC()) {
+        if (pc.isNullPc) {
+          println("[T-Daemon]")
           val upper = findUpper((aspect.adv.exprs ++ lp.exprs) flatMap (_.getVariables))
           val fx0 = "x_" + (upper + 1)
           val fx1 = "x_" + (upper + 2)
           val fxe = "x_" + (upper + 3)
 
-          val nParallel = Fork(fx0, lp.x_0, fx1)
-          val nChoiceJoin = Merge(fx1, fxe, aspect.xa)
-          val replacedTa: List[localExpr] = aspect.adv.exprs map {
+          
+          val localizedTa = localize(aspect.adv, fxe)
+          val replacedTa: List[localExpr] = localizedTa.exprs map {
             case LocalProtocol.AdviceTransition(x1, x2) => LocalProtocol.NullAction(x1, x2)
             case LocalProtocol.End(x) => LocalProtocol.Indirection(x, fxe)
             case e => e
           }
-          return new LocalProtocol(replacedTa ++ List(nParallel, nChoiceJoin), lp.p, fx0)
+          val nParallel = Fork(fx0, lp.x_0, fx1)
+          val nChoiceJoin = Merge(fx1, fxe, localizedTa.xa)
+//          println("nParallel: " + nParallel)
+//          println("nChoiceJoin: " + nChoiceJoin)
+//          println("replacedTa" + replacedTa)
+          return new LocalProtocol(lp.exprs ++ replacedTa ++ List(nParallel, nChoiceJoin), lp.p, fx0)
         }
 
         // T-NoDaemon
@@ -154,22 +159,22 @@ object Weaver {
             case _ => throw new Exception("Weaving only matches messages")
           })) ++ rest, lp.p, lp.x_0))
 
-        def replaceMatch(ms: List[localExpr], all: Set[localExpr]): Set[localExpr] = {
-          ms match {
-            case m :: restm => m match {
-              //              case s @ Send(x, p, l, u, xp) => {
-              //
-              //              }
-              //              case r @ Receive(x, p, l, u, xp) => {
-              //
-              //              }
-              case _ => all
-              case _ => throw new Exception("Weaving should only match messages")
-            }
-            case Nil => all
-          }
-        }
-        new LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p, lp.x_0)
+        //        def replaceMatch(ms: List[localExpr], all: Set[localExpr]): Set[localExpr] = {
+        //          ms match {
+        //            case m :: restm => m match {
+        //              //              case s @ Send(x, p, l, u, xp) => {
+        //              //
+        //              //              }
+        //              //              case r @ Receive(x, p, l, u, xp) => {
+        //              //
+        //              //              }
+        //              case _ => all
+        //              case _ => throw new Exception("Weaving should only match messages")
+        //            }
+        //            case Nil => all
+        //          }
+        //        }
+        //        new LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p, lp.x_0)
       }
       case Nil => lp
     }
