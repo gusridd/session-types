@@ -105,7 +105,9 @@ object Weaver {
     aspects match {
       case aspect :: aRest => {
         val pc = Congruence(aspect.pc)
-        // T-Daemon
+        /**
+         * T-Daemon
+         */
         if (pc.isNullPc) {
           println("[T-Daemon]")
           val upper = findUpper((aspect.adv.exprs ++ lp.exprs) flatMap (_.getVariables))
@@ -122,13 +124,11 @@ object Weaver {
           }
           val nParallel = Fork(fx0, lp.x_0, fx1)
           val nChoiceJoin = Merge(fx1, fxe, localizedTa.xa)
-//          println("nParallel: " + nParallel)
-//          println("nChoiceJoin: " + nChoiceJoin)
-//          println("replacedTa" + replacedTa)
           return new LocalProtocol(lp.exprs ++ replacedTa ++ List(nParallel, nChoiceJoin), lp.p, fx0)
         }
-
-        // T-NoDaemon
+        /**
+         * T-NoDaemon
+         */
         val (matches, rest) = lp.exprs partition { e => pointcutMatchLocal(pc, e) }
 
         localWeaving(aRest,
@@ -159,23 +159,6 @@ object Weaver {
             }
             case _ => throw new Exception("Weaving only matches messages")
           })) ++ rest, lp.p, lp.x_0))
-
-        //        def replaceMatch(ms: List[localExpr], all: Set[localExpr]): Set[localExpr] = {
-        //          ms match {
-        //            case m :: restm => m match {
-        //              //              case s @ Send(x, p, l, u, xp) => {
-        //              //
-        //              //              }
-        //              //              case r @ Receive(x, p, l, u, xp) => {
-        //              //
-        //              //              }
-        //              case _ => all
-        //              case _ => throw new Exception("Weaving should only match messages")
-        //            }
-        //            case Nil => all
-        //          }
-        //        }
-        //        new LocalProtocol(((replaceMatch(matches, lp.exprs.to) -- matches)).to, lp.p, lp.x_0)
       }
       case Nil => lp
     }
