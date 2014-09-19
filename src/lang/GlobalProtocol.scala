@@ -18,6 +18,11 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
 
   def contains(x: String): Boolean = xs contains x
 
+  def getMessageLabels: Set[String] = (exprs flatMap {
+    case Message(_, _, _, l, _, _) => Some(l)
+    case _ => None
+  }).to
+
   def getMapCount(exprs: Iterable[expr]): Map[String, (Int, Int)] = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     exprs foreach {

@@ -136,7 +136,7 @@ case class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, Loc
     }
     case _ => false
   }
-  
+
   def isNullPc: Boolean = pcs match {
     case List(NullPC()) => true
     case _ => false
@@ -180,6 +180,10 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
 
   def getVariables = exprs.flatMap(_.getVariables).to
 
+  def getParticipants: Set[String]
+
+  def getMessageLabels: Set[String]
+
   implicit class sustitutableString(s: String) {
     def substitute(s1: String, s2: String) = {
       if (s == s1) s2
@@ -215,6 +219,18 @@ class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advic
     GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
 
+  def getParticipants = {
+    (exprs flatMap {
+      case Message(_, s, r, _, _, _) => Some(Set(s, r))
+      case _ => Set()
+    }).reduce(_ ++ _)
+  }
+
+  def getMessageLabels: Set[String] = (exprs flatMap {
+    case Message(_, _, _, l, _, _) => Some(l)
+    case _ => None
+  }).to
+
 }
 object GlobalAdvice {
   def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs, xa)
@@ -225,6 +241,20 @@ class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends A
   override def substitute(s1: String, s2: String): LocalAdvice = {
     LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
+
+  def getParticipants = {
+    (exprs flatMap {
+      case Send(_, p, _, _, _) => Some(Set(p))
+      case Receive(_, p, _, _, _) => Some(Set(p))
+      case _ => Set()
+    }).reduce(_ ++ _)
+  }
+
+  def getMessageLabels: Set[String] = (exprs flatMap {
+    case Send(_, _, l, _, _) => Some(l)
+    case Receive(_, _, l, _, _) => Some(l)
+    case _ => None
+  }).to
 
 }
 object LocalAdvice {
@@ -268,6 +298,12 @@ class Aspect[+E, S, A <: Advice[A]](val name: String, pc: Pointcut[E, S], adv: A
   def xa = adv.xa
 }
 
-case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: GlobalAdvice) extends Aspect(name, pc, adv)
+case class GlobalAspect(override val name: String, pc: GlobalPointcut, adv: GlobalAdvice) extends Aspect(name, pc, adv) {
+  def getDaemonLabels: Set[String] = {
+    val freshParticipant = adv.getParticipants mkString ("")
+    val localAsp = LocalProjection(this, freshParticipant)
+    localAsp.adv.getMessageLabels
+  }
+}
 
 class LocalAspect(name: String, val p: String, val pc: LocalPointcut, val adv: LocalAdvice) extends Aspect(name, pc, adv)
