@@ -6,6 +6,9 @@ import lang.aspect.Pointcut
 import lang.aspect.NullPC
 import lang.aspect.LocalPointcut
 import lang.aspect.LocalAdvice
+import lang.aspect.LocalAspect
+import lang.LocalProtocol.NullAction
+import lang.LocalProtocol.AdviceTransition
 
 /**
  * The methods listed here do not correspond to a congruence relation, but
@@ -101,6 +104,23 @@ object Congruence {
       LocalPointcut(List(NullPC()))
     } else {
       LocalPointcut(filtered)
+    }
+  }
+
+  def apply(la: LocalAspect): LocalAspect = {
+    /**
+     * In the case that the pc is 0, it's known that the projection of proceed
+     * will end up in a Null action and this will end in a simple replacement
+     * of variables.
+     */
+    if (this.apply(la.pc).isNullPc) {
+      println("[INFO] Congruence NullPc")
+      new LocalAspect(la.name, la.p, this.apply(la.pc), this.apply(new LocalAdvice(la.adv.exprs map {
+        case AdviceTransition(x1, x2) => NullAction(x1, x2)
+        case e => e
+      }, la.adv.xa)))
+    } else {
+      new LocalAspect(la.name, la.p, this.apply(la.pc), this.apply(la.adv))
     }
   }
 
