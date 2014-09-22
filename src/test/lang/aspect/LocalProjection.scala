@@ -82,7 +82,8 @@ class LocalProjection extends PathInfo {
 
     val Ts: LocalAspect = LocalProjection(aspect, "C")
     val adv = Ts.adv
-    adv.exprs foreach { x => println(x.canonical) }
+    
+    println(Ts.toString)
     
     assertTrue(adv.exprs.contains(Merge("x_1", "x_6", "x_2")))
     assertTrue(adv.exprs.contains(End("x_4")))
