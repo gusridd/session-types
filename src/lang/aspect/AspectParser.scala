@@ -8,6 +8,7 @@ import lang.expr
 import lang.Identifier
 import lang.stringToIdentifier
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
 import lang._
 import scala.collection.mutable.StringBuilder
 import lang.LocalProtocol.localExpr
@@ -224,25 +225,11 @@ object GlobalAdvice {
   def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs, xa)
 }
 
-class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] {
+class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] with Local {
 
   override def substitute(s1: String, s2: String): LocalAdvice = {
     LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
-
-  def getParticipants = {
-    (exprs flatMap {
-      case Send(_, p, _, _, _) => Some(Set(p))
-      case Receive(_, p, _, _, _) => Some(Set(p))
-      case _ => Set()
-    }).reduce(_ ++ _)
-  }
-
-  def getMessageLabels: Set[String] = (exprs flatMap {
-    case Send(_, _, l, _, _) => Some(l)
-    case Receive(_, _, l, _, _) => Some(l)
-    case _ => None
-  }).to
 
 }
 object LocalAdvice {

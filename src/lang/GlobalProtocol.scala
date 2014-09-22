@@ -73,12 +73,12 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
 //    (leftHash, rightHash)
 //  }
 
-  def getParticipants(): scala.collection.immutable.Set[String] = {
-    (exprs flatMap {
-      case Message(_, s, r, _, _, _) => Some(scala.collection.immutable.Set(s, r))
-      case _ => Set()
-    }).reduce(_ ++ _)
-  }
+//  def getParticipants(): scala.collection.immutable.Set[String] = {
+//    (exprs flatMap {
+//      case Message(_, s, r, _, _, _) => Some(scala.collection.immutable.Set(s, r))
+//      case _ => Set()
+//    }).reduce(_ ++ _)
+//  }
 
   def print(): Unit = exprs foreach (e => println(e.canonical))
 

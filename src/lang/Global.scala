@@ -1,6 +1,7 @@
 package lang
 
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.Set
 
 trait Global {
 
@@ -33,9 +34,9 @@ trait Global {
     case _ => None
   }).to
   
-  def getParticipants(): scala.collection.immutable.Set[String] = {
+  def getParticipants(): scala.collection.mutable.Set[String] = {
     (exprs flatMap {
-      case Message(_, s, r, _, _, _) => Some(scala.collection.immutable.Set(s, r))
+      case Message(_, s, r, _, _, _) => Some(scala.collection.mutable.Set(s, r))
       case _ => Set()
     }).reduce(_ ++ _)
   }
