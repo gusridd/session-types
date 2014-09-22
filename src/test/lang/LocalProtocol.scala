@@ -8,10 +8,7 @@ import java.io.{ FileReader => FR }
 import java.io.{ StringReader => SR }
 import java.io.Reader
 
-class LocalProtocol {
-
-  val path = "./src/lang/test/"
-  val path_wf = "./src/protocol/wellformed/"
+class LocalProtocol extends PathInfo {
 
   def getProtocol(reader: Reader) = {
     val g: GlobalProtocol = GlobalParser.parse(reader)
@@ -80,6 +77,25 @@ class LocalProtocol {
   @Test def testTravelAgency() {
     val g = getProtocol(new FR(path_wf + "TravelAgency.txt"))
     //TODO: local projection for TravelAgency
+  }
+
+  @Test def testLinearInteractionProjectedToA() {
+    val g = getProtocol(new FR(path + "LinearInteraction.txt"))
+    val local = LocalProjection(g, "A")
+    
+    assertTrue(local.exprs.contains(Send("x_0","L","Log","","x_1")))
+    assertTrue(local.exprs.contains(Send("x_1","B","M1","","x_2")))
+    assertTrue(local.exprs.contains(Send("x_2","L","Log","","x_4")))
+    assertTrue(local.exprs.contains(LocalProtocol.End("x_4")))
+  }
+  
+  @Test def testLinearInteractionProjectedToC() {
+    val g = getProtocol(new FR(path + "LinearInteraction.txt"))
+    val local = LocalProjection(g, "C")
+    
+    assertTrue(local.exprs.contains(Receive("x_0","B","M2","","x_3")))
+    assertTrue(local.exprs.contains(Send("x_3","D","Log","","x_5")))
+    assertTrue(local.exprs.contains(LocalProtocol.End("x_5")))
   }
 
 }
