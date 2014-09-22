@@ -23,10 +23,10 @@ import lang.expr
 object LocalProjection {
 
   def apply(a: GlobalAspect, p: String): LocalAspect = {
-    new LocalAspect(
+    Congruence(new LocalAspect(
       a.name,
-      p, Congruence(pcLocalProjection(a.pc, p)),
-      Congruence(advLocalProjection(a.adv, p)))
+      p, pcLocalProjection(a.pc, p),
+      advLocalProjection(a.adv, p)))
   }
 
   private[this] def lp(a: GlobalAdvice, participant: String): List[localExpr] = {
@@ -40,7 +40,7 @@ object LocalProjection {
       case Choice(x, xp, xpp) => {
         try {
           // This is a trick in order to get the active sender efficiently
-          val g = new GlobalProtocol(exprs,a.xa)
+          val g = new GlobalProtocol(exprs, a.xa)
           val as = ActiveSender(g, x)
           if (participant == as) {
             InternalChoice(x, xp, xpp)
@@ -51,6 +51,7 @@ object LocalProjection {
           case e: Exception => {
             println("[EXCEPTION] " + e.toString())
             ExternalChoice(x, xp, xpp)
+            throw e
           }
         }
       }

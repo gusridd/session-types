@@ -48,6 +48,7 @@ object LocalProjection {
           }
         } catch {
           case e: Exception => ExternalChoice(x, xp, xpp)
+          throw e
         }
       }
       case ChoiceJoin(x, xp, xpp) => Merge(x, xp, xpp)
