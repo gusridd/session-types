@@ -23,11 +23,10 @@ import lang.expr
 object LocalProjection {
 
   def apply(a: GlobalAspect, p: String): LocalAspect = {
-    //    Congruence(lp(a.adv.exprs, p))
     new LocalAspect(
       a.name,
-      p, pcLocalProjection(a.pc, p),
-      advLocalProjection(a.adv, p))
+      p, Congruence(pcLocalProjection(a.pc, p)),
+      Congruence(advLocalProjection(a.adv, p)))
   }
 
   private[this] def lp(a: GlobalAdvice, participant: String): List[localExpr] = {

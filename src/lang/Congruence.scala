@@ -5,6 +5,7 @@ import scala.annotation.tailrec
 import lang.aspect.Pointcut
 import lang.aspect.NullPC
 import lang.aspect.LocalPointcut
+import lang.aspect.LocalAdvice
 
 /**
  * The methods listed here do not correspond to a congruence relation, but
@@ -66,6 +67,29 @@ object Congruence {
       }
     }
     reduce(lp, lp.exprs)
+  }
+
+  def apply(lAdv: LocalAdvice): LocalAdvice = {
+    @tailrec
+    def reduce(lAdv: LocalAdvice, rec: List[localExpr]): LocalAdvice = {
+      rec match {
+        case e :: rest => e match {
+          case i @ LocalProtocol.Indirection(x1, x2) => {
+            val nExprs = (lAdv.exprs filterNot (_ == i)).map(_.substitute(x2, x1))
+            reduce(new LocalAdvice(nExprs, lAdv.xa.sub(x2, x1)), rest.map(_.substitute(x2, x1)))
+          }
+          case i @ LocalProtocol.NullAction(x1, x2) => {
+            val nExprs = (lAdv.exprs filterNot (_ == i)).map(_.substitute(x2, x1))
+            reduce(new LocalAdvice(nExprs, lAdv.xa.sub(x2, x1)), rest.map(_.substitute(x2, x1)))
+          }
+          case _ => {
+            reduce(lAdv, rest)
+          }
+        }
+        case Nil => lAdv
+      }
+    }
+    reduce(lAdv, lAdv.exprs)
   }
 
   def apply(pc: LocalPointcut): LocalPointcut = {

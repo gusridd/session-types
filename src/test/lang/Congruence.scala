@@ -6,8 +6,11 @@ import lang._
 import java.io.{ FileReader => FR }
 import java.io.{ StringReader => SR }
 import java.io.Reader
+import lang.aspect.AspectParser
+import lang.aspect.LocalAspect
+import lang.aspect.NullPC
 
-class Congruence {
+class Congruence extends PathInfo {
 
   @Test def testCongruenceIndirection() {
     val g = GlobalParser.parse(new SR(
@@ -32,7 +35,7 @@ class Congruence {
 	x_4 | x_7 = x_6
 	      x_6 = end
     	  """))
-    	  
+
     val ng = Congruence(g)
 
     assertEquals(4, ng.exprs.size)
@@ -67,12 +70,24 @@ class Congruence {
       Message("x_2", "B", "S", "Sale", "Boolean", "x_4"),
       Message("x_3", "B", "C", "Purchase", "Boolean", "x_5"),
       ParallelJoin("x_4", "x_5", "x_6"),
-      End("x_6")),"x_0")
+      End("x_6")), "x_0")
 
     val ng = Congruence(g)
 
     assertEquals(10, ng.exprs.size)
 
     assertTrue(ng.exprs.contains(Message("x_0", "S", "B", "Item", "String", "x_1^[x_0)]")))
+  }
+
+  /**
+   * Aspectual Local Projection should use congruence
+   */
+  @Test def testCongruenceAspectualLocalProjectionPointcut() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspect = parsed(0)
+
+    val Ts: LocalAspect = lang.aspect.LocalProjection(aspect, "A")
+
+    assertTrue(Ts.pc.isNullPc)
   }
 }

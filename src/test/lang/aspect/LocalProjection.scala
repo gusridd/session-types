@@ -91,4 +91,21 @@ class LocalProjection extends PathInfo {
     assertTrue(adv.exprs.contains(Send("x_5", "B", "Counter", "Int", "x_6")))
     assertTrue(adv.exprs.contains(ExternalChoice("x_2", "x_3", "x_4")))
   }
+  
+  @Test def testProjectAuthenticationToA_Adv() {
+    val parsed = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspect = parsed(0)
+
+    val Ts: LocalAspect = LocalProjection(aspect, "A")
+    val adv = Ts.adv
+    
+    println(Ts.toString)
+    
+    assertTrue(adv.exprs.contains(Merge("x_1", "x_6", "x_2")))
+    assertTrue(adv.exprs.contains(End("x_4")))
+    assertTrue(adv.exprs.contains(AdviceTransition("x_0", "x_1")))
+    assertTrue(adv.exprs.contains(Receive("x_3", "B", "Offer", "Int", "x_5")))
+    assertTrue(adv.exprs.contains(Send("x_5", "B", "Counter", "Int", "x_6")))
+    assertTrue(adv.exprs.contains(ExternalChoice("x_2", "x_3", "x_4")))
+  }
 }
