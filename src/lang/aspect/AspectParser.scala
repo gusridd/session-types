@@ -168,7 +168,7 @@ object NullPC {
   def unapply(n: NullPC) = Some()
 }
 
-trait Advice[A <: Advice[A]] extends AspectualAST {
+trait Advice[A <: Advice[A]] extends AspectualAST{
   A =>
   val exprs: List[expr]
   val xa: String
@@ -180,9 +180,9 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
 
   def getVariables = exprs.flatMap(_.getVariables).to
 
-  def getParticipants: Set[String]
-
-  def getMessageLabels: Set[String]
+  //  def getParticipants: Set[String]
+  //
+  //  def getMessageLabels: Set[String]
 
   implicit class sustitutableString(s: String) {
     def substitute(s1: String, s2: String) = {
@@ -191,45 +191,33 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
     }
   }
 
-  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
-
-  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    (hashCacheL, hashCacheR) match {
-      case (Some(hl), Some(hr)) => return (hl, hr)
-      case _ => {
-        val (leftHash, rightHash) = getHashesFromExpr(exprs)
-        hashCacheL = Some(leftHash)
-        hashCacheR = Some(rightHash)
-        (leftHash, rightHash)
-      }
-    }
-  }
-
-  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    val leftHash = HashMap[String, expr]()
-    val rightHash = HashMap[String, expr]()
-    exprs foreach { x => x.addToHash(leftHash, rightHash) }
-    (leftHash, rightHash)
-  }
+  //  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
+  //  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+  //
+  //  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+  //    (hashCacheL, hashCacheR) match {
+  //      case (Some(hl), Some(hr)) => return (hl, hr)
+  //      case _ => {
+  //        val (leftHash, rightHash) = getHashesFromExpr(exprs)
+  //        hashCacheL = Some(leftHash)
+  //        hashCacheR = Some(rightHash)
+  //        (leftHash, rightHash)
+  //      }
+  //    }
+  //  }
+  //
+  //  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+  //    val leftHash = HashMap[String, expr]()
+  //    val rightHash = HashMap[String, expr]()
+  //    exprs foreach { x => x.addToHash(leftHash, rightHash) }
+  //    (leftHash, rightHash)
+  //  }
 }
-class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice] {
+class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice]  with Global {
 
   override def substitute(s1: String, s2: String) = {
     GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
-
-  def getParticipants = {
-    (exprs flatMap {
-      case Message(_, s, r, _, _, _) => Some(Set(s, r))
-      case _ => Set()
-    }).reduce(_ ++ _)
-  }
-
-  def getMessageLabels: Set[String] = (exprs flatMap {
-    case Message(_, _, _, l, _, _) => Some(l)
-    case _ => None
-  }).to
 
 }
 object GlobalAdvice {

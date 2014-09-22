@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 import scala.util.parsing.input.Positional
 import lang.aspect.AdviceTransition
 
-class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional {
+class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional with Global{
 
   private val end: String = "end"
   val xs: HashSet[String] = HashSet() ++ exprs.flatMap(e => e.getVariables)
@@ -18,10 +18,10 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
 
   def contains(x: String): Boolean = xs contains x
 
-  def getMessageLabels: Set[String] = (exprs flatMap {
-    case Message(_, _, _, l, _, _) => Some(l)
-    case _ => None
-  }).to
+//  def getMessageLabels: Set[String] = (exprs flatMap {
+//    case Message(_, _, _, l, _, _) => Some(l)
+//    case _ => None
+//  }).to
 
   def getMapCount(exprs: Iterable[expr]): Map[String, (Int, Int)] = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
@@ -51,37 +51,33 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
     m
   }
 
-  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+//  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
+//  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+//
+//  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+//    (hashCacheL, hashCacheR) match {
+//      case (Some(hl), Some(hr)) => return (hl, hr)
+//      case _ => {
+//        val (leftHash, rightHash) = getHashesFromExpr(exprs)
+//        hashCacheL = Some(leftHash)
+//        hashCacheR = Some(rightHash)
+//        (leftHash, rightHash)
+//      }
+//    }
+//  }
+//
+//  def getHashesFromExpr(exprs: List[expr] = exprs): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+//    val leftHash = HashMap[String, expr]()
+//    val rightHash = HashMap[String, expr]()
+//    exprs foreach { x => x.addToHash(leftHash, rightHash) }
+//    (leftHash, rightHash)
+//  }
 
-  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    (hashCacheL, hashCacheR) match {
-      case (Some(hl), Some(hr)) => return (hl, hr)
-      case _ => {
-        val (leftHash, rightHash) = getHashesFromExpr(exprs)
-        hashCacheL = Some(leftHash)
-        hashCacheR = Some(rightHash)
-        (leftHash, rightHash)
-      }
-    }
-  }
-
-  def getHashesFromExpr(exprs: List[expr] = exprs): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    val leftHash = HashMap[String, expr]()
-    val rightHash = HashMap[String, expr]()
-    exprs foreach { x => x.addToHash(leftHash, rightHash) }
-    (leftHash, rightHash)
-  }
-
-  def getParticipants(): Set[String] = {
-    val s = Set[String]()
-    exprs foreach {
-      case m @ Message(_, a, b, _, _, _) => {
-        (s += a) += b
-      }
-      case _ =>
-    }
-    s
+  def getParticipants(): scala.collection.immutable.Set[String] = {
+    (exprs flatMap {
+      case Message(_, s, r, _, _, _) => Some(scala.collection.immutable.Set(s, r))
+      case _ => Set()
+    }).reduce(_ ++ _)
   }
 
   def print(): Unit = exprs foreach (e => println(e.canonical))

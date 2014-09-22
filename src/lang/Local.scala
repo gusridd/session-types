@@ -1,0 +1,5 @@
+package lang
+
+trait Local {
+
+}
