@@ -45,6 +45,10 @@ class WFGlobalProtocolTest extends PathInfo {
     val g = getProtocol(new FR(path + "interleavedSAndTSystem.txt"))
   }
   
+  @Test def testLinearInteraction() {
+    val g = getProtocol(new FR(path + "LinearInteraction.txt"))
+  }
+  
   @Test(expected = classOf[NoActiveSenders]) 
   def testRecursiveChoice() {
     val g = getProtocol(new FR(path + "RecursiveChoice.txt"))

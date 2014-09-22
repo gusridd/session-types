@@ -1,0 +1,6 @@
+x_0 = A -> L: Log; x_1
+x_1 = A -> B: M1; x_2
+x_2 = B -> C: M2; x_3
+x_3 = A -> L: Log; x_4
+x_4 = C -> D: Log; x_5
+x_5 = end
