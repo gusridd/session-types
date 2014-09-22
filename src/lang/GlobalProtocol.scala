@@ -51,26 +51,21 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
     m
   }
 
-  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+  type iMap[K,V] = scala.collection.immutable.Map[K,V]
+  
+  private[this] val (hashCacheL,hashCacheR) = getHashesFromExpr(exprs)
+  
 
-  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    (hashCacheL, hashCacheR) match {
-      case (Some(hl), Some(hr)) => return (hl, hr)
-      case _ => {
-        val (leftHash, rightHash) = getHashesFromExpr(exprs)
-        hashCacheL = Some(leftHash)
-        hashCacheR = Some(rightHash)
-        (leftHash, rightHash)
-      }
-    }
+  def getHashes(): (iMap[String, lang.expr], iMap[String, lang.expr]) = {
+    (hashCacheL,hashCacheR)
   }
-
-  def getHashesFromExpr(exprs: List[expr] = exprs): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+  
+  def getHashesFromExpr(exprs: List[expr] = exprs): (iMap[String, lang.expr], iMap[String, lang.expr]) = {
     val leftHash = HashMap[String, expr]()
     val rightHash = HashMap[String, expr]()
     exprs foreach { x => x.addToHash(leftHash, rightHash) }
-    (leftHash, rightHash)
+    val l = collection.immutable.HashMap[String,lang.expr]() ++ leftHash
+    (collection.immutable.HashMap()++leftHash, collection.immutable.HashMap()++rightHash.toSet)
   }
 
   def getParticipants(): Set[String] = {
