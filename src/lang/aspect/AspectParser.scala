@@ -191,70 +191,75 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
     }
   }
 
-  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
-
-  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    (hashCacheL, hashCacheR) match {
-      case (Some(hl), Some(hr)) => return (hl, hr)
-      case _ => {
-        val (leftHash, rightHash) = getHashesFromExpr(exprs)
-        hashCacheL = Some(leftHash)
-        hashCacheR = Some(rightHash)
-        (leftHash, rightHash)
-      }
-    }
-  }
-
-  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-    val leftHash = HashMap[String, expr]()
-    val rightHash = HashMap[String, expr]()
-    exprs foreach { x => x.addToHash(leftHash, rightHash) }
-    (leftHash, rightHash)
-  }
+//  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
+//  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
+//
+//  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+//    (hashCacheL, hashCacheR) match {
+//      case (Some(hl), Some(hr)) => return (hl, hr)
+//      case _ => {
+//        val (leftHash, rightHash) = getHashesFromExpr(exprs)
+//        hashCacheL = Some(leftHash)
+//        hashCacheR = Some(rightHash)
+//        (leftHash, rightHash)
+//      }
+//    }
+//  }
+  def getHashes(): (scala.collection.immutable.Map[String, lang.expr], scala.collection.immutable.Map[String, lang.expr])
+  def getHashesFromExpr(exprs: List[expr]): (scala.collection.immutable.Map[String, lang.expr], scala.collection.immutable.Map[String, lang.expr])
+//  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
+//    val leftHash = HashMap[String, expr]()
+//    val rightHash = HashMap[String, expr]()
+//    exprs foreach { x => x.addToHash(leftHash, rightHash) }
+//    (leftHash, rightHash)
+//  }
 }
-class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice] {
+class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice] with Global {
 
+  val x_0 = xa
+  
   override def substitute(s1: String, s2: String) = {
-    GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
+    GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.sub(s1, s2))
   }
 
-  def getParticipants = {
-    (exprs flatMap {
-      case Message(_, s, r, _, _, _) => Some(Set(s, r))
-      case _ => Set()
-    }).reduce(_ ++ _)
-  }
-
-  def getMessageLabels: Set[String] = (exprs flatMap {
-    case Message(_, _, _, l, _, _) => Some(l)
-    case _ => None
-  }).to
+//  def getParticipants = {
+//    (exprs flatMap {
+//      case Message(_, s, r, _, _, _) => Some(Set(s, r))
+//      case _ => Set()
+//    }).reduce(_ ++ _)
+//  }
+//
+//  def getMessageLabels: Set[String] = (exprs flatMap {
+//    case Message(_, _, _, l, _, _) => Some(l)
+//    case _ => None
+//  }).to
 
 }
 object GlobalAdvice {
   def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs, xa)
 }
 
-class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] {
+class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] with Local{
 
+  val x_0 = xa
+  
   override def substitute(s1: String, s2: String): LocalAdvice = {
     LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
   }
 
-  def getParticipants = {
-    (exprs flatMap {
-      case Send(_, p, _, _, _) => Some(Set(p))
-      case Receive(_, p, _, _, _) => Some(Set(p))
-      case _ => Set()
-    }).reduce(_ ++ _)
-  }
-
-  def getMessageLabels: Set[String] = (exprs flatMap {
-    case Send(_, _, l, _, _) => Some(l)
-    case Receive(_, _, l, _, _) => Some(l)
-    case _ => None
-  }).to
+//  def getParticipants = {
+//    (exprs flatMap {
+//      case Send(_, p, _, _, _) => Some(Set(p))
+//      case Receive(_, p, _, _, _) => Some(Set(p))
+//      case _ => Set()
+//    }).reduce(_ ++ _)
+//  }
+//
+//  def getMessageLabels: Set[String] = (exprs flatMap {
+//    case Send(_, _, l, _, _) => Some(l)
+//    case Receive(_, _, l, _, _) => Some(l)
+//    case _ => None
+//  }).to
 
 }
 object LocalAdvice {
