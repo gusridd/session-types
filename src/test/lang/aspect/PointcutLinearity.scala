@@ -15,7 +15,7 @@ class PointcutLinearity extends PathInfo {
   import lang.aspect.Weaver
   
   @Test def testPointcutLinearityAuthenticationWithSimpleTrade() {
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
     
     assertFalse(PointcutLinearity(aspects,protocol))

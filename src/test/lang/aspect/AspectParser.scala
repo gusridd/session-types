@@ -103,7 +103,7 @@ class Parser extends PathInfo {
   }
 
   @Test def testParseAuthentication() {
-    val parsed = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val parsed = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
   }
 
   @Test def testParseLogging() {

@@ -14,7 +14,7 @@ class AspectualLocalChoice extends PathInfo {
   
 
   @Test def testSimpleTradeAuthentication() {
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
     // TODO: be sure about this
     assertTrue(AspectualLocalChoice(aspects, protocol))

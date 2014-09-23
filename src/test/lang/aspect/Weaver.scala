@@ -17,7 +17,7 @@ class Weaver extends PathInfo {
   import lang.aspect.Weaver
 
   @Test def testNaiveWeaveAuthenticationWithSimpleTrade() {
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
     val wovenType = Weaver.naiveGlobalWeaving(aspects, protocol)
     wovenType.exprs map (x => println(x.canonical))
@@ -38,7 +38,7 @@ class Weaver extends PathInfo {
   }
 
   @Test def testWeaveAuthenticationWithSimpleTrade() {
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
     val wovenType = Weaver.GlobalWeaving(aspects, protocol)
     wovenType.exprs map (x => println(x.canonical))
@@ -144,7 +144,7 @@ class Weaver extends PathInfo {
   
   @Test def testLocalWeaveSimpleTradeWithAuthenticationParticipantB() {
     val p = "B"
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
 
     val localAspects = aspects map { a => lang.aspect.LocalProjection(a, p) }
@@ -162,7 +162,7 @@ class Weaver extends PathInfo {
 
   @Test def testLocalWeaveSimpleTradeWithAuthenticationParticipantC() {
     val p = "C"
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
 
     val localAspects = aspects map { a => lang.aspect.LocalProjection(a, p) }
@@ -175,7 +175,7 @@ class Weaver extends PathInfo {
   
   @Test def testLocalWeaveSimpleTradeWithAuthenticationParticipantA() {
     val p = "A"
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
 
     val localAspects = aspects map { a => lang.aspect.LocalProjection(a, p) }

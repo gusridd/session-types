@@ -93,7 +93,7 @@ class UniqueMsg extends PathInfo {
    * This one is tricky as in the paper says it should pass, but it shall not
    */
   @Test def testUniqueMsgAuthentication() {
-    val aspects = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)

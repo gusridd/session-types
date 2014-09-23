@@ -83,7 +83,7 @@ class Congruence extends PathInfo {
    * Aspectual Local Projection should use congruence
    */
   @Test def testCongruenceAspectualLocalProjectionPointcut() {
-    val parsed = AspectParser.parse(new FR(path_wf_a + "Authentication.txt"))
+    val parsed = AspectParser.parse(new FR(path_mf_a + "Authentication.txt"))
     val aspect = parsed(0)
 
     val Ts: LocalAspect = lang.aspect.LocalProjection(aspect, "A")
