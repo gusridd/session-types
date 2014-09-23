@@ -8,7 +8,7 @@ import lang.LocalProtocol.SimpSend
 import lang.LocalProtocol.Receive
 import lang.LocalProtocol.SimpReceive
 
-class LocalProtocol(override val exprs: List[LocalProtocol.localExpr], val p: String, x_0: String) extends GlobalProtocol(exprs, x_0) {
+class LocalProtocol(override val exprs: List[LocalProtocol.localExpr], val p: String, val x_0: String) extends Local {
 
   def contains(smpl: SimpleLocalExpr): Boolean = {
     exprs exists {

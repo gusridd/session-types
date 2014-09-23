@@ -14,7 +14,7 @@ import LocalProtocol.localExpr
 object LocalProjection {
 
   def apply(g: GlobalProtocol, p: String): LocalProtocol = {
-    g.getParticipants().find(_ == p) match {
+    g.getParticipants.find(_ == p) match {
       case Some(pp) => {
         Congruence(lp(g, p))
       }
