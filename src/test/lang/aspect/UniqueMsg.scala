@@ -103,6 +103,21 @@ class UniqueMsg extends PathInfo {
     }
   }
   
+  /**
+   * This example exposes that the uniqueMsg condition is too strong so another
+   * algorithm is needed
+   */
+  @Test def testUniqueMsgAuthWithLock() {
+    val aspects = AspectParser.parse(new FR(path_wf_a + "AuthWithLock.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
+
+    assertEquals(1, aspects.size)
+
+    aspects foreach {
+      case a: GlobalAspect => assertTrue(uniqueMsg(protocol, a))
+    }
+  }
+  
   @Test def testUniqueMsgFarm() {
     val aspects = AspectParser.parse(new FR(path_wf_a + "Farm.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "NonParallelized.txt")))
