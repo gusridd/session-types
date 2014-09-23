@@ -4,7 +4,8 @@ import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Map
 import scala.collection.mutable.LinkedHashSet
-import scala.collection.mutable.Set
+//import scala.collection.mutable.Set
+import scala.collection.immutable.Set
 import scala.annotation.tailrec
 import scala.util.parsing.input.Positional
 import lang.aspect.AdviceTransition
@@ -51,32 +52,30 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
     m
   }
 
-  type iMap[K,V] = scala.collection.immutable.Map[K,V]
-  
-  private[this] val (hashCacheL,hashCacheR) = getHashesFromExpr(exprs)
-  
+  type iMap[K, V] = scala.collection.immutable.Map[K, V]
+
+  val (lHash, rHash) = getHashesFromExpr(exprs)
 
   def getHashes(): (iMap[String, lang.expr], iMap[String, lang.expr]) = {
-    (hashCacheL,hashCacheR)
+    (lHash, rHash)
   }
-  
-  def getHashesFromExpr(exprs: List[expr] = exprs): (iMap[String, lang.expr], iMap[String, lang.expr]) = {
+
+  def getHashesFromExpr(exprs: List[expr] = exprs): (iMap[String, expr], iMap[String, expr]) = {
     val leftHash = HashMap[String, expr]()
     val rightHash = HashMap[String, expr]()
     exprs foreach { x => x.addToHash(leftHash, rightHash) }
-    val l = collection.immutable.HashMap[String,lang.expr]() ++ leftHash
-    (collection.immutable.HashMap()++leftHash, collection.immutable.HashMap()++rightHash.toSet)
+    val l = collection.immutable.HashMap[String, lang.expr]() ++ leftHash
+    val r = collection.immutable.HashMap[String, lang.expr]() ++ rightHash
+    (l, r)
   }
-
-  def getParticipants(): Set[String] = {
-    val s = Set[String]()
-    exprs foreach {
-      case m @ Message(_, a, b, _, _, _) => {
-        (s += a) += b
-      }
-      case _ =>
-    }
-    s
+  
+  def getParticipants: Set[String] = {
+    ((exprs flatMap {
+      case e@Message(_,_,_,_,_,_) => Some(e)
+      case _ => None
+    }) flatMap {
+      case Message(_,s,r,_,_,_) => Set(s,r)
+    }).toSet
   }
 
   def print(): Unit = exprs foreach (e => println(e.canonical))
