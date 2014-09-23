@@ -110,6 +110,8 @@ case class GlobalPointcut(pcs: List[GlobalPC]) extends Pointcut[expr, GlobalPC] 
     case _ => false
   }
 
+  def getParticipants: Set[String] = (pcs flatMap { _.getParticipants }).toSet
+
   override def contains(e: GlobalPC): Boolean = pcs.contains(e)
 }
 
@@ -118,6 +120,8 @@ case class GlobalPC(s: String, r: String, l: String, t: String) {
     case "*" => s + "->" + r + ":" + l
     case _ => s + "->" + r + ":" + l + "(" + t + ")"
   }
+
+  def getParticipants = Set(s, r)
 }
 
 case class LocalPointcut(val pcs: List[LocalPC]) extends Pointcut[localExpr, LocalPC] {
@@ -217,7 +221,7 @@ object LocalAdvice {
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
   def left = x1
   def right = "proceed;" + x2
-  
+
   def substitute(s1: String, s2: String) = {
     new AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
   }
