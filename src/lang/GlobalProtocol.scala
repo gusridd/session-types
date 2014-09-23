@@ -2,8 +2,8 @@ package lang
 
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.Map
-import scala.collection.mutable.LinkedHashSet
+import scala.collection.immutable.Map
+//import scala.collection.mutable.LinkedHashSet
 //import scala.collection.mutable.Set
 import scala.collection.immutable.Set
 import scala.annotation.tailrec
@@ -19,9 +19,8 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
 
   def contains(x: String): Boolean = xs contains x
 
-
   def getMapCount(exprs: Iterable[expr]): Map[String, (Int, Int)] = {
-    val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
+    val m = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     exprs foreach {
       case Message(x1, _, _, _, _, x2) =>
         m(x1) = (m(x1)._1 + 1, m(x1)._2)
@@ -45,9 +44,9 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
       case End(x) =>
         m(x) = (m(x)._1 + 1, m(x)._2)
     }
-    m
+    collection.immutable.Map() ++ m
   }
 
-  def print(): Unit = exprs foreach (e => println(e.canonical))
-  
+  def print(): Unit = canonical(0)
+
 }
