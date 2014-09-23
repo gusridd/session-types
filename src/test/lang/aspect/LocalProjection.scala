@@ -66,7 +66,8 @@ class LocalProjection extends PathInfo {
 
     val Ts: LocalAspect = LocalProjection(aspect, "B")
     val adv = Ts.adv
-    adv.exprs foreach { x => println(x.canonical) }
+    
+    println(Ts.toString)
     
     assertTrue(adv.exprs.contains(Merge("x_1", "x_6", "x_2")))
     assertTrue(adv.exprs.contains(End("x_4")))
@@ -101,11 +102,11 @@ class LocalProjection extends PathInfo {
     
     println(Ts.toString)
     
-    assertTrue(adv.exprs.contains(Merge("x_1", "x_6", "x_2")))
-    assertTrue(adv.exprs.contains(End("x_4")))
-    assertTrue(adv.exprs.contains(AdviceTransition("x_0", "x_1")))
-    assertTrue(adv.exprs.contains(Receive("x_3", "B", "Offer", "Int", "x_5")))
-    assertTrue(adv.exprs.contains(Send("x_5", "B", "Counter", "Int", "x_6")))
-    assertTrue(adv.exprs.contains(ExternalChoice("x_2", "x_3", "x_4")))
+    assertTrue(adv.exprs.contains(Merge("x_0", "x_5", "x_1")))
+    assertTrue(adv.exprs.contains(End("x_6")))
+    assertTrue(adv.exprs.contains(Receive("x_1", "B", "Auth", "String", "x_2")))
+    assertTrue(adv.exprs.contains(Send("x_3", "B", "Retry", "", "x_5")))
+    assertTrue(adv.exprs.contains(Send("x_4", "B", "OK", "", "x_6")))
+    assertTrue(adv.exprs.contains(InternalChoice("x_2", "x_3", "x_4")))
   }
 }

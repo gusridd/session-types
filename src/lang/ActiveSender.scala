@@ -17,8 +17,20 @@ object ActiveSender {
   }
 
   def apply(g: GlobalProtocol, x: String) = guess(g, x, reduce)
-  def apply(a: GlobalAspect, x: String) = guess(a.adv, x, relaxedReduce)
-
+  
+  /**
+   * The Active Sender computation for an advice is relaxed as it has proceed
+   * which do not carry information about who is sending or receiving a
+   * particular message, but for projection tipically that information is not
+   * needed, so a 'proceed'
+   */
+  def apply(adv: GlobalAdvice, x: String) = guess(adv, x, relaxedReduce)
+  
+  
+  /**
+   * This method tries to check if there exists a participant that is the active
+   * sender
+   */
   def guess(g: Global, x: String, recF: (Global, String, Set[String], Set[String], String, Set[String], Set[String], Int) => Boolean) = {
     val (leftHash, rightHash) = g.getHashes
     leftHash(x) match {
@@ -29,8 +41,7 @@ object ActiveSender {
          * and Boolean, if it reduces then (p,true) is given.
          */
         implicit val justConmuted = false
-        //        println(g.getParticipants)
-        //        println(g.getHashes()._1.foreach(x => println(x)))
+        
         val activeSenders = g.getParticipants map
           (p => {
             //            println("ASend Participant: " + p)
@@ -41,7 +52,6 @@ object ActiveSender {
             }
             e._2
           })
-
         if (activeSenders.size != 1) {
           println("[FAIL] ASend(" + x + "): " + activeSenders)
           throw new NoActiveSenders(x)
@@ -93,15 +103,7 @@ object ActiveSender {
     }
   }
 
-  /**
-   * The Active Sender computation for an advice is relaxed as it has proceed
-   * which do not carry information about who is sending or receiving a
-   * particular message, but for projection tipically that information is not
-   * needed, so a 'proceed'
-   */
-  def apply(a: GlobalAdvice, x: String) = {
-
-  }
+  
 
   def relaxedReduce(adv: Global, actL: String, setL: Set[String],
     parL: Set[String], actR: String, setR: Set[String],
@@ -131,9 +133,10 @@ object ActiveSender {
        */
       case Message(x1, p, pp, _, _, x1p) if parL.contains(p) => true
       case Indirection(x1, x2) => relaxedReduce(adv, x2, setL, parL, actR, setR, parR, counter)
-      case _ => {
+      case e @ _ => {
         if (counter == 0) false
         else {
+          println("[INFO] " + e)
           relaxedReduce(adv, actR, setR, parR, actL, setL, parL, 0)
         }
       }

@@ -39,9 +39,8 @@ object LocalProjection {
       case Parallel(x, xp, xpp) => Fork(x, xp, xpp)
       case Choice(x, xp, xpp) => {
         try {
-          // This is a trick in order to get the active sender efficiently
-          val g = new GlobalProtocol(exprs, a.xa)
-          val as = ActiveSender(g, x)
+          val as = ActiveSender(a, x)
+          println("[INFO] ASend(" + x + "): " + as)
           if (participant == as) {
             InternalChoice(x, xp, xpp)
           } else {
