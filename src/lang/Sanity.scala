@@ -40,19 +40,19 @@ object Sanity {
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
     }
 
-    if(!m.contains(x0)){
-      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
+    if (!m.contains(x0)) {
+      throw new SanityConditionException("Unique start: " + x0 + " must appear exactly once, on the left-hand side")
     }
-    
+
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
-      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
+      throw new SanityConditionException("Unique start: " + x0 + " must appear exactly once, on the left-hand side")
     }
     threadReduction(exprs)
     true
   }
 
   /**
-   * Function that counts how many times does each variable appears at 
+   * Function that counts how many times does each variable appears at
    * which side of the global protocol definitions. It returns that
    * information into a map for later internal use.
    */
@@ -80,8 +80,8 @@ object Sanity {
         m(x3) = (m(x3)._1, m(x3)._2 + 1)
       case End(x) =>
         m(x) = (m(x)._1 + 1, m(x)._2)
-      case Indirection(x1,x2) => 
-        m(x1) = (m(x1)._1+1,m(x1)._2)
+      case Indirection(x1, x2) =>
+        m(x1) = (m(x1)._1 + 1, m(x1)._2)
         m(x2) = (m(x2)._1, m(x2)._2 + 1)
     }
     m
@@ -125,7 +125,7 @@ object Sanity {
     }
     (leftHash, rightHash)
   }
-  
+
   def variableSet(exprs: Iterable[expr]) = {
     val s: Set[String] = Set()
     exprs foreach (e => s ++ e.getVariables)
@@ -151,7 +151,7 @@ object Sanity {
      */
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
       /**
-       * As variables are substituted on each iteration the hash can be 
+       * As variables are substituted on each iteration the hash can be
        * corrupted, so it must be recomputed every time
        */
       val hash = getHash(exprs)
@@ -189,7 +189,7 @@ object Sanity {
           //          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
           //return (exprs,false)
         }
-        case i@Indirection(x1,x2) => return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true)
+        case i @ Indirection(x1, x2) => return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true)
         case _ =>
       }
       (exprs, false)
@@ -245,6 +245,8 @@ object Sanity {
        * that is formed only with Choices/ChoiceJoin/Messages/Continue
        */
       def ChoiceCover(e: expr, s: Set[expr]): Set[expr] = {
+        println("[INFO] ChoiceCover e: " + e.canonical)
+        println("[INFO] ChoiceCover s: " + s)
         if (s.contains(e)) {
           return s
         }

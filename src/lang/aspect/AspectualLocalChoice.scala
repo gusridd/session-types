@@ -24,9 +24,10 @@ object AspectualLocalChoice {
     }
     val wovenProtocol = aspects.foldLeft(g)(op)
     println("------woven protocol")
-//    wovenExprs map {x => println(x.canonical)}
+    wovenProtocol.print
     println("------end woven protocol")
     try {
+      Congruence(wovenProtocol).print
       WFGlobalProtocol(Congruence(wovenProtocol))
       true
     } catch {
