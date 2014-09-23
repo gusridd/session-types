@@ -47,6 +47,6 @@ class GlobalProtocol(val exprs: List[expr], val x_0: String) extends Positional 
     collection.immutable.Map() ++ m
   }
 
-  def print(): Unit = canonical(0)
+  def print(): Unit = println(canonical(0))
 
 }

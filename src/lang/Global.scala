@@ -16,7 +16,7 @@ trait Global {
     (lHash, rHash)
   }
 
-  def getHashesFromExpr(exprs: List[expr] = exprs): (iMap[String, expr], iMap[String, expr]) = {
+  def getHashesFromExpr(exprs: List[expr]): (iMap[String, expr], iMap[String, expr]) = {
     val leftHash = HashMap[String, expr]()
     val rightHash = HashMap[String, expr]()
     exprs foreach { x => x.addToHash(leftHash, rightHash) }

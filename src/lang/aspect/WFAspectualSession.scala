@@ -4,10 +4,11 @@ import lang.WFGlobalProtocol
 import lang.expr
 import lang.GlobalProtocol
 import lang.End
+import lang.aspect.WFAspectualSession.NonWFAspectualSession
 
 class WFAspectualSession(aspects: List[GlobalAspect], exprs: List[expr], x_0: String) extends WFGlobalProtocol(exprs, x_0) {
 
-  if(!this.wellFormedness) throw new Exception("Aspects \"" + aspects.mkString(", ") + "\" are not well-formed")
+  if(!this.wellFormedness) throw new NonWFAspectualSession(aspects)
   
   private[this] def wellFormedness(): Boolean = {
     /**
@@ -59,6 +60,12 @@ object WFAspectualSession {
 
   def apply(aspects: List[GlobalAspect], g: GlobalProtocol) = {
     new WFAspectualSession(aspects, g.exprs, g.x_0)
+  }
+  
+  class NonWFAspectualSession(asps: List[GlobalAspect]) extends Exception {
+    override def toString(): String = {
+      "Aspects: \"" + (asps map {_.name}).mkString(", ") + "\" are not well-formed"
+    }
   }
 
 }
