@@ -157,16 +157,16 @@ object Sanity {
       val hash = getHash(exprs)
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) =>
-          return { /*println("[Trans]"); */ ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
+          return { println("[Trans] " + m); ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
         case p @ Parallel(x1, x2, x3) => hash.get(p.right) match {
           case Some(pj @ ParallelJoin(x2p, x3p, x4p)) =>
-            return { println("[Bra]"); ((exprs filter (x => x != p && x != pj)).map(_.substitute(x1, x4p)), true) }
+            return { println("[Bra] " + pj); ((exprs filter (x => x != p && x != pj)).map(_.substitute(x1, x4p)), true) }
           case None =>
         }
         case c @ Choice(x1, x2, x3) => hash.get(c.right) match {
           case Some(cj @ ChoiceJoin(x2p, x3p, x4p)) =>
             return {
-              //              println("[Bra]: " + c + " AND " + cj)
+              println("[Bra]: " + c + " AND " + cj)
               //              println("nonfiltered " + exprs)
               //              val filtered = (exprs filter (x => c != x && x != cj))
               //              println("filtered " + filtered)
@@ -175,21 +175,38 @@ object Sanity {
           case Some(_) =>
           case None =>
         }
-        case rec @ ChoiceJoin(x1, x2, x3) => { println("maybeRec:" + rec + "\nhash:" + hash.get(rec.right)); hash.get(rec.right) } match {
-          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p || x2 == x2p)) =>
-            return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true) }
-          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p || x1 == x2p)) =>
-            return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x4p)), true) }
-          case Some(_) =>
-          case None =>
-        }
+        case rec @ ChoiceJoin(x1, x2, x3) =>
+          { println("maybeRec:" + rec + "\nhash:" + hash.get(rec.right)); hash.get(rec.right) } match {
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x2p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x2p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x2p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x2p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x4p)), true)
+              }
+            case Some(_) =>
+            case None =>
+          }
         case e @ End(x) => {
           // end should not be substituted until the end
           println("[End] " + e);
           //          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
           //return (exprs,false)
         }
-        case i @ Indirection(x1, x2) => return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true)
+        case i @ Indirection(x1, x2) => { println("[Ind]"); return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true) }
         case _ =>
       }
       (exprs, false)
