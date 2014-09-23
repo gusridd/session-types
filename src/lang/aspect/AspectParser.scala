@@ -184,82 +184,30 @@ trait Advice[A <: Advice[A]] extends AspectualAST {
 
   def getMessageLabels: Set[String]
 
-  implicit class sustitutableString(s: String) {
-    def substitute(s1: String, s2: String) = {
-      if (s == s1) s2
-      else s
-    }
-  }
-
-//  private var hashCacheL: Option[HashMap[String, lang.expr]] = None
-//  private var hashCacheR: Option[HashMap[String, lang.expr]] = None
-//
-//  def getHashes(): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-//    (hashCacheL, hashCacheR) match {
-//      case (Some(hl), Some(hr)) => return (hl, hr)
-//      case _ => {
-//        val (leftHash, rightHash) = getHashesFromExpr(exprs)
-//        hashCacheL = Some(leftHash)
-//        hashCacheR = Some(rightHash)
-//        (leftHash, rightHash)
-//      }
-//    }
-//  }
   def getHashes(): (scala.collection.immutable.Map[String, lang.expr], scala.collection.immutable.Map[String, lang.expr])
   def getHashesFromExpr(exprs: List[expr]): (scala.collection.immutable.Map[String, lang.expr], scala.collection.immutable.Map[String, lang.expr])
-//  def getHashesFromExpr(exprs: List[expr]): (HashMap[String, lang.expr], HashMap[String, lang.expr]) = {
-//    val leftHash = HashMap[String, expr]()
-//    val rightHash = HashMap[String, expr]()
-//    exprs foreach { x => x.addToHash(leftHash, rightHash) }
-//    (leftHash, rightHash)
-//  }
+
 }
 class GlobalAdvice(override val exprs: List[expr], val xa: String) extends Advice[GlobalAdvice] with Global {
 
   val x_0 = xa
-  
+
   override def substitute(s1: String, s2: String) = {
     GlobalAdvice(exprs map (_.substitute(s1, s2)), xa.sub(s1, s2))
   }
-
-//  def getParticipants = {
-//    (exprs flatMap {
-//      case Message(_, s, r, _, _, _) => Some(Set(s, r))
-//      case _ => Set()
-//    }).reduce(_ ++ _)
-//  }
-//
-//  def getMessageLabels: Set[String] = (exprs flatMap {
-//    case Message(_, _, _, l, _, _) => Some(l)
-//    case _ => None
-//  }).to
 
 }
 object GlobalAdvice {
   def apply(exprs: List[expr], xa: String) = new GlobalAdvice(exprs, xa)
 }
 
-class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] with Local{
+class LocalAdvice(override val exprs: List[localExpr], val xa: String) extends Advice[LocalAdvice] with Local {
 
   val x_0 = xa
-  
-  override def substitute(s1: String, s2: String): LocalAdvice = {
-    LocalAdvice(exprs map (_.substitute(s1, s2)), xa.substitute(s1, s2))
-  }
 
-//  def getParticipants = {
-//    (exprs flatMap {
-//      case Send(_, p, _, _, _) => Some(Set(p))
-//      case Receive(_, p, _, _, _) => Some(Set(p))
-//      case _ => Set()
-//    }).reduce(_ ++ _)
-//  }
-//
-//  def getMessageLabels: Set[String] = (exprs flatMap {
-//    case Send(_, _, l, _, _) => Some(l)
-//    case Receive(_, _, l, _, _) => Some(l)
-//    case _ => None
-//  }).to
+  override def substitute(s1: String, s2: String): LocalAdvice = {
+    LocalAdvice(exprs map (_.substitute(s1, s2)), xa.sub(s1, s2))
+  }
 
 }
 object LocalAdvice {
@@ -267,12 +215,13 @@ object LocalAdvice {
 }
 
 case class AdviceTransition(x1: String, x2: String) extends AspectualAST {
-  override def left = x1
-  override def right = "proceed;" + x2
+  def left = x1
+  def right = "proceed;" + x2
+  
   def substitute(s1: String, s2: String) = {
     new AdviceTransition(x1.sub(s1, s2), x2.sub(s1, s2))
   }
-  override def getVariables = scala.collection.mutable.Set(x1, x2)
+  def getVariables = scala.collection.mutable.Set(x1, x2)
 
   override def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
     lHash(x1) = this
@@ -293,7 +242,6 @@ class Aspect[+E, S, A <: Advice[A]](val name: String, pc: Pointcut[E, S], adv: A
     sb ++= "Name: " + name + "\n"
     sb ++= "pc: "
     sb ++= pc.canonical
-    //    pc foreach (p => sb ++= (p.canonical) + " ")
     sb ++= "\nadvice:"
     adv.exprs foreach (e => sb ++= ("\n\t" + e.canonical))
     sb ++= " in " + xa
