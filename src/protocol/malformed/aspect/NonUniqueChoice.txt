@@ -1,0 +1,16 @@
+SessionAspect NonUniqueChoice {
+	pointcut: 
+		B -> S : * +  B -> C: *
+	advice: 
+		x_0 = x_1 + x_2
+		x_1 = B -> A: Auth1; x_3
+		x_4 = A -> B: OK; x_5
+		x_5 = B -> A: Auth2(String); x_6	
+		
+		x_2 = B -> A: Auth2(String); x_7
+		x_7 = A -> B: OK; x_8
+	
+		x_6 + x_8 = x_9
+		x_9 = proceed; x_10
+		x_10 = end
+}

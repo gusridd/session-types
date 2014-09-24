@@ -206,13 +206,15 @@ object uniqueMsg {
          * not appear in the pointcut, therefore the 'proceed' can't be a
          * message to a daemon.
          */
-        case AdviceTransition(_,xp) => collectFirstMessagesToDaemon(xp, cs, mp)
+        case AdviceTransition(_, xp) => collectFirstMessagesToDaemon(xp, cs, mp)
         case End(x) => cs
         case _ => cs
       }
       cs
     }
     val firstToDaemon = collectFirstMessagesToDaemon(a.xa, Set(), Set())
+
+    println("[INFO] firstToDaemon" + firstToDaemon)
 
     val repetitions: List[SimpleMessage] = (a.adv.exprs flatMap {
       case m @ Message(_, _, _, _, _, _) if (firstToDaemon.contains(m)) =>

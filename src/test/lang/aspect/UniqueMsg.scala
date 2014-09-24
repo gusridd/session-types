@@ -162,11 +162,20 @@ class UniqueMsg extends PathInfo {
     }
   }
   
-  /**
-   * All the next tests belong to the category of maybe well formed
-   */
+
   @Test def testUniqueMsgLoggingTwice() {
-    val aspects = AspectParser.parse(new FR(path_mb_a + "LoggingTwice.txt"))
+    val aspects = AspectParser.parse(new FR(path_mf_a + "LoggingTwice.txt"))
+    val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
+
+    assertEquals(1, aspects.size)
+
+    aspects foreach {
+      case a: GlobalAspect => assertFalse(uniqueMsg(protocol, a))
+    }
+  }
+  
+  @Test def testUniqueMsgNonUniqueChoice() {
+    val aspects = AspectParser.parse(new FR(path_mf_a + "LoggingTwice.txt"))
     val protocol = WFGlobalProtocol(GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt")))
 
     assertEquals(1, aspects.size)
