@@ -15,138 +15,6 @@ object uniqueMsg {
   /**
    * Main method that tries to check
    */
-  //    def apply(g: GlobalProtocol, a: GlobalAspect): Boolean = {
-  //  
-  //      val leftHash = a.adv.getHashes._1
-  //      def Msg(x: String, xb: Set[String], M: Set[SimpleMessage]): Boolean = {
-  //        if(x == a.adv.xa && !leftHash.isDefinedAt(x)){
-  //          a.adv.exprs foreach {e => println(e.canonical)}
-  //          println("FAILFAILFAILFAIL")
-  //          println(leftHash)
-  //        }
-  //        leftHash(x) match {
-  //          case m @ Message(x, _, _, _, _, xp) => {
-  //            val Mp = M - m
-  //            if (M.contains(m)) {
-  //              // The disjoint sum of sets considers the empty set
-  //              val r = Msg(xp, xb, Mp) // || Msg(xp, xb, M)
-  //              if (r) {
-  //                println("[Msg-Message]:")
-  //                println("\t" + m.canonical)
-  //                println("\tMsg(" + xp + ", " + xb + ", " + Mp + ")")
-  //              }
-  //              r
-  //            } else {
-  //              false
-  //            }
-  //          }
-  //          case AdviceTransition(x1, x2) => {
-  //            val pairs = disjointPartition(M)
-  //  
-  //            // This represent all the disjoint sums in whose all the elements
-  //            // of the first set are matched by some pointcut.
-  //            val properties = pairs filter ({
-  //              case (sM, sMP) => sM forall (m => Weaver.pointcutMatchGlobal(a.pc, m))
-  //            })
-  //            properties exists ({
-  //              case (m, mp) => {
-  //                val r = Msg(x2, xb, mp)
-  //                if (r) {
-  //                  println("[Msg-Proceed]:")
-  //                  println("\t" + leftHash(x2).canonical)
-  //                  println("\tMsg(" + x2 + ", " + xb + ", " + mp + ")")
-  //                }
-  //                r
-  //              }
-  //            })
-  //          }
-  //          case c @ Choice(x, x1, x2) if (!xb.contains(x)) => {
-  //            sumPartition(M) exists ({
-  //              case (m1, m2) => {
-  //                val r = Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
-  //                if (r) {
-  //                  println("[Msg-Choice]:")
-  //                  println("\t" + c.canonical)
-  //                  println("\tMsg(" + x1 + ", " + (xb + x) + ", " + m1 + ")")
-  //                  println("\tMsg(" + x2 + ", " + (xb + x) + ", " + m2 + ")")
-  //                }
-  //                r
-  //              }
-  //            })
-  //          }
-  //          case p @ Parallel(x, x1, x2) if (!xb.contains(x)) => {
-  //            disjointPartition(M) exists ({
-  //              case (m1, m2) => {
-  //                val r = Msg(x1, xb + x, m1) && Msg(x2, xb + x, m2)
-  //                if (r) {
-  //                  println("[Msg-Fork]:")
-  //                  println("\t" + p.canonical)
-  //                  println("\tMsg(" + x1 + ", " + (xb + x) + ", " + m1 + ")")
-  //                  println("\tMsg(" + x2 + ", " + (xb + x) + ", " + m2 + ")")
-  //                }
-  //                r
-  //              }
-  //            })
-  //          }
-  //          // As in the ChoiceJoin and ParallelJoin x1 and x2 appear both at the 
-  //          // left side of the equation, no other case should be checked.
-  //          case c @ ChoiceJoin(x1, x2, x) => {
-  //            val r = Msg(x, xb, M)
-  //            if (r) {
-  //              println("[Msg-Merge/Join]:")
-  //              println("\t" + c.canonical)
-  //              println("\tMsg(" + x + ", " + xb + ", " + M + ")")
-  //            }
-  //            r
-  //          }
-  //          case p @ ParallelJoin(x1, x2, x) => {
-  //            val r = Msg(x, xb, M)
-  //            if (r) {
-  //              println("[Msg-Merge/Join]:")
-  //              println("\t" + p.canonical)
-  //              println("\tMsg(" + x + ", " + xb + ", " + M + ")")
-  //            }
-  //            r
-  //          }
-  //          // Base cases
-  //          case c @ Choice(x, x1, x2) if (M.isEmpty && xb.contains(x)) => {
-  //            println("[Msg-Choice/Fork-Stop]:")
-  //            println("\t" + c.canonical)
-  //            println("\tMsg(" + x + ", " + xb + ", " + M + ")")
-  //            true
-  //          }
-  //          case p @ Parallel(x, x1, x2) if (M.isEmpty && xb.contains(x)) => {
-  //            println("[Msg-Choice/Fork-Stop]:")
-  //            println("\t" + p.canonical)
-  //            println("\tMsg(" + x + ", " + xb + ", " + M + ")")
-  //            true
-  //          }
-  //          case e @ End(x) if (M.isEmpty) => {
-  //            println("[Msg-End]:")
-  //            println("\t" + e.canonical)
-  //            println("\tMsg(" + x + ", " + xb + ", " + M + ")")
-  //            true
-  //          }
-  //          case End(x) => false
-  //          case Choice(x, x1, x2) => false
-  //          case Parallel(x, x1, x2) => false
-  //        }
-  //      }
-  //  
-  //      /**
-  //       * If we try to compute the Msg function starting with every message
-  //       * it should give true in every case.
-  //       */
-  //      val messages: Set[SimpleMessage] = ((a.adv.exprs ++ g.exprs) flatMap {
-  //        case m @ Message(_, s, r, l, u, _) => Some(SimpleMessage(s, r, l, u))
-  //        case _ => None
-  //      }).to
-  //      messages.subsets exists (M => {
-  //        val r = Msg(a.xa, Set(), M)
-  //        if (r) println("The correct set M for UniqueMsg was: " + M)
-  //        r
-  //      })
-  //    }
 
   type iSet[T] = scala.collection.immutable.Set[T]
 
@@ -188,43 +56,57 @@ object uniqueMsg {
      * There can exist more than one daemon participant
      */
     val dParticipants = advParticipants -- pcParticipants
+    println("[INFO] Daemon participants " + dParticipants)
 
-    def collectFirstMessagesToDaemon(x: String, cs: Set[SimpleMessage], mp: Set[String]): Set[SimpleMessage] = {
+    def collectFirstMessagesToDaemon(x: String, cs: Set[SimpleMessage], mp: Set[String], ds: Set[String]): Set[SimpleMessage] = {
       lHash(x) match {
-        case m @ Message(_, s, r, _, _, xp) if (dParticipants.contains(r) && !cs.contains(m)) =>
-          collectFirstMessagesToDaemon(xp, cs + m, mp)
+        case m @ Message(_, s, r, _, _, xp) if (dParticipants.contains(r) && !ds.contains(r)) =>
+          collectFirstMessagesToDaemon(xp, cs + m, mp, ds + r)
+        case m @ Message(_, s, r, _, _, xp) => collectFirstMessagesToDaemon(xp, cs, mp, ds)
         case Choice(_, x1, x2) =>
-          collectFirstMessagesToDaemon(x1, cs, mp) ++ collectFirstMessagesToDaemon(x2, cs, mp)
+          collectFirstMessagesToDaemon(x1, cs, mp, ds) ++ collectFirstMessagesToDaemon(x2, cs, mp, ds)
         case ChoiceJoin(_, _, xm) if (mp.contains(xm)) => cs
         case ChoiceJoin(_, _, xm) =>
-          collectFirstMessagesToDaemon(xm, cs, mp + xm)
+          collectFirstMessagesToDaemon(xm, cs, mp + xm, ds)
         case Parallel(_, x1, x2) =>
-          collectFirstMessagesToDaemon(x1, cs, mp) ++ collectFirstMessagesToDaemon(x2, cs, mp)
-        case ParallelJoin(_, _, xp) => collectFirstMessagesToDaemon(xp, cs, mp)
+          collectFirstMessagesToDaemon(x1, cs, mp, ds) ++ collectFirstMessagesToDaemon(x2, cs, mp, ds)
+        case ParallelJoin(_, _, xp) => collectFirstMessagesToDaemon(xp, cs, mp, ds)
         /**
          * We know that if a participant is considered as a daemon, then it does
          * not appear in the pointcut, therefore the 'proceed' can't be a
          * message to a daemon.
          */
-        case AdviceTransition(_, xp) => collectFirstMessagesToDaemon(xp, cs, mp)
+        case AdviceTransition(_, xp) => collectFirstMessagesToDaemon(xp, cs, mp, ds)
         case End(x) => cs
-        case _ => cs
       }
-      cs
     }
-    val firstToDaemon = collectFirstMessagesToDaemon(a.xa, Set(), Set())
+    val firstToDaemon = collectFirstMessagesToDaemon(a.xa, Set(), Set(), Set())
 
-    println("[INFO] firstToDaemon" + firstToDaemon)
+    println("[INFO] firstToDaemon " + firstToDaemon)
 
-    val repetitions: List[SimpleMessage] = (a.adv.exprs flatMap {
-      case m @ Message(_, _, _, _, _, _) if (firstToDaemon.contains(m)) =>
-        Some(messageToSimpleMessage(m))
-      case _ => None
-    })
     /**
-     * Each starting message, can just occur once in the interaction.
+     * This funcion checks if for each branch in the interaction, each daemon
+     * is notified of the start of the interaction by messages on the set
+     * computed with 'collectFirstMessagesToDaemon', and only one can occur on
+     * each branch, if now, they can be confused with parallel interactions from
+     * the original session.
      */
-    (firstToDaemon.size == repetitions.size)
+    def justOccurOnce(x: String, someSeen: Boolean, ftd: Set[SimpleMessage], mp: Set[String]): Boolean = {
+      lHash(x) match {
+        case m @ Message(_, s, r, _, _, xp) if (someSeen && ftd.contains(m)) => false
+        case m @ Message(_, s, r, _, _, xp) if (!someSeen && ftd.contains(m)) => justOccurOnce(xp, true, ftd, mp)
+        case m @ Message(_, s, r, _, _, xp) => justOccurOnce(xp, someSeen, ftd, mp)
+        case Choice(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, mp) && justOccurOnce(x2, someSeen, ftd, mp)
+        case ChoiceJoin(_, _, xp) if (mp.contains(xp)) => true
+        case ChoiceJoin(_, _, xp) if (!mp.contains(xp)) => justOccurOnce(xp, someSeen, ftd, mp + xp)
+        case Parallel(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, mp) && justOccurOnce(x2, someSeen, ftd, mp)
+        case ParallelJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, mp)
+        case AdviceTransition(_, xp) => justOccurOnce(xp, someSeen, ftd, mp)
+        case End(_) => true
+      }
+    }
+
+    justOccurOnce(a.xa, false, firstToDaemon, Set())
   }
 
 }
