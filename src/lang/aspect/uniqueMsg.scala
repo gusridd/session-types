@@ -95,18 +95,22 @@ object uniqueMsg {
      * should have an end, so if an initial merge is found, at least one choice
      * exist that will avoid the problem.
      */
-    def justOccurOnce(x: String, someSeen: Boolean, ftd: Set[SimpleMessage], chp: Set[String]): Boolean = {
-      println("[INFO] seen: " + someSeen + " m: " + lHash(x).canonical)
+    def justOccurOnce(x: String, seen: Boolean, ftd: Set[SimpleMessage], chp: Set[String]): Boolean = {
+      println("[INFO] seen: " + seen + " m: " + lHash(x).canonical)
       lHash(x) match {
-        case m @ Message(_, s, r, _, _, xp) if (someSeen && ftd.contains(m)) => false
-        case m @ Message(_, s, r, _, _, xp) if (!someSeen && ftd.contains(m)) => justOccurOnce(xp, true, ftd, chp)
-        case m @ Message(_, s, r, _, _, xp) => justOccurOnce(xp, someSeen, ftd, chp)
+        case m @ Message(_, s, r, _, _, xp) if (seen && ftd.contains(m)) => false
+        case m @ Message(_, s, r, _, _, xp) if (!seen && ftd.contains(m)) =>
+          justOccurOnce(xp, true, ftd, chp)
+        case m @ Message(_, s, r, _, _, xp) =>
+          justOccurOnce(xp, seen, ftd, chp)
         case Choice(_, x1, x2) if (chp.contains(x)) => true
-        case Choice(_, x1, x2) if (!chp.contains(x)) => justOccurOnce(x1, someSeen, ftd, chp + x) && justOccurOnce(x2, someSeen, ftd, chp + x)
-        case ChoiceJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, chp + xp)
-        case Parallel(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, chp) && justOccurOnce(x2, someSeen, ftd, chp)
-        case ParallelJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, chp)
-        case AdviceTransition(_, xp) => justOccurOnce(xp, someSeen, ftd, chp)
+        case Choice(_, x1, x2) if (!chp.contains(x)) =>
+          justOccurOnce(x1, seen, ftd, chp + x) && justOccurOnce(x2, seen, ftd, chp + x)
+        case ChoiceJoin(_, _, xp) => justOccurOnce(xp, seen, ftd, chp + xp)
+        case Parallel(_, x1, x2) =>
+          justOccurOnce(x1, seen, ftd, chp) && justOccurOnce(x2, seen, ftd, chp)
+        case ParallelJoin(_, _, xp) => justOccurOnce(xp, seen, ftd, chp)
+        case AdviceTransition(_, xp) => justOccurOnce(xp, seen, ftd, chp)
         case End(_) => true
       }
     }
