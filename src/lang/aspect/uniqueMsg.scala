@@ -85,23 +85,28 @@ object uniqueMsg {
     println("[INFO] firstToDaemon " + firstToDaemon)
 
     /**
-     * This funcion checks if for each branch in the interaction, each daemon
+     * This function checks if for each branch in the interaction, each daemon
      * is notified of the start of the interaction by messages on the set
      * computed with 'collectFirstMessagesToDaemon', and only one can occur on
      * each branch, if now, they can be confused with parallel interactions from
-     * the original session.
+     * the original session. It collects the choice points because the interaction
+     * can start with a merge, which can repeat initial messages, so choices are
+     * used to avoid infinite recursion. This is also possible because an aspect
+     * should have an end, so if an initial merge is found, at least one choice
+     * exist that will avoid the problem.
      */
-    def justOccurOnce(x: String, someSeen: Boolean, ftd: Set[SimpleMessage], mp: Set[String]): Boolean = {
+    def justOccurOnce(x: String, someSeen: Boolean, ftd: Set[SimpleMessage], chp: Set[String]): Boolean = {
+      println("[INFO] seen: " + someSeen + " m: " + lHash(x).canonical)
       lHash(x) match {
         case m @ Message(_, s, r, _, _, xp) if (someSeen && ftd.contains(m)) => false
-        case m @ Message(_, s, r, _, _, xp) if (!someSeen && ftd.contains(m)) => justOccurOnce(xp, true, ftd, mp)
-        case m @ Message(_, s, r, _, _, xp) => justOccurOnce(xp, someSeen, ftd, mp)
-        case Choice(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, mp) && justOccurOnce(x2, someSeen, ftd, mp)
-        case ChoiceJoin(_, _, xp) if (mp.contains(xp)) => true
-        case ChoiceJoin(_, _, xp) if (!mp.contains(xp)) => justOccurOnce(xp, someSeen, ftd, mp + xp)
-        case Parallel(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, mp) && justOccurOnce(x2, someSeen, ftd, mp)
-        case ParallelJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, mp)
-        case AdviceTransition(_, xp) => justOccurOnce(xp, someSeen, ftd, mp)
+        case m @ Message(_, s, r, _, _, xp) if (!someSeen && ftd.contains(m)) => justOccurOnce(xp, true, ftd, chp)
+        case m @ Message(_, s, r, _, _, xp) => justOccurOnce(xp, someSeen, ftd, chp)
+        case Choice(_, x1, x2) if (chp.contains(x)) => true
+        case Choice(_, x1, x2) if (!chp.contains(x)) => justOccurOnce(x1, someSeen, ftd, chp + x) && justOccurOnce(x2, someSeen, ftd, chp + x)
+        case ChoiceJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, chp + xp)
+        case Parallel(_, x1, x2) => justOccurOnce(x1, someSeen, ftd, chp) && justOccurOnce(x2, someSeen, ftd, chp)
+        case ParallelJoin(_, _, xp) => justOccurOnce(xp, someSeen, ftd, chp)
+        case AdviceTransition(_, xp) => justOccurOnce(xp, someSeen, ftd, chp)
         case End(_) => true
       }
     }
