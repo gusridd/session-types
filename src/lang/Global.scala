@@ -10,7 +10,7 @@ trait Global {
   val x_0: String
   type iMap[K, V] = scala.collection.immutable.Map[K, V]
 
-  val (lHash, rHash) = getHashesFromExpr(exprs)
+  lazy val (lHash, rHash) = getHashesFromExpr(exprs)
 
   def getHashes(): (iMap[String, lang.expr], iMap[String, lang.expr]) = {
     (lHash, rHash)
