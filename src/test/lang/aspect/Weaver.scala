@@ -140,6 +140,10 @@ class Weaver extends PathInfo {
     assertTrue(localWovenType.contains(SimpSend("C", "Purchase", "Boolean")))
     assertTrue(localWovenType.contains(SimpSend("L", "LogData", "String")))
 
+    println(aspects(0))
+    println(localAspects(0))
+    println(localProtocol.canonical(0))
+    println(localWovenType.canonical(0))
   }
   
   @Test def testLocalWeaveSimpleTradeWithAuthenticationParticipantB() {
@@ -249,6 +253,35 @@ class Weaver extends PathInfo {
     assertTrue(localWovenType.contains(SimpSend("W2", "Ready", "")))
     assertTrue(localWovenType.contains(SimpSend("W3", "Ready", "")))
     assertTrue(localWovenType.contains(SimpSend("W4", "Ready", "")))
+  }
+  
+  @Test def testLocalWeaveSimpleTradeWithAuthWithLockParticipantB() {
+    val p = "B"
+    val aspects = AspectParser.parse(new FR(path_wf_a + "AuthWithLock.txt"))
+    val protocol = GlobalParser.parse(new FR(path_wf + "SimpleTrade.txt"))
+
+    val localAspects = aspects map { a => lang.aspect.LocalProjection(a, p) }
+    val localProtocol = lang.LocalProjection(protocol, p)
+
+    val localWovenType = Congruence(Weaver.localWeaving(localAspects, localProtocol)) 
+    
+//    println(aspects(0))
+//    println(protocol.canonical(0))
+//    
+//    println(localAspects(0))
+//    println(localProtocol.canonical(0))
+//    
+//    println(localWovenType.canonical(0))
+    
+    assertTrue(localWovenType.contains(SimpReceive("A", "Retry", "")))
+    assertTrue(localWovenType.contains(SimpSend("A", "AuthLock", "")))
+    assertTrue(localWovenType.contains(SimpSend("A", "AuthInfo", "String")))
+    assertTrue(localWovenType.contains(SimpSend("S", "Sale", "Boolean")))
+    assertTrue(localWovenType.contains(SimpReceive("S", "Item", "String")))
+    assertTrue(localWovenType.contains(SimpSend("C", "Purchase", "Boolean")))
+    assertTrue(localWovenType.contains(SimpReceive("A", "OK", "")))
+    
+    
   }
 
 }
