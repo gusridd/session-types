@@ -1,3 +1,7 @@
 package object lang {
-	implicit def stringToIdentifier(s: String) = new identifier(s)
+  /**
+   * Implicit conversion from String to Identifier. This makes
+   * string replacement more easy.
+   */
+  implicit def stringToIdentifier(s: String) = new Identifier(s)
 }

@@ -1,0 +1,11 @@
+SessionAspect Negotiation {
+	pointcut: 
+		S -> B : Item(String)
+	advice: 
+			  x_0 = proceed ; x_1
+		x_1 + x_6 =  x_2
+			  x_2 = x_3 + x_4
+			  x_3 = B -> C : Offer(Int); x_5
+			  x_5 = C -> B: Counter(Int); x_6
+			  x_4 = end
+}

@@ -1,0 +1,8 @@
+	  x_0 = S -> B: Item; x_1
+	  x_1 = x_2 | x_3
+	  x_2 = B -> L: Log; x_4
+	  x_4 = B -> S: Sale; x_5
+	  x_3 = B -> L: Log; x_6
+	  x_6 = B -> C: Purchase; x_7 
+x_5 | x_7 = x_8
+	  x_8 = end

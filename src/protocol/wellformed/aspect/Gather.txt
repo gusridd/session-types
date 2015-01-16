@@ -1,0 +1,23 @@
+SessionAspect Gather {
+	pointcut: 
+		W -> T : Result
+	advice: 
+		x_0 = x_1 | x_2
+		x_1 = W -> T: Result; x_3
+		x_3 | x_4 = x_5
+		x_2 = x_6 | x_7
+		x_6 = x_8 | x_9
+		x_7 = x_10 | x_11
+		x_8 = W -> W1: Ready; x_12
+		x_12 = W1 -> T: Result; x_13
+		x_9 = W -> W2: Ready; x_14
+		x_14 = W2 -> T: Result; x_15
+		x_13 | x_15 = x_16
+		x_10 = W -> W3: Ready; x_17
+		x_17 = W3 -> T: Result; x_18
+		x_11 = W -> W4: Ready; x_19
+		x_19 = W4 -> T: Result; x_20
+		x_18 | x_20 = x_21
+		x_16 | x_21 = x_4
+		x_5 = end
+}

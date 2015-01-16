@@ -15,9 +15,19 @@ class GlobalSessionParser extends JavaTokenParsers {
 
   import scala.math.Ordering.String
 
-  def global: Parser[GlobalProtocol] = rep(expr) ^^ (x => new GlobalProtocol(x))
+  def global: Parser[GlobalProtocol] = (explicitStart | implicitStart) ^^ ({
+    case (exprs,x0) => new GlobalProtocol(exprs,x0)
+  })
 
-  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end | failure("illegal start of protocol")) ^^ (x => x)
+  def explicitStart: Parser[(List[expr],String)] = (rep(expr) ~ "in" ~ xid) ^^ ({
+    case x ~ _ ~ x0 => (x,x0)
+  })
+  
+  def implicitStart: Parser[(List[expr],String)] = rep(expr) ^^ ({
+    case x => (x,"x_0")
+  })
+
+  def expr: Parser[expr] = positioned(message | choice | choiceJoin | parallel | parallelJoin | end | indirection | failure("illegal start of protocol")) ^^ (x => x)
 
   def message: Parser[Message] = (messageWithType | messageWithoutType | failure("illegal start of message")) ^^ (x => x)
 
@@ -47,26 +57,16 @@ class GlobalSessionParser extends JavaTokenParsers {
     case x1 ~ _ ~ x2 ~ _ ~ x3 => ParallelJoin(x1, x2, x3)
   }
 
+  def indirection: Parser[Indirection] = xid ~ "=" ~ xid ^^ {
+    case x1 ~ _ ~ x2 => Indirection(x1, x2)
+  }
+
   def end: Parser[End] = (xid ~ "=" ~ "end" | failure("illegal start of end")) ^^ { case x ~ _ ~ _ => new End(x) }
 
   def xid: Parser[String] = ("""x_[0-9]+""".r | failure("illegal start of xid")) ^^ { _.toString() }
 
   def id: Parser[String] = ("""[A-Z][A-Za-z0-9\-_]*""".r | failure("illegal start of id")) ^^ { _.toString() }
 
-}
-
-/**
- * Class for treating Strings like identifiers
- */
-class identifier(self: String) {
-  def sub(target: String, replacement: String): String =
-    if (self == target) replacement else self
-
-  def minimum(other: String): String =
-    if (self < other) self else other
-
-  def maximum(other: String): String =
-    if (self > other) self else other
 }
 
 object GlobalParser extends GlobalSessionParser {
@@ -76,24 +76,26 @@ object GlobalParser extends GlobalSessionParser {
         gp
       }
       case Failure(msg, next) => {
-        println("[" + next.pos +  "] failure: " + msg)
-        new GlobalProtocol(List.empty)
+        println("[" + next.pos + "] failure: " + msg)
+        throw new Exception("Parser error: [" + next.pos + "] " + msg)
       }
       case Error(msg, next) => {
-        println("[" + next.pos +  "] error: " + msg)
-        new GlobalProtocol(List.empty)
+        println("[" + next.pos + "] error: " + msg)
+        throw new Exception("Parser error: [" + next.pos + "] " + msg)
       }
     }
   }
 }
 
-sealed trait expr extends Positional {
+trait expr extends Positional {
   def canonical(): String = left + " = " + right
   def substitute(s1: String, s2: String): expr
   def left: String
   def right: String
   def isEnd = false
   def getVariables: Set[String]
+
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]): Unit
 }
 
 sealed trait Ternary {
@@ -124,6 +126,11 @@ case class Message(val x_1: String, val s: String, val r: String, val msg: Strin
   def left = x_1
   def right = s + " -> " + r + " : " + msg + " (" + t + "); " + x_2
   def getVariables = Set(x_1, x_2)
+
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+  }
 }
 class Choice private (val x_1: String, val x_2: String, val x_3: String) extends expr with Ternary {
   type T = Choice
@@ -131,6 +138,12 @@ class Choice private (val x_1: String, val x_2: String, val x_3: String) extends
   override def toString(): String = "Choice(" + x_1 + "," + x_2 + "," + x_3 + ")"
   def left = x_1
   def right = x_2 + " + " + x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 /**
  * Companion object and Extractor Choices with lexicographical order
@@ -147,6 +160,12 @@ class ChoiceJoin private (val x_1: String, val x_2: String, val x_3: String) ext
   protected def construct(x_1: String, x_2: String, x_3: String) = ChoiceJoin(x_1, x_2, x_3)
   def left = x_1 + " + " + x_2
   def right = x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    lHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 /**
  * Companion object and Extractor ChoiceJoin with lexicographical order
@@ -164,6 +183,12 @@ class Parallel private (val x_1: String, val x_2: String, val x_3: String) exten
   protected def construct(x_1: String, x_2: String, x_3: String) = Parallel(x_1, x_2, x_3)
   def left = x_1
   def right = x_2 + " | " + x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 object Parallel {
   def apply(x_1: String, x_2: String, x_3: String): Parallel =
@@ -177,6 +202,12 @@ class ParallelJoin private (val x_1: String, val x_2: String, val x_3: String) e
   protected def construct(x_1: String, x_2: String, x_3: String) = ParallelJoin(x_1, x_2, x_3)
   def left = x_1 + " | " + x_2
   def right = x_3
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    lHash(x_2) = this
+    rHash(x_3) = this
+  }
 }
 object ParallelJoin {
   def apply(x_1: String, x_2: String, x_3: String): ParallelJoin = {
@@ -195,6 +226,11 @@ case class End(x: String) extends expr {
   def right = "end"
   override def isEnd = true
   def getVariables = Set(x)
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x) = this
+    rHash("end") = this
+  }
 }
 case class Indirection(x_1: String, x_2: String) extends expr {
   def substitute(s1: String, s2: String): Indirection = {
@@ -203,9 +239,30 @@ case class Indirection(x_1: String, x_2: String) extends expr {
   def left = x_1
   def right = x_2
   def getVariables = Set(x_1, x_2)
+  
+  def addToHash(lHash: HashMap[String, expr], rHash: HashMap[String, expr]) = {
+    lHash(x_1) = this
+    rHash(x_2) = this
+  }
 }
 
-class SanityConditionException(s: String) extends Exception
-class LocalChoiceException(s: String) extends Exception
+abstract class WFConditionException extends Exception
+
+class SanityConditionException(s: String) extends WFConditionException
+object SanityConditionException {
+  def apply() = new SanityConditionException("")
+  def apply(s: String) = new SanityConditionException(s)
+}
+class LocalChoiceConditionException(s: String) extends WFConditionException
+object LocalChoiceConditionException {
+  def apply() = new LocalChoiceConditionException("")
+  def apply(s: String) = new LocalChoiceConditionException(s)
+}
+class LinearityConditionException(s: String) extends WFConditionException
+object LinearityConditionException {
+  def apply() = new LinearityConditionException("")
+  def apply(s: String) = new LinearityConditionException(s)
+}
+
 class NotConnectedException(s: String) extends Exception
 

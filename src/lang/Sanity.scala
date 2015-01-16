@@ -8,7 +8,7 @@ object Sanity {
 
   def apply(g: GlobalProtocol): Boolean = {
     val exprs = g.exprs
-    val x0 = g.x0
+    val x0 = g.x_0
     implicit val xs = g.xs
 
     /**
@@ -35,21 +35,27 @@ object Sanity {
     }
 
     if (!unambiguous.isEmpty) {
-      print("Unanbiguity at: " + unambiguous.head._1)
+      g.print
+      print("Ambiguity at: " + unambiguous.head._1)
       throw new SanityConditionException("Unanbiguity: ambiguous definition at " + unambiguous.head._1)
     }
 
-    if(!m.contains(x0)){
-      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
+    if (!m.contains(x0)) {
+      throw new SanityConditionException("Unique start: " + x0 + " must appear exactly once, on the left-hand side")
     }
-    
+
     if (m(x0)._1 != 1 && m(x0)._2 != 0) {
-      throw new SanityConditionException("Unique start: "+ x0 +" must appear exactly once, on the left-hand side")
+      throw new SanityConditionException("Unique start: " + x0 + " must appear exactly once, on the left-hand side")
     }
     threadReduction(exprs)
     true
   }
 
+  /**
+   * Function that counts how many times does each variable appears at
+   * which side of the global protocol definitions. It returns that
+   * information into a map for later internal use.
+   */
   def getMapCount(exprs: Iterable[expr])(implicit xs: HashSet[String]): Map[String, (Int, Int)] = {
     val m: scala.collection.mutable.Map[String, (Int, Int)] = collection.mutable.Map() ++ ((xs map (t => (t, (0, 0)))) toMap);
     exprs foreach {
@@ -74,6 +80,9 @@ object Sanity {
         m(x3) = (m(x3)._1, m(x3)._2 + 1)
       case End(x) =>
         m(x) = (m(x)._1 + 1, m(x)._2)
+      case Indirection(x1, x2) =>
+        m(x1) = (m(x1)._1 + 1, m(x1)._2)
+        m(x2) = (m(x2)._1, m(x2)._2 + 1)
     }
     m
   }
@@ -135,26 +144,29 @@ object Sanity {
       leftHash
     }
 
-    val hash = getHash(exprs)
-
     /**
      * reduce:
      * exprs: list of expressions to reduce
      * return the list of the reduced expressions and a boolean representing if a reduction has been applied
      */
     def reduce(exprs: List[expr]): (List[expr], Boolean) = {
+      /**
+       * As variables are substituted on each iteration the hash can be
+       * corrupted, so it must be recomputed every time
+       */
+      val hash = getHash(exprs)
       exprs foreach {
         case m @ Message(x1, _, _, _, _, x2) =>
-          return { /*println("[Trans]"); */ ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
+          return { println("[Trans] " + m); ((exprs filterNot (_ == m)).map(_.substitute(x1, x2)), true) }
         case p @ Parallel(x1, x2, x3) => hash.get(p.right) match {
           case Some(pj @ ParallelJoin(x2p, x3p, x4p)) =>
-            return { println("[Bra]"); ((exprs filter (x => x != p && x != pj)).map(_.substitute(x1, x4p)), true) }
+            return { println("[Bra] " + pj); ((exprs filter (x => x != p && x != pj)).map(_.substitute(x1, x4p)), true) }
           case None =>
         }
         case c @ Choice(x1, x2, x3) => hash.get(c.right) match {
           case Some(cj @ ChoiceJoin(x2p, x3p, x4p)) =>
             return {
-              //              println("[Bra]: " + c + " AND " + cj)
+              println("[Bra]: " + c + " AND " + cj)
               //              println("nonfiltered " + exprs)
               //              val filtered = (exprs filter (x => c != x && x != cj))
               //              println("filtered " + filtered)
@@ -163,20 +175,38 @@ object Sanity {
           case Some(_) =>
           case None =>
         }
-        case rec @ ChoiceJoin(x1, x2, x3) => { println("maybeRec:" + rec + "\nhash:" + hash.get(rec.right)); hash.get(rec.right) } match {
-          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p || x2 == x2p)) =>
-            return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true) }
-          case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p || x1 == x2p)) =>
-            return { println("[Rec]"); ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x4p)), true) }
-          case Some(_) =>
-          case None =>
-        }
+        case rec @ ChoiceJoin(x1, x2, x3) =>
+          { println("maybeRec:" + rec + "\nhash:" + hash.get(rec.right)); hash.get(rec.right) } match {
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x4p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x2p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x2 == x2p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x1, x4p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x4p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x2p)), true)
+              }
+            case Some(recj @ Choice(x3p, x4p, x2p)) if (x3 == x3p && (x1 == x2p)) =>
+              return {
+                //                println("[Rec] " + recj + " AND " + rec);
+                ((exprs filter (x => x != rec && x != recj)).map(_.substitute(x2, x4p)), true)
+              }
+            case Some(_) =>
+            case None =>
+          }
         case e @ End(x) => {
           // end should not be substituted until the end
           println("[End] " + e);
           //          return ((exprs filterNot (x => x == e)).map(_.substitute(e.left, e.right)), true)
           //return (exprs,false)
         }
+        case i @ Indirection(x1, x2) => { println("[Ind]"); return ((exprs filterNot (_ == i)).map(_.substitute(x1, x2)), true) }
         case _ =>
       }
       (exprs, false)
@@ -232,6 +262,8 @@ object Sanity {
        * that is formed only with Choices/ChoiceJoin/Messages/Continue
        */
       def ChoiceCover(e: expr, s: Set[expr]): Set[expr] = {
+        println("[INFO] ChoiceCover e: " + e.canonical)
+        println("[INFO] ChoiceCover s: " + s)
         if (s.contains(e)) {
           return s
         }

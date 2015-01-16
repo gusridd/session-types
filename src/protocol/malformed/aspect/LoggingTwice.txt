@@ -1,0 +1,11 @@
+SessionAspect LoggingTwice {
+	pointcut: 
+		B -> S : * + B -> C: *
+	advice: 
+		x_0 = proceed; x_1
+		x_1 = B -> L: LogData(String); x_2
+		x_2 = L -> B: Ack; x_3
+		x_3 = B -> L: LogData(String); x_4
+		x_4 = L -> B: Ack; x_5
+		x_5 = end
+}

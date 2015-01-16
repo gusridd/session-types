@@ -1,0 +1,13 @@
+SessionAspect Authentication {
+	pointcut: 
+		B -> S : * +  B -> C: *
+	advice: 
+              x_0 = B -> A: AuthLock; x_1
+    	x_1 + x_6 = x_2
+			  x_2 = B -> A: AuthInfo(String); x_3
+			  x_3 = x_4 + x_5
+			  x_4 = A -> B: Retry; x_6
+			  x_5 = A -> B: OK; x_7
+			  x_7 = proceed; x_8
+			  x_8 = end
+}
